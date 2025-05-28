@@ -1,6 +1,6 @@
 {
   "name": "@thealteroffice/react-native-adgeist",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Publishers can integrate our SDK to connect their ad spaces to the AdGeist marketplace.",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
@@ -32,7 +32,7 @@
     "expo-plugin": "yarn workspace react-native-adgeist-expo-plugin",
     "test": "jest",
     "typecheck": "tsc",
-    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "lint": "eslint \"src/**/*.{js,ts,tsx}\" \"example/**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "release": "release-it"
@@ -78,8 +78,8 @@
     "jest": "^29.7.0",
     "prettier": "^3.0.3",
     "react": "19.0.0",
-    "react-native": "0.78.2",
-    "react-native-builder-bob": "^0.40.7",
+    "react-native": "0.79.2",
+    "react-native-builder-bob": "^0.40.10",
     "release-it": "^17.10.0",
     "turbo": "^1.10.7",
     "typescript": "^5.2.2"

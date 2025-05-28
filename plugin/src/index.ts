@@ -27,5 +27,5 @@ const withRNAdgeist: ConfigPlugin = (config) => {
   ]);
 };
 
-const pak = require('react-native-adgeist/package.json');
+const pak = require('@thealteroffice/react-native-adgeist/package.json');
 export default createRunOncePlugin(withRNAdgeist, pak.name, pak.version);
