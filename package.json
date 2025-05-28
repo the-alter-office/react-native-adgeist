@@ -2,16 +2,11 @@
   "name": "@thealteroffice/react-native-adgeist",
   "version": "0.0.1",
   "description": "Publishers can integrate our SDK to connect their ad spaces to the AdGeist marketplace.",
-  "source": "./src/index.tsx",
   "main": "./lib/module/index.js",
+  "module": "./lib/module/index.js",
+  "source": "./src/index.tsx",
+  "react-native": "./src/index.tsx",
   "types": "./lib/typescript/src/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./lib/typescript/src/index.d.ts",
-      "default": "./lib/module/index.js"
-    },
-    "./package.json": "./package.json"
-  },
   "files": [
     "src",
     "lib",
@@ -134,7 +129,6 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      "codegen",
       [
         "module",
         {
@@ -153,14 +147,9 @@
     "name": "RNAdgeistSpec",
     "type": "modules",
     "jsSrcsDir": "src",
-    "outputDir": {
-      "ios": "ios/generated",
-      "android": "android/generated"
-    },
     "android": {
       "javaPackageName": "com.adgeist"
-    },
-    "includesGeneratedCode": true
+    }
   },
   "create-react-native-library": {
     "type": "turbo-module",

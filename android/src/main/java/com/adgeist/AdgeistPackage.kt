@@ -5,11 +5,12 @@ import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.model.ReactModuleInfo
 import com.facebook.react.module.model.ReactModuleInfoProvider
+import com.adgeist.implementation.AdgeistModuleImpl
 import java.util.HashMap
 
 class AdgeistPackage : BaseReactPackage() {
   override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
-    return if (name == AdgeistModule.NAME) {
+    return if (name == AdgeistModuleImpl.NAME) {
       AdgeistModule(reactContext)
     } else {
       null
@@ -19,9 +20,9 @@ class AdgeistPackage : BaseReactPackage() {
   override fun getReactModuleInfoProvider(): ReactModuleInfoProvider {
     return ReactModuleInfoProvider {
       val moduleInfos: MutableMap<String, ReactModuleInfo> = HashMap()
-      moduleInfos[AdgeistModule.NAME] = ReactModuleInfo(
-        AdgeistModule.NAME,
-        AdgeistModule.NAME,
+      moduleInfos[AdgeistModuleImpl.NAME] = ReactModuleInfo(
+        AdgeistModuleImpl.NAME,
+        AdgeistModuleImpl.NAME,
         false,  // canOverrideExistingModule
         false,  // needsEagerInit
         false,  // isCxxModule

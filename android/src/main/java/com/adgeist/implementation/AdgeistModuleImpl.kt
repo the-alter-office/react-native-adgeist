@@ -1,10 +1,7 @@
-package com.adgeist
+package com.adgeist.implementation
 
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.module.annotations.ReactModule
-import com.facebook.react.turbomodule.core.interfaces.TurboModule
 import com.facebook.react.bridge.Promise
-import android.util.Log
+import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
 import com.adgeistkit.AdgeistCore
@@ -13,20 +10,13 @@ import com.adgeistkit.Campaign
 import com.adgeistkit.Creative
 import com.adgeistkit.BudgetSettings
 
-@ReactModule(name = AdgeistModule.NAME)
-class AdgeistModule(reactContext: ReactApplicationContext) :
-  NativeAdgeistSpec(reactContext), TurboModule {
+class AdgeistModuleImpl internal constructor(private val context: ReactApplicationContext) {
 
-  private val adgeistInstanceFromLibrary = AdgeistCore.initialize(reactContext.applicationContext)
+  private val adgeistInstanceFromLibrary = AdgeistCore.initialize(context.applicationContext)
   private val getAd = adgeistInstanceFromLibrary.getCreative()
   private val postCreativeAnalytic = adgeistInstanceFromLibrary.postCreativeAnalytics()
 
-
-  override fun getName(): String {
-    return NAME
-  }
-
-  override fun fetchCreative(adSpaceId: String, publisherId: String, promise: Promise) {
+  fun fetchCreative(adSpaceId: String, publisherId: String, promise: Promise) {
     getAd.fetchCreative(adSpaceId, publisherId) { adData ->
       if (adData != null) {
         promise.resolve(adData.toWritableMap())
@@ -36,10 +26,9 @@ class AdgeistModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  override fun sendCreativeAnalytic(campaignId: String, adSpaceId: String, publisherId: String, eventType: String, promise: Promise) {
+  fun sendCreativeAnalytic(campaignId: String, adSpaceId: String, publisherId: String, eventType: String, promise: Promise) {
     postCreativeAnalytic.sendTrackingData(campaignId, adSpaceId, publisherId, eventType) { adData ->
       if (adData != null) {
-        Log.d("MyActivity of app module", adData)
         promise.resolve(adData)
       } else {
         promise.reject("NO_AD", "Couldn't find the campaign to update analytics")
@@ -49,6 +38,7 @@ class AdgeistModule(reactContext: ReactApplicationContext) :
 
   companion object {
     const val NAME = "Adgeist"
+
   }
 }
 

@@ -45,7 +45,11 @@ Simply add the library plugin to your `app.json` file:
 }
 ```
 
-This way, Expo will handle the native setup for you during `prebuild`.
+This way, Expo will handle the native setup for you during `prebuild`. You can prebuild using
+
+```sh
+npx expo prebuild --clean
+```
 
 > Note: only SDK 50 and above are supported, the plugin is configured to handle only the kotlin template.
 
@@ -53,6 +57,7 @@ This way, Expo will handle the native setup for you during `prebuild`.
 
 ```js
 import { BannerAd } from '@thealteroffice/react-native-adgeist';
+import { BottomBannerAd } from '@thealteroffice/react-native-adgeist';
 
 // ...
 
@@ -61,5 +66,10 @@ import { BannerAd } from '@thealteroffice/react-native-adgeist';
   dataAdSlot={ADSPACE_ID}
   width={400}
   height={300}
-/>;
+/>
+
+<BottomBannerAd
+  dataPublisherId={PUBLISHER_ID}
+  dataAdSlot={ADSPACE_ID}
+/>
 ```
