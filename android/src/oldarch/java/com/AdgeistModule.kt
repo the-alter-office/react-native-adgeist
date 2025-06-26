@@ -14,13 +14,13 @@ class AdgeistModule internal constructor(reactContext: ReactApplicationContext) 
     override fun getName(): String = AdgeistModuleImpl.NAME
 
     @ReactMethod
-    fun fetchCreative(adSpaceId: String, publisherId: String, promise: Promise) {
-        implementation.fetchCreative(adSpaceId, publisherId, promise)
+    fun fetchCreative(apiKey: String, origin: String, adSpaceId: String, publisherId: String, isTestEnvironment: Boolean, promise: Promise) {
+        implementation.fetchCreative(apiKey, origin, adSpaceId, publisherId, isTestEnvironment, promise)
     }
 
     @ReactMethod
-    fun sendCreativeAnalytic(campaignId: String, adSpaceId: String, publisherId: String, eventType: String, promise: Promise) {
-        implementation.sendCreativeAnalytic(campaignId, adSpaceId, publisherId, eventType, promise)
+    fun sendCreativeAnalytic(campaignId: String, adSpaceId: String, publisherId: String, eventType: String, origin: String, apiKey: String, bidId: String, isTestEnvironment: Boolean , promise: Promise) {
+        implementation.sendCreativeAnalytic(campaignId, adSpaceId, publisherId, eventType, origin, apiKey, bidId, isTestEnvironment, promise)
     }
 
 }

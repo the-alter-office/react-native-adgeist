@@ -1,2 +1,2 @@
 export * from './components/BannerAd';
-export * from './components/BottomBannerAd';
+export * from './components/AdgeistProvider';

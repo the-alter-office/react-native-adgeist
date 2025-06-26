@@ -6,9 +6,11 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
 import com.adgeistkit.AdgeistCore
 import com.adgeistkit.CreativeDataModel
-import com.adgeistkit.Campaign
-import com.adgeistkit.Creative
-import com.adgeistkit.BudgetSettings
+import com.adgeistkit.BidResponseData
+import com.adgeistkit.SeatBid
+import com.adgeistkit.Bid
+import com.adgeistkit.BidExtension
+
 
 class AdgeistModuleImpl internal constructor(private val context: ReactApplicationContext) {
 
@@ -16,8 +18,8 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
   private val getAd = adgeistInstanceFromLibrary.getCreative()
   private val postCreativeAnalytic = adgeistInstanceFromLibrary.postCreativeAnalytics()
 
-  fun fetchCreative(adSpaceId: String, publisherId: String, promise: Promise) {
-    getAd.fetchCreative(adSpaceId, publisherId) { adData ->
+  fun fetchCreative(apiKey: String, origin: String, adSpaceId: String, publisherId: String, isTestEnvironment: Boolean, promise: Promise) {
+    getAd.fetchCreative(apiKey, origin, adSpaceId, publisherId, isTestEnvironment) { adData ->
       if (adData != null) {
         promise.resolve(adData.toWritableMap())
       } else {
@@ -26,8 +28,8 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     }
   }
 
-  fun sendCreativeAnalytic(campaignId: String, adSpaceId: String, publisherId: String, eventType: String, promise: Promise) {
-    postCreativeAnalytic.sendTrackingData(campaignId, adSpaceId, publisherId, eventType) { adData ->
+  fun sendCreativeAnalytic(campaignId: String, adSpaceId: String, publisherId: String, eventType: String, origin: String, apiKey: String, bidId: String, isTestEnvironment: Boolean = true, promise: Promise) {
+    postCreativeAnalytic.sendTrackingData(campaignId, adSpaceId, publisherId, eventType, origin, apiKey, bidId, isTestEnvironment) { adData ->
       if (adData != null) {
         promise.resolve(adData)
       } else {
@@ -42,36 +44,43 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
   }
 }
 
-// Extension function to convert CreativeData to WritableMap
+// Extension function to convert CreativeDataModel to WritableMap
 fun CreativeDataModel.toWritableMap(): WritableMap {
   val map = Arguments.createMap()
   map.putBoolean("success", success)
   map.putString("message", message)
 
   val dataMap = Arguments.createMap()
-  data?.let { campaign ->
-    dataMap.putString("_id", campaign._id)
-    dataMap.putString("name", campaign.name)
+  data?.let { bidResponse ->
+    dataMap.putString("id", bidResponse.id)
+    dataMap.putString("bidId", bidResponse.bidId)
+    dataMap.putString("cur", bidResponse.cur)
 
-    val creativeMap = Arguments.createMap()
-    campaign.creative?.let { creative ->
-      creativeMap.putString("title", creative.title)
-      creativeMap.putString("description", creative.description)
-      creativeMap.putString("fileUrl", creative.fileUrl)
-      creativeMap.putString("ctaUrl", creative.ctaUrl)
-      creativeMap.putString("type", creative.type)
-      creativeMap.putString("fileName", creative.fileName)
-      creativeMap.putString("createdAt", creative.createdAt)
-      creativeMap.putString("updatedAt", creative.updatedAt)
-    }
-    dataMap.putMap("creative", creativeMap)
+    val seatBidArray = Arguments.createArray()
+    bidResponse.seatBid.forEach { seatBid ->
+      val seatBidMap = Arguments.createMap()
+      seatBidMap.putString("bidId", seatBid.bidId)
 
-    val budgetMap = Arguments.createMap()
-    campaign.budgetSettings?.let { budget ->
-      budgetMap.putDouble("totalBudget", budget.totalBudget)
-      budgetMap.putDouble("spentBudget", budget.spentBudget)
+      val bidArray = Arguments.createArray()
+      seatBid.bid.forEach { bid ->
+        val bidMap = Arguments.createMap()
+        bidMap.putString("id", bid.id)
+        bidMap.putString("impId", bid.impId)
+        bidMap.putDouble("price", bid.price)
+
+        val extMap = Arguments.createMap()
+        extMap.putString("creativeUrl", bid.ext.creativeUrl)
+        extMap.putString("ctaUrl", bid.ext.ctaUrl)
+        extMap.putString("creativeTitle", bid.ext.creativeTitle)
+        extMap.putString("creativeDescription", bid.ext.creativeDescription)
+        bidMap.putMap("ext", extMap)
+
+        bidArray.pushMap(bidMap)
+      }
+      seatBidMap.putArray("bid", bidArray)
+      seatBidArray.pushMap(seatBidMap)
     }
-    dataMap.putMap("budgetSettings", budgetMap)
+    dataMap.putArray("seatBid", seatBidArray)
   }
 
   map.putMap("data", dataMap)

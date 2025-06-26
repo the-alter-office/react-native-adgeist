@@ -9,111 +9,141 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import Adgeist from '../NativeAdgeist';
-
-interface Creative {
-  fileUrl: string;
-  title: string;
-  description: string;
-  ctaUrl?: string;
-}
+import { useAdgeistContext } from './AdgeistProvider';
 
 interface AdData {
-  _id: string;
-  creative: Creative;
+  id: string;
+  bidId: string;
+  cur: string;
+  seatBid: SeatBid[];
 }
 
+interface SeatBid {
+  bidId: string;
+  bid: Bid[];
+}
+
+interface Bid {
+  id: string;
+  impId: string;
+  price: number;
+  ext: BidExtension;
+}
+
+interface BidExtension {
+  creativeUrl: string;
+  ctaUrl: string;
+  creativeTitle: string;
+  creativeDescription: string;
+  creativeBrandName?: string;
+}
 interface AdBannerTypes {
-  dataPublisherId: string;
   dataAdSlot: string;
   width: number;
   height: number;
 }
 
-export const BannerAd: React.FC<AdBannerTypes> = ({
-  dataPublisherId,
-  dataAdSlot,
-  width,
-  height,
-}) => {
+export const BannerAd: React.FC<AdBannerTypes> = ({ dataAdSlot }) => {
   const [adData, setAdData] = useState<AdData | null>(null);
+  const { publisherId, apiKey, domain, isTestEnvironment } =
+    useAdgeistContext();
+
+  const creativeData = adData?.seatBid?.[0]?.bid?.[0]?.ext as BidExtension;
 
   useEffect(() => {
     (async () => {
       try {
         const response: Object = await Adgeist.fetchCreative(
+          apiKey,
+          domain,
           dataAdSlot,
-          dataPublisherId
+          publisherId,
+          isTestEnvironment
         );
+
         const creative: { data: AdData } = response as { data: AdData };
         setAdData(creative.data);
 
-        await Adgeist.sendCreativeAnalytic(
-          creative.data._id,
-          dataAdSlot,
-          dataPublisherId,
-          'impression'
-        );
+        if (creative.data.seatBid.length > 0) {
+          await Adgeist.sendCreativeAnalytic(
+            creative.data.seatBid?.[0]?.bid?.[0]?.id || '',
+            dataAdSlot,
+            publisherId,
+            'IMPRESSION',
+            domain,
+            apiKey,
+            creative.data.id,
+            isTestEnvironment
+          );
+        }
       } catch (error) {
         console.error('Ad load failed:', error);
       }
     })();
-  }, [dataPublisherId, dataAdSlot]);
+  }, [publisherId, dataAdSlot, apiKey, domain, isTestEnvironment]);
 
   const handleClick = async () => {
-    if (adData?.creative?.ctaUrl) {
+    if (adData && adData?.seatBid.length > 0) {
       await Adgeist.sendCreativeAnalytic(
-        adData._id,
+        adData?.seatBid?.[0]?.bid?.[0]?.id || '',
         dataAdSlot,
-        dataPublisherId,
-        'click'
+        publisherId,
+        'CLICK',
+        domain,
+        apiKey,
+        adData.id,
+        isTestEnvironment
       );
-      Linking.openURL(adData.creative.ctaUrl).catch((err) =>
+      Linking.openURL(creativeData.ctaUrl).catch((err) =>
         console.error('Failed to open URL:', err)
       );
     }
   };
 
-  if (!adData?.creative?.fileUrl) return null;
+  if (!creativeData?.creativeUrl) return null;
 
   return (
     <TouchableWithoutFeedback accessible accessibilityLabel="Ad Banner">
-      <View style={styles.container}>
+      <View style={styles.adContainer}>
         <Image
-          style={[styles.creative, { width, height }]}
-          source={{ uri: adData.creative.fileUrl }}
+          style={[styles.creative, { width: '100%', height: 300 }]}
+          source={{ uri: creativeData.creativeUrl }}
         />
-        <View style={styles.options}>
-          <Text style={styles.option}>x</Text>
-          <Text style={styles.option}>i</Text>
-        </View>
         <View style={styles.adContent}>
-          <Image
-            style={styles.logo}
-            source={{ uri: adData.creative.fileUrl }}
-          />
-          <View style={styles.textContainer}>
-            <View style={styles.titleRow}>
-              <Text style={styles.adBadge}>AD</Text>
-              <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
-                {adData.creative.title}
-              </Text>
-            </View>
+          <View style={styles.contentContainer}>
+            <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+              {creativeData.creativeTitle}
+            </Text>
+
             <Text
               style={styles.description}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {adData.creative.description}
+              {creativeData.creativeDescription}
+            </Text>
+
+            <Text
+              style={styles.brandName}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {creativeData?.creativeBrandName || 'Brand Name'}
             </Text>
           </View>
           <TouchableWithoutFeedback
-            onPress={handleClick}
+            onPress={() => {
+              handleClick();
+            }}
             accessible
             accessibilityLabel="Visit Site Button"
           >
-            <View style={styles.button}>
-              <Text style={styles.buttonText}>Visit Site</Text>
-            </View>
+            <Image
+              style={[styles.linkButton]}
+              source={{
+                uri: 'https://d2cfeg6k9cklz9.cloudfront.net/onboarding-icons/Button.png',
+              }}
+            />
           </TouchableWithoutFeedback>
         </View>
       </View>
@@ -122,81 +152,48 @@ export const BannerAd: React.FC<AdBannerTypes> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  adContainer: {
+    width: Dimensions.get('window').width,
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderRadius: 5,
   },
   creative: {
-    resizeMode: 'contain',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  options: {
-    flexDirection: 'row',
-    gap: 2,
-    position: 'absolute',
-    top: 5,
-    left: 5,
-  },
-  option: {
-    color: 'green',
-    backgroundColor: '#00000022',
-    width: 20,
-    height: 20,
-    textAlign: 'center',
+    resizeMode: 'cover',
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
   },
   adContent: {
     width: '100%',
     backgroundColor: 'white',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
     paddingVertical: 10,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    borderTopColor: '#00000022',
-    borderTopWidth: 1,
+    borderBottomLeftRadius: 5,
+    borderBottomRightRadius: 5,
   },
-  logo: {
-    width: 35,
-    height: 35,
-    resizeMode: 'contain',
-    borderRadius: 2,
-  },
-  textContainer: {
-    width: Dimensions.get('window').width - 150,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    width: Dimensions.get('window').width - 200,
-  },
-  adBadge: {
-    color: 'white',
-    backgroundColor: 'green',
-    width: 40,
-    borderRadius: 4,
-    textAlign: 'center',
+  contentContainer: {
+    width: Dimensions.get('window').width - 100,
   },
   title: {
     color: 'black',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   description: {
     color: 'black',
+    fontSize: 16,
   },
-  button: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderWidth: 1,
-    borderColor: 'green',
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
+  brandName: {
+    color: 'black',
+    fontSize: 16,
+    opacity: 0.6,
+    marginTop: 5,
+    fontWeight: 'semibold',
+  },
+  linkButton: {
+    width: 40,
     height: 40,
-  },
-  buttonText: {
-    color: 'green',
   },
 });
