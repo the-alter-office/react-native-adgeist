@@ -5,8 +5,11 @@ import React
 @objc public class AdgeistImpl: NSObject {
     private static let adGeist = AdgeistCore.shared
     @objc public func fetchCreative(
+        apiKey: String,
+        origin: String,
         adSpaceId: String,
         publisherId: String,
+        isTestEnvironment: Boolean,
         resolver: @escaping RCTPromiseResolveBlock, 
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
@@ -34,6 +37,10 @@ import React
         adSpaceId: String,
         publisherId: String,
         eventType: String,
+        origin: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Boolean,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {

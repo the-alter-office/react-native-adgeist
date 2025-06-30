@@ -22,25 +22,42 @@ RCT_EXPORT_MODULE(Adgeist)
 
 
 // Exported methods for JS
-RCT_EXPORT_METHOD(fetchCreative:(NSString *)adSpaceId
+RCT_EXPORT_METHOD(fetchCreative:(NSString *)apiKey
+                  origin:(NSString *)origin
+                  adSpaceId:(NSString *)adSpaceId
                   publisherId:(NSString *)publisherId
-                      resolve:(RCTPromiseResolveBlock)resolve
-                       reject:(RCTPromiseRejectBlock)reject)
+                  isTestEnvironment:(BOOL)isTestEnvironment
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
 {
-    [adgeist fetchCreativeWithAdSpaceId:adSpaceId publisherId:publisherId resolver:resolve rejecter:reject];
+    [adgeist fetchCreativeWithApiKey:apiKey
+                               origin:origin
+                           adSpaceId:adSpaceId
+                          publisherId:publisherId
+                  isTestEnvironment:isTestEnvironment
+                             resolver:resolve
+                             rejecter:reject];
 }
 
 RCT_EXPORT_METHOD(sendCreativeAnalytic:(NSString *)campaignId
-                   adSpaceId:(NSString *)adSpaceId
-                 publisherId:(NSString *)publisherId
-                   eventType:(NSString *)eventType
-                     resolve:(RCTPromiseResolveBlock)resolve
-                      reject:(RCTPromiseRejectBlock)reject)
+                  adSpaceId:(NSString *)adSpaceId
+                  publisherId:(NSString *)publisherId
+                  eventType:(NSString *)eventType
+                  origin:(NSString *)origin
+                  apiKey:(NSString *)apiKey
+                  bidId:(NSString *)bidId
+                  isTestEnvironment:(BOOL)isTestEnvironment
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
 {
     [adgeist sendCreativeAnalyticWithCampaignId:campaignId
                                       adSpaceId:adSpaceId
                                     publisherId:publisherId
                                       eventType:eventType
+                                       origin:origin
+                                       apiKey:apiKey
+                                       bidId:bidId
+                                       isTestEnvironment:isTestEnvironment
                                        resolver:resolve
                                        rejecter:reject];
 }

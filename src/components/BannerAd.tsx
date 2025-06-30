@@ -7,6 +7,7 @@ import {
   Text,
   View,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from 'react-native';
 import Adgeist from '../NativeAdgeist';
 import { useAdgeistContext } from './AdgeistProvider';
@@ -45,6 +46,7 @@ interface AdBannerTypes {
 
 export const BannerAd: React.FC<AdBannerTypes> = ({ dataAdSlot }) => {
   const [adData, setAdData] = useState<AdData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { publisherId, apiKey, domain, isTestEnvironment } =
     useAdgeistContext();
 
@@ -53,6 +55,7 @@ export const BannerAd: React.FC<AdBannerTypes> = ({ dataAdSlot }) => {
   useEffect(() => {
     (async () => {
       try {
+        setIsLoading(true);
         const response: Object = await Adgeist.fetchCreative(
           apiKey,
           domain,
@@ -63,6 +66,7 @@ export const BannerAd: React.FC<AdBannerTypes> = ({ dataAdSlot }) => {
 
         const creative: { data: AdData } = response as { data: AdData };
         setAdData(creative.data);
+        setIsLoading(false);
 
         if (creative.data.seatBid.length > 0) {
           await Adgeist.sendCreativeAnalytic(
@@ -99,6 +103,14 @@ export const BannerAd: React.FC<AdBannerTypes> = ({ dataAdSlot }) => {
       );
     }
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingOverlayContainer}>
+        <ActivityIndicator size="large" color="#63AA75" />
+      </View>
+    );
+  }
 
   if (!creativeData?.creativeUrl) return null;
 
@@ -156,6 +168,12 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width,
     backgroundColor: 'white',
     borderRadius: 5,
+  },
+  loadingOverlayContainer: {
+    width: '100%',
+    height: 375,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   creative: {
     resizeMode: 'cover',
