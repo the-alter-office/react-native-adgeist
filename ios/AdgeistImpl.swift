@@ -9,11 +9,17 @@ import React
         origin: String,
         adSpaceId: String,
         publisherId: String,
-        isTestEnvironment: Boolean,
+        isTestEnvironment: Bool,
         resolver: @escaping RCTPromiseResolveBlock, 
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        AdgeistImpl.adGeist.getCreative().fetchCreative(adSpaceId: adSpaceId, publisherId: publisherId) { creativeData in
+        AdgeistImpl.adGeist.getCreative().fetchCreative(
+            apiKey: apiKey,
+            origin: origin,
+            adSpaceId: adSpaceId,
+            companyId: publisherId,
+            isTestEnvironment: isTestEnvironment
+        ) { creativeData in
             if let creativeData = creativeData {
                 do {
                     let encoder = JSONEncoder()
@@ -40,7 +46,7 @@ import React
         origin: String,
         apiKey: String,
         bidId: String,
-        isTestEnvironment: Boolean,
+        isTestEnvironment: Bool,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
@@ -48,7 +54,11 @@ import React
             campaignId: campaignId,
             adSpaceId: adSpaceId,
             publisherId: publisherId,
-            eventType: eventType
+            eventType: eventType,
+            origin: origin,
+            apiKey: apiKey,
+            bidId: bidId,
+            isTestEnvironment: isTestEnvironment
         ) { response in
             if let response = response {
                 resolver(response)
