@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Adgeist from '../NativeAdgeist';
 import { useAdgeistContext } from './AdgeistProvider';
+import Video from 'react-native-video';
 
 interface AdData {
   id: string;
@@ -40,14 +41,18 @@ interface BidExtension {
 }
 interface AdBannerTypes {
   dataAdSlot: string;
+  dataSlotType: 'banner' | 'video';
   width: number;
   height: number;
 }
 
-export const BannerAd: React.FC<AdBannerTypes> = ({ dataAdSlot }) => {
+export const BannerAd: React.FC<AdBannerTypes> = ({
+  dataAdSlot,
+  dataSlotType = 'banner',
+}) => {
   const [adData, setAdData] = useState<AdData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { publisherId, apiKey, domain, isTestEnvironment } =
+  const { isInitialized, publisherId, apiKey, domain, isTestEnvironment } =
     useAdgeistContext();
 
   const creativeData = adData?.seatBid?.[0]?.bid?.[0]?.ext as BidExtension;
@@ -55,36 +60,45 @@ export const BannerAd: React.FC<AdBannerTypes> = ({ dataAdSlot }) => {
   useEffect(() => {
     (async () => {
       try {
-        setIsLoading(true);
-        const response: Object = await Adgeist.fetchCreative(
-          apiKey,
-          domain,
-          dataAdSlot,
-          publisherId,
-          isTestEnvironment
-        );
-
-        const creative: { data: AdData } = response as { data: AdData };
-        setAdData(creative.data);
-        setIsLoading(false);
-
-        if (creative.data.seatBid.length > 0) {
-          await Adgeist.sendCreativeAnalytic(
-            creative.data.seatBid?.[0]?.bid?.[0]?.id || '',
+        if (isInitialized) {
+          setIsLoading(true);
+          const response: Object = await Adgeist.fetchCreative(
+            apiKey,
+            domain,
             dataAdSlot,
             publisherId,
-            'IMPRESSION',
-            domain,
-            apiKey,
-            creative.data.id,
             isTestEnvironment
           );
+
+          const creative: { data: AdData } = response as { data: AdData };
+          setAdData(creative.data);
+          setIsLoading(false);
+
+          if (creative.data.seatBid.length > 0) {
+            await Adgeist.sendCreativeAnalytic(
+              creative.data.seatBid?.[0]?.bid?.[0]?.id || '',
+              dataAdSlot,
+              publisherId,
+              'IMPRESSION',
+              domain,
+              apiKey,
+              creative.data.id,
+              isTestEnvironment
+            );
+          }
         }
       } catch (error) {
         console.error('Ad load failed:', error);
       }
     })();
-  }, [publisherId, dataAdSlot, apiKey, domain, isTestEnvironment]);
+  }, [
+    isInitialized,
+    publisherId,
+    dataAdSlot,
+    apiKey,
+    domain,
+    isTestEnvironment,
+  ]);
 
   const handleClick = async () => {
     if (adData && adData?.seatBid.length > 0) {
@@ -117,10 +131,18 @@ export const BannerAd: React.FC<AdBannerTypes> = ({ dataAdSlot }) => {
   return (
     <TouchableWithoutFeedback accessible accessibilityLabel="Ad Banner">
       <View style={styles.adContainer}>
-        <Image
-          style={[styles.creative, { width: '100%', height: 300 }]}
-          source={{ uri: creativeData.creativeUrl }}
-        />
+        {dataSlotType == 'banner' ? (
+          <Image
+            style={[styles.creative, { width: '100%', height: 300 }]}
+            source={{ uri: creativeData.creativeUrl }}
+          />
+        ) : (
+          <Video
+            source={{ uri: creativeData.creativeUrl }}
+            style={{ width: '100%', aspectRatio: 16 / 9, height: 300 }}
+          />
+        )}
+
         <View style={styles.adContent}>
           <View style={styles.contentContainer}>
             <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">

@@ -1,6 +1,6 @@
 {
   "name": "@thealteroffice/react-native-adgeist",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Publishers can integrate our SDK to connect their ad spaces to the AdGeist marketplace.",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
@@ -167,5 +167,8 @@
     "type": "turbo-module",
     "languages": "kotlin-objc",
     "version": "0.49.8"
+  },
+  "dependencies": {
+    "react-native-video": "^6.16.0"
   }
 }

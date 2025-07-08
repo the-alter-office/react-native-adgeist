@@ -11,10 +11,12 @@ export default function App() {
       apiKey="7f6b3361bd6d804edfb40cecf3f42e5ebc0b11bd88d96c8a6d64188b93447ad9"
       isTestEnvironment={true}
       domain="https://adgeist-ad-integration.d49kd6luw1c4m.amplifyapp.com"
+      customAdgeistApiOrigin="bg-services-api.adgeist.ai"
     >
       <View style={styles.container}>
         <BannerAd
           dataAdSlot="686149fac1fd09fff371e53c"
+          dataSlotType="video"
           width={Dimensions.get('window').width}
           height={300}
         />

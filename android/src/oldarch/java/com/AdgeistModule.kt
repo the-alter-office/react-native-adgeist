@@ -14,6 +14,11 @@ class AdgeistModule internal constructor(reactContext: ReactApplicationContext) 
     override fun getName(): String = AdgeistModuleImpl.NAME
 
     @ReactMethod
+    fun initializeSdk(customDomain: String, promise: Promise) {
+        implementation.initializeSdk(customDomain, promise)   
+    }
+
+    @ReactMethod
     fun fetchCreative(apiKey: String, origin: String, adSpaceId: String, publisherId: String, isTestEnvironment: Boolean, promise: Promise) {
         implementation.fetchCreative(apiKey, origin, adSpaceId, publisherId, isTestEnvironment, promise)
     }

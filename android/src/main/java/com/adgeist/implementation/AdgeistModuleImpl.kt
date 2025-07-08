@@ -5,6 +5,8 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
 import com.adgeistkit.AdgeistCore
+import com.adgeistkit.FetchCreative
+import com.adgeistkit.CreativeAnalytics
 import com.adgeistkit.CreativeDataModel
 import com.adgeistkit.BidResponseData
 import com.adgeistkit.SeatBid
@@ -14,33 +16,43 @@ import com.adgeistkit.BidExtension
 
 class AdgeistModuleImpl internal constructor(private val context: ReactApplicationContext) {
 
-  private val adgeistInstanceFromLibrary = AdgeistCore.initialize(context.applicationContext)
-  private val getAd = adgeistInstanceFromLibrary.getCreative()
-  private val postCreativeAnalytic = adgeistInstanceFromLibrary.postCreativeAnalytics()
+  private var adgeistInstance: AdgeistCore? = null
+  private var getAd: FetchCreative? = null
+  private var postCreativeAnalytic: CreativeAnalytics? = null
+
+  fun initializeSdk(customDomain: String?, promise: Promise) {
+    try {
+      adgeistInstance = AdgeistCore.initialize(context.applicationContext, customDomain)
+      getAd = adgeistInstance?.getCreative()
+      postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()
+      promise.resolve("SDK initialized with domain: ${customDomain ?: "default"}")
+    } catch (e: Exception) {
+      promise.reject("INIT_FAILED", "SDK initialization failed", e)
+    }
+  }
 
   fun fetchCreative(apiKey: String, origin: String, adSpaceId: String, publisherId: String, isTestEnvironment: Boolean, promise: Promise) {
-    getAd.fetchCreative(apiKey, origin, adSpaceId, publisherId, isTestEnvironment) { adData ->
+    getAd?.fetchCreative(apiKey, origin, adSpaceId, publisherId, isTestEnvironment) { adData ->
       if (adData != null) {
         promise.resolve(adData.toWritableMap())
       } else {
         promise.reject("NO_AD", "Ad data not available")
       }
-    }
+    } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
   }
 
   fun sendCreativeAnalytic(campaignId: String, adSpaceId: String, publisherId: String, eventType: String, origin: String, apiKey: String, bidId: String, isTestEnvironment: Boolean = true, promise: Promise) {
-    postCreativeAnalytic.sendTrackingData(campaignId, adSpaceId, publisherId, eventType, origin, apiKey, bidId, isTestEnvironment) { adData ->
+    postCreativeAnalytic?.sendTrackingData(campaignId, adSpaceId, publisherId, eventType, origin, apiKey, bidId, isTestEnvironment) { adData ->
       if (adData != null) {
         promise.resolve(adData)
       } else {
         promise.reject("NO_AD", "Couldn't find the campaign to update analytics")
       }
-    }
+    } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
   }
 
   companion object {
     const val NAME = "Adgeist"
-
   }
 }
 
