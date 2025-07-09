@@ -3,7 +3,25 @@ import AdgeistKit
 import React
 
 @objc public class AdgeistImpl: NSObject {
-    private static let adGeist = AdgeistCore.shared
+    private var adgeistInstance: AdgeistCore?
+    private var getAd: FetchCreative?
+    private var postCreativeAnalytic: CreativeAnalytics?
+    
+    @objc public func initializeSdk(
+        customDomain: String?,
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        do {
+            adgeistInstance = AdgeistCore.initialize(customDomain: customDomain ?? "bg-services-api.adgeist.ai")
+            getAd = adgeistInstance?.getCreative()
+            postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()
+            resolver("SDK initialized with domain: \(customDomain ?? "default")")
+        } catch {
+            rejecter("INIT_FAILED", "SDK initialization failed", error)
+        }
+    }
+
     @objc public func fetchCreative(
         apiKey: String,
         origin: String,
@@ -13,7 +31,12 @@ import React
         resolver: @escaping RCTPromiseResolveBlock, 
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        AdgeistImpl.adGeist.getCreative().fetchCreative(
+        guard let getAd = getAd else {
+            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
+            return
+        }
+
+        getAd.fetchCreative(
             apiKey: apiKey,
             origin: origin,
             adSpaceId: adSpaceId,
@@ -50,7 +73,12 @@ import React
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        AdgeistImpl.adGeist.postCreativeAnalytics().sendTrackingData(
+        guard let postCreativeAnalytic = postCreativeAnalytic else {
+            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
+            return
+        }
+
+        postCreativeAnalytic.sendTrackingData(
             campaignId: campaignId,
             adSpaceId: adSpaceId,
             publisherId: publisherId,

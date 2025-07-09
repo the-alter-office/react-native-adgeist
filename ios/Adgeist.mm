@@ -20,6 +20,14 @@ RCT_EXPORT_MODULE(Adgeist)
     return self;
 }
 
+RCT_EXPORT_METHOD(initializeSdk:(NSString *)customDomain
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+    [adgeist initializeSdkWithCustomDomain:customDomain
+                                   resolver:resolve
+                                   rejecter:reject];
+}
 
 // Exported methods for JS
 RCT_EXPORT_METHOD(fetchCreative:(NSString *)apiKey
