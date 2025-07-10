@@ -139,7 +139,8 @@ export const BannerAd: React.FC<AdBannerTypes> = ({
         ) : (
           <Video
             source={{ uri: creativeData.creativeUrl }}
-            style={{ width: '100%', aspectRatio: 16 / 9, height: 300 }}
+            resizeMode="contain"
+            style={{ width: '100%', height: 300 }}
           />
         )}
 
