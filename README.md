@@ -44,6 +44,47 @@ npx expo prebuild --clean
 
 > **Note**: Requires Expo SDK 50+ and Kotlin template support.
 
+## ⚙️ Peer Dependencies
+
+This package uses `react-native-video` internally for media rendering.
+
+### Why Peer Dependency?
+React Native native modules like `react-native-video` should not be bundled inside libraries to prevent native build conflicts.
+
+We declare `react-native-video` as a peer dependency, so your app controls the version.
+
+### What You Need to Do
+- **If your app already uses `react-native-video`**: No action needed.
+- **If your app does not have `react-native-video` installed**: Please install it manually:
+
+```bash
+npm install react-native-video@^4.5.2
+```
+or
+```bash
+yarn add react-native-video@^4.5.2
+```
+
+### What Happens If You Skip This?
+If `react-native-video` is not installed, your app will crash at runtime with:
+
+```javascript
+Error: Cannot find module 'react-native-video'
+```
+
+### Why Not Include It in dependencies?
+Adding `react-native-video` to dependencies directly in this library would:
+
+- ❌ Cause duplicate native module linking
+- ❌ Lead to iOS/Android build failures
+- ❌ Break compatibility with apps already using `react-native-video`
+
+### Dependency Summary
+
+| Package | Install It? | Why? |
+|---------|-------------|------|
+| `react-native-video` | ✅ **Yes (required)** | Your app must install this manually to satisfy the peer dependency |
+
 ## 🔧 Setup & Configuration
 
 ### Basic Setup
