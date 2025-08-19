@@ -131,7 +131,7 @@ export const BannerAd: React.FC<AdBannerTypes> = ({
   return (
     <TouchableWithoutFeedback accessible accessibilityLabel="Ad Banner">
       <View style={styles.adContainer}>
-        {dataSlotType == 'banner' ? (
+        {dataSlotType === 'banner' ? (
           <Image
             style={[styles.creative, { width: '100%', height: 300 }]}
             source={{ uri: creativeData.creativeUrl }}
@@ -141,6 +141,7 @@ export const BannerAd: React.FC<AdBannerTypes> = ({
             source={{ uri: creativeData.creativeUrl }}
             resizeMode="contain"
             style={{ width: '100%', height: 300 }}
+            repeat={true}
           />
         )}
 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Dimensions, StyleSheet, View, Text, Pressable } from 'react-native';
+import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { useAdgeistContext } from './AdgeistProvider';
 import Adgeist from '../NativeAdgeist';
 
@@ -42,43 +42,51 @@ export const ConsentModal: React.FC<ConsentModalPropsType> = () => {
 
 const styles = StyleSheet.create({
   modalContainer: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+    width: '100%',
+    height: '100%',
     position: 'absolute',
     top: 0,
     left: 0,
     zIndex: 1000,
-    backgroundColor: '#00000044',
-    padding: 20,
+    backgroundColor: '#000000DD',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalInnerContainer: {
+    width: '95%',
+    maxWidth: 375,
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 15,
   },
   headerContainer: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '600',
     marginBottom: 5,
+    opacity: 0.8,
   },
   textContainer: {
-    fontSize: 14,
+    fontSize: 15,
     marginBottom: 5,
+    opacity: 0.8,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 5,
+    gap: 10,
   },
   button: {
-    backgroundColor: '#63AA75',
-    padding: 10,
+    backgroundColor: '#000000CC',
+    paddingVertical: 10,
+    paddingHorizontal: 25,
     borderRadius: 5,
+    marginVertical: 5,
+    marginTop: 10,
   },
   buttonText: {
-    color: 'black',
+    color: '#FFFFFF',
+    fontWeight: '500',
+    fontSize: 15,
   },
 });
