@@ -3,6 +3,9 @@ package com.adgeist
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.adgeist.implementation.AdgeistModuleImpl
+import com.adgeistkit.UserDetails
+import com.adgeistkit.Event
+import com.facebook.react.bridge.ReadableMap
 
 class AdgeistModule internal constructor(reactContext: ReactApplicationContext) : 
     NativeAdgeistSpec(reactContext) {
@@ -23,4 +26,19 @@ class AdgeistModule internal constructor(reactContext: ReactApplicationContext) 
         implementation.sendCreativeAnalytic(campaignId, adSpaceId, publisherId, eventType, origin, apiKey, bidId, isTestEnvironment, promise)
     }
 
+    override fun setUserDetails(userDetails: ReadableMap) {
+        implementation.setUserDetails(userDetails)
+    }
+
+    override fun logEvent(event: ReadableMap) {
+        implementation.logEvent(event)
+    }
+
+    override fun getConsentStatus(promise: Promise) {
+        implementation.getConsentStatus(promise)
+    }
+
+    override fun updateConsentStatus(consent: Boolean) {
+        implementation.updateConsentStatus(consent)
+    }
 }

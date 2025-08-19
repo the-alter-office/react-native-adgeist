@@ -70,6 +70,18 @@ RCT_EXPORT_METHOD(sendCreativeAnalytic:(NSString *)campaignId
                                        rejecter:reject];
 }
 
+RCT_EXPORT_METHOD(setUserDetails:(NSObject *)userDetails) {
+    [adgeist setUserDetails:userDetails];
+}
+
+RCT_EXPORT_METHOD(updateConsentStatus:(BOOL)consent) {
+    [adgeist updateConsentStatus:consent];
+}
+
+RCT_EXPORT_METHOD(logEvent:(NSObject *)eventDict) {
+    [adgeist logEvent:eventDict];
+}
+
 // TurboModule support for the new architecture
 #ifdef RCT_NEW_ARCH_ENABLED
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:

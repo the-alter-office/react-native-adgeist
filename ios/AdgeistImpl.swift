@@ -96,6 +96,33 @@ import React
         }
     }
 
+    @objc public func setUserDetails(_ userDetailsDict: [String: Any]) {
+        let userDetails = UserDetails(
+            userId: userDetailsDict["userId"] as? String,
+            userName: userDetailsDict["userName"] as? String,
+            email: userDetailsDict["email"] as? String,
+            phone: userDetailsDict["phone"] as? String
+        )
+        adgeistInstance?.setUserDetails(userDetails)
+    }
+
+    @objc public func updateConsentStatus(_ consent: Bool) {
+        adgeistInstance?.updateConsentStatus(consent)
+    }
+
+
+    @objc public func logEvent(_ eventDict: NSDictionary) {
+        print("Event must have a non-empty eventType")
+        guard let eventType = eventDict["eventType"] as? String, !eventType.isEmpty else {
+            print("Event must have a non-empty eventType")
+            return
+        }
+
+        let eventProps = eventDict["eventProperties"] as? [String: Any] ?? [:]
+        let event = Event(eventType: eventType, eventProperties: eventProps)
+        adgeistInstance?.logEvent(event)
+    }
+
     @objc public static func requiresMainQueueSetup() -> Bool {
         return true
     }

@@ -5,6 +5,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.adgeist.implementation.AdgeistModuleImpl
+import com.facebook.react.bridge.ReadableMap
 
 class AdgeistModule internal constructor(reactContext: ReactApplicationContext) : 
     ReactContextBaseJavaModule(reactContext) {
@@ -28,4 +29,23 @@ class AdgeistModule internal constructor(reactContext: ReactApplicationContext) 
         implementation.sendCreativeAnalytic(campaignId, adSpaceId, publisherId, eventType, origin, apiKey, bidId, isTestEnvironment, promise)
     }
 
+    @ReactMethod
+    fun setUserDetails(userDetails: ReadableMap) {
+        implementation.setUserDetails(userDetails)
+    }
+
+    @ReactMethod
+    fun logEvent(event: ReadableMap) {
+        implementation.logEvent(event)
+    }
+
+    @ReactMethod
+    fun getConsentStatus(promise: Promise) {
+        implementation.getConsentStatus(promise)
+    }
+
+    @ReactMethod
+    fun updateConsentStatus(consent: Boolean) {
+        implementation.updateConsentStatus(consent)
+    }
 }

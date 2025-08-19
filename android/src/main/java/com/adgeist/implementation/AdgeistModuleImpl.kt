@@ -12,7 +12,9 @@ import com.adgeistkit.BidResponseData
 import com.adgeistkit.SeatBid
 import com.adgeistkit.Bid
 import com.adgeistkit.BidExtension
-
+import com.adgeistkit.UserDetails
+import com.adgeistkit.Event
+import com.facebook.react.bridge.ReadableMap
 
 class AdgeistModuleImpl internal constructor(private val context: ReactApplicationContext) {
 
@@ -51,10 +53,54 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
   }
 
+  fun setUserDetails(userDetailsMap: ReadableMap) {
+    val userDetails = UserDetails(
+        userId = userDetailsMap.getStringSafe("userId"),
+        userName = userDetailsMap.getStringSafe("userName"),
+        email = userDetailsMap.getStringSafe("email"),
+        phone = userDetailsMap.getStringSafe("phone")
+    )
+    adgeistInstance?.setUserDetails(userDetails)
+  }
+
+  fun logEvent(eventMap: ReadableMap) {
+    val eventType = eventMap.getStringSafe("eventType")
+
+    if (eventType.isNullOrEmpty()) {
+        throw IllegalArgumentException("Event must have a non-empty eventType")
+    }
+
+    val props = if (eventMap.hasKey("eventProperties")) eventMap.getMap("eventProperties") else null
+    val eventProps = props?.toHashMap() ?: emptyMap<String, Any>()
+
+    val event = Event(
+        eventType = eventType,
+        eventProperties = eventProps
+    )
+    adgeistInstance?.logEvent(event)
+  }
+
+  fun getConsentStatus(promise: Promise) {
+    try {
+        val consent = adgeistInstance?.getConsentStatus() ?: false
+        promise.resolve(consent)
+    } catch (e: Exception) {
+        promise.reject("CONSENT_ERROR", "Failed to get consent status", e)
+    }
+}
+
+  fun updateConsentStatus(consent: Boolean) {
+    adgeistInstance?.updateConsentStatus(consent)
+  }
+  
   companion object {
     const val NAME = "Adgeist"
   }
 }
+
+fun ReadableMap.getStringSafe(key: String): String? =
+    if (this.hasKey(key) && !this.isNull(key)) this.getString(key) else null
+
 
 // Extension function to convert CreativeDataModel to WritableMap
 fun CreativeDataModel.toWritableMap(): WritableMap {

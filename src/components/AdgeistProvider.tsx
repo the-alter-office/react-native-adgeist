@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import Adgeist from '../NativeAdgeist';
+import { ConsentModal } from './ConsentModal';
 
 interface AdgeistContextType {
   publisherId: string;
@@ -7,6 +8,7 @@ interface AdgeistContextType {
   domain: string;
   isTestEnvironment: boolean;
   isInitialized: boolean;
+  setAdgeistConsentModal: (value: boolean) => void;
 }
 
 interface AdgeistProviderPropsType {
@@ -24,6 +26,7 @@ const AdgeistContext = createContext<AdgeistContextType>({
   domain: '',
   isTestEnvironment: true,
   isInitialized: false,
+  setAdgeistConsentModal: () => {},
 });
 
 export const AdgeistProvider: React.FC<AdgeistProviderPropsType> = ({
@@ -35,14 +38,20 @@ export const AdgeistProvider: React.FC<AdgeistProviderPropsType> = ({
   isTestEnvironment = true,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [adgeistConsentModal, setAdgeistConsentModal] = useState(false);
+  const [isKotlinInitializationFailed, setIsKotlinInitializationFailed] =
+    useState(false);
 
   useEffect(() => {
     const initializeAdgeist = async () => {
+      setIsKotlinInitializationFailed(false);
+      setIsInitialized(false);
+
       try {
         await Adgeist.initializeSdk(customAdgeistApiOrigin);
         setIsInitialized(true);
-      } catch (error) {
-        console.error('Error initializing Adgeist SDK:', error);
+      } catch {
+        setIsKotlinInitializationFailed(true);
         setIsInitialized(false);
       }
     };
@@ -52,9 +61,23 @@ export const AdgeistProvider: React.FC<AdgeistProviderPropsType> = ({
 
   return (
     <AdgeistContext.Provider
-      value={{ publisherId, apiKey, domain, isTestEnvironment, isInitialized }}
+      value={{
+        publisherId,
+        apiKey,
+        domain,
+        isTestEnvironment,
+        isInitialized,
+        setAdgeistConsentModal,
+      }}
     >
-      {children}
+      {isKotlinInitializationFailed && <>{children}</>}
+
+      {isInitialized && (
+        <>
+          {adgeistConsentModal && <ConsentModal />}
+          {children}
+        </>
+      )}
     </AdgeistContext.Provider>
   );
 };

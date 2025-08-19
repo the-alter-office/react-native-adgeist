@@ -1,8 +1,20 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 
+export interface UserDetails {
+  userId?: string;
+  userName?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface Event {
+  eventType: string;
+  eventProperties: Object;
+}
 export interface Spec extends TurboModule {
   initializeSdk(customDomain: string): Promise<boolean>;
+
   fetchCreative(
     apiKey: string,
     origin: string,
@@ -10,6 +22,7 @@ export interface Spec extends TurboModule {
     publisherId: string,
     isTestEnvironment: boolean
   ): Promise<Object>;
+
   sendCreativeAnalytic(
     campaignId: string,
     adSpaceId: string,
@@ -20,6 +33,14 @@ export interface Spec extends TurboModule {
     bidId: string,
     isTestEnvironment: boolean
   ): Promise<Object>;
+
+  setUserDetails(user: UserDetails): void;
+
+  logEvent(event: Event): void;
+
+  getConsentStatus(): Promise<boolean>;
+
+  updateConsentStatus(consent: boolean): void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('Adgeist');

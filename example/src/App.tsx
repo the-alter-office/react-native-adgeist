@@ -1,8 +1,5 @@
-import { View, StyleSheet, Dimensions } from 'react-native';
-import {
-  AdgeistProvider,
-  BannerAd,
-} from '@thealteroffice/react-native-adgeist';
+import { AdgeistProvider } from '@thealteroffice/react-native-adgeist';
+import ContentContainer from './ContentContainer';
 
 export default function App() {
   return (
@@ -13,23 +10,7 @@ export default function App() {
       domain="https://adgeist-ad-integration.d49kd6luw1c4m.amplifyapp.com/"
       customAdgeistApiOrigin="bg-services-qa-api.adgeist.ai"
     >
-      <View style={styles.container}>
-        <BannerAd
-          dataAdSlot="686eb31d527f1cf0d34cd273"
-          dataSlotType="video"
-          width={Dimensions.get('window').width}
-          height={300}
-        />
-      </View>
+      <ContentContainer />
     </AdgeistProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'black',
-  },
-});
