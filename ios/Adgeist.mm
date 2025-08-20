@@ -74,12 +74,18 @@ RCT_EXPORT_METHOD(setUserDetails:(NSObject *)userDetails) {
     [adgeist setUserDetails:userDetails];
 }
 
+RCT_EXPORT_METHOD(getConsentStatus:(RCTPromiseResolveBlock)resolve 
+                  reject:(RCTPromiseRejectBlock)reject) {
+    [adgeist getConsentStatusWithResolver:resolve 
+                                 rejecter:reject];
+}
+
 RCT_EXPORT_METHOD(updateConsentStatus:(BOOL)consent) {
     [adgeist updateConsentStatus:consent];
 }
 
-RCT_EXPORT_METHOD(logEvent:(NSObject *)eventDict) {
-    [adgeist logEvent:eventDict];
+RCT_EXPORT_METHOD(logEvent:(NSDictionary *)eventDict) {
+    [adgeist logEventWithEventDict:eventDict];
 }
 
 // TurboModule support for the new architecture

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Dimensions,
   Image,
   Linking,
   StyleSheet,
@@ -42,13 +41,19 @@ interface BidExtension {
 interface AdBannerTypes {
   dataAdSlot: string;
   dataSlotType: 'banner' | 'video';
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
+  isResponsive: boolean;
+  responsiveType?: 'SQUARE' | 'VERTICAL' | 'WIDE';
 }
 
 export const BannerAd: React.FC<AdBannerTypes> = ({
   dataAdSlot,
   dataSlotType = 'banner',
+  width = 0,
+  height = 0,
+  isResponsive = false,
+  // responsiveType = 'SQUARE',
 }) => {
   const [adData, setAdData] = useState<AdData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,7 +125,12 @@ export const BannerAd: React.FC<AdBannerTypes> = ({
 
   if (isLoading) {
     return (
-      <View style={styles.loadingOverlayContainer}>
+      <View
+        style={[
+          styles.loadingOverlayContainer,
+          !isResponsive && { width: width, height: height },
+        ]}
+      >
         <ActivityIndicator size="large" color="#63AA75" />
       </View>
     );
@@ -129,18 +139,27 @@ export const BannerAd: React.FC<AdBannerTypes> = ({
   if (!creativeData?.creativeUrl) return null;
 
   return (
-    <TouchableWithoutFeedback accessible accessibilityLabel="Ad Banner">
-      <View style={styles.adContainer}>
+    <TouchableWithoutFeedback
+      accessible
+      accessibilityLabel="Ad Banner"
+      style={{ width: '100%', height: '100%' }}
+    >
+      <View
+        style={[
+          styles.adContainer,
+          !isResponsive && { width: width, height: height },
+        ]}
+      >
         {dataSlotType === 'banner' ? (
           <Image
-            style={[styles.creative, { width: '100%', height: 300 }]}
+            style={[styles.creative, { width: '100%', height: '70%' }]}
             source={{ uri: creativeData.creativeUrl }}
           />
         ) : (
           <Video
             source={{ uri: creativeData.creativeUrl }}
             resizeMode="contain"
-            style={{ width: '100%', height: 300 }}
+            style={{ width: '100%', height: '70%' }}
             repeat={true}
           />
         )}
@@ -189,23 +208,22 @@ export const BannerAd: React.FC<AdBannerTypes> = ({
 
 const styles = StyleSheet.create({
   adContainer: {
-    width: Dimensions.get('window').width,
     backgroundColor: 'white',
     borderRadius: 5,
   },
   loadingOverlayContainer: {
-    width: '100%',
-    height: 375,
     alignItems: 'center',
     justifyContent: 'center',
   },
   creative: {
-    resizeMode: 'cover',
+    resizeMode: 'contain',
     borderTopLeftRadius: 5,
+    backgroundColor: 'white',
     borderTopRightRadius: 5,
   },
   adContent: {
     width: '100%',
+    height: '30%',
     backgroundColor: 'white',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -216,7 +234,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 5,
   },
   contentContainer: {
-    width: Dimensions.get('window').width - 100,
+    width: '80%',
   },
   title: {
     color: 'black',

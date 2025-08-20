@@ -97,7 +97,11 @@ import React
     }
 
     @objc public func setUserDetails(_ userDetailsDict: [String: Any]) {
-        let userDetails = UserDetails(
+        let filtered = userDetailsDict.compactMapValues { value -> Any? in
+            (value is NSNull) ? nil : value
+        }
+
+       let userDetails = UserDetails(
             userId: userDetailsDict["userId"] as? String,
             userName: userDetailsDict["userName"] as? String,
             email: userDetailsDict["email"] as? String,
@@ -106,19 +110,35 @@ import React
         adgeistInstance?.setUserDetails(userDetails)
     }
 
+
+    @objc public func getConsentStatus(resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
+        guard let adgeistInstance = adgeistInstance else {
+            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
+            return
+        }
+        let status = adgeistInstance.getConsentStatus()
+        resolver(status)
+    }
+
     @objc public func updateConsentStatus(_ consent: Bool) {
         adgeistInstance?.updateConsentStatus(consent)
     }
 
 
-    @objc public func logEvent(_ eventDict: NSDictionary) {
-        print("Event must have a non-empty eventType")
-        guard let eventType = eventDict["eventType"] as? String, !eventType.isEmpty else {
+    @objc public func logEvent(eventDict: [String: Any]) {
+        let filtered = eventDict.compactMapValues { value -> Any? in
+            (value is NSNull) ? nil : value
+        }
+
+        guard let eventType = filtered["eventType"] as? String, !eventType.isEmpty else {
             print("Event must have a non-empty eventType")
             return
         }
 
-        let eventProps = eventDict["eventProperties"] as? [String: Any] ?? [:]
+        let eventProps = (filtered["eventProperties"] as? [String: Any])?.compactMapValues { value -> Any? in
+            (value is NSNull) ? nil : value
+        } ?? [:]
+
         let event = Event(eventType: eventType, eventProperties: eventProps)
         adgeistInstance?.logEvent(event)
     }

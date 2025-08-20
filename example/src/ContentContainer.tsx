@@ -1,4 +1,4 @@
-import { View, StyleSheet, Dimensions, Text, Pressable } from 'react-native';
+import { View, StyleSheet, Text, Pressable } from 'react-native';
 import {
   BannerAd,
   setUserDetails,
@@ -58,10 +58,11 @@ export default function ContentContainer() {
       </Pressable>
 
       <BannerAd
-        dataAdSlot="686eb31d527f1cf0d34cd273"
-        dataSlotType="video"
-        width={Dimensions.get('window').width}
-        height={300}
+        dataAdSlot="68a473fec752b36e62d264e9"
+        width={360}
+        height={360}
+        isResponsive={false}
+        dataSlotType="banner"
       />
     </View>
   );

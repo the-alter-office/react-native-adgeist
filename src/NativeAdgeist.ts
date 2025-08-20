@@ -34,9 +34,9 @@ export interface Spec extends TurboModule {
     isTestEnvironment: boolean
   ): Promise<Object>;
 
-  setUserDetails(user: UserDetails): void;
+  setUserDetails(user: Object): void;
 
-  logEvent(event: Event): void;
+  logEvent(event: Object): void;
 
   getConsentStatus(): Promise<boolean>;
 
