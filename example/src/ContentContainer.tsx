@@ -58,11 +58,11 @@ export default function ContentContainer() {
       </Pressable>
 
       <BannerAd
-        dataAdSlot="68a473fec752b36e62d264e9"
+        dataAdSlot="68a4af38c752b36e62d2672c"
         width={360}
         height={360}
         isResponsive={false}
-        dataSlotType="banner"
+        dataSlotType="video"
       />
     </View>
   );
