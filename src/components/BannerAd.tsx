@@ -120,18 +120,18 @@ export const BannerAd: React.FC<AdBannerProps> = ({
       setAdData(creative.data);
       onAdLoadSuccess?.(creative.data);
 
-      if (creative.data.seatBid.length > 0) {
-        await Adgeist.sendCreativeAnalytic(
-          creative.data.seatBid?.[0]?.bid?.[0]?.id || '',
-          dataAdSlot,
-          publisherId,
-          'IMPRESSION',
-          domain,
-          apiKey,
-          creative.data.id,
-          isTestEnvironment
-        );
-      }
+      // if (creative.data.seatBid.length > 0) {
+      //   await Adgeist.sendCreativeAnalytic(
+      //     creative.data.seatBid?.[0]?.bid?.[0]?.id || '',
+      //     dataAdSlot,
+      //     publisherId,
+      //     'IMPRESSION',
+      //     domain,
+      //     apiKey,
+      //     creative.data.id,
+      //     isTestEnvironment
+      //   );
+      // }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Ad load failed');
       setError(error);
