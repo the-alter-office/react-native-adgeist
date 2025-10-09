@@ -4,11 +4,10 @@ import ContentContainer from './ContentContainer';
 export default function App() {
   return (
     <AdgeistProvider
-      publisherId="689db1dfd22d70ae37580333"
-      apiKey="0f296c9cb61b42dd1cbccdce2ec88fbc74ed327bef71fbfecc899cbfc480aea3"
+      publisherId="68e4baa14040394a656d5262"
+      apiKey="48ad37bbe0c4091dee7c4500bc510e4fca6e7f7a1c293180708afa292820761c"
       isTestEnvironment={true}
-      domain="https://altergame.click"
-      customAdgeistApiOrigin="bg-services-qa-api.adgeist.ai"
+      domain="https://adgeist-ad-integration.d49kd6luw1c4m.amplifyapp.com"
     >
       <ContentContainer />
     </AdgeistProvider>

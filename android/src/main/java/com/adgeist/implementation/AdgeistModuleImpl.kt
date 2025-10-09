@@ -43,15 +43,6 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
   }
 
-  fun sendCreativeAnalytic(campaignId: String, adSpaceId: String, publisherId: String, eventType: String, origin: String, apiKey: String, bidId: String, isTestEnvironment: Boolean = true, promise: Promise) {
-    postCreativeAnalytic?.sendTrackingData(campaignId, adSpaceId, publisherId, eventType, origin, apiKey, bidId, isTestEnvironment) { adData ->
-      if (adData != null) {
-        promise.resolve(adData)
-      } else {
-        promise.reject("NO_AD", "Couldn't find the campaign to update analytics")
-      }
-    } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
-  }
 
   fun setUserDetails(userDetailsMap: ReadableMap) {
     val userDetails = UserDetails(
@@ -93,6 +84,107 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     adgeistInstance?.updateConsentStatus(consent)
   }
   
+  fun trackImpression(
+    campaignId: String,
+    adSpaceId: String,
+    publisherId: String,
+    apiKey: String,
+    bidId: String,
+    isTestEnvironment: Boolean,
+    renderTime: Float,
+    promise: Promise
+  ) {
+    postCreativeAnalytic?.trackImpression(
+      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, renderTime
+    )
+    promise.resolve("Impression event sent")
+  }
+
+  fun trackView(
+    campaignId: String,
+    adSpaceId: String,
+    publisherId: String,
+    apiKey: String,
+    bidId: String,
+    isTestEnvironment: Boolean,
+    viewTime: Float,
+    visibilityRatio: Float,
+    scrollDepth: Float,
+    timeToVisible: Float,
+    promise: Promise
+  ) {
+    postCreativeAnalytic?.trackView(
+      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment,
+      viewTime, visibilityRatio, scrollDepth, timeToVisible
+    )
+    promise.resolve("View event sent")
+  }
+
+  fun trackTotalView(
+    campaignId: String,
+    adSpaceId: String,
+    publisherId: String,
+    apiKey: String,
+    bidId: String,
+    isTestEnvironment: Boolean,
+    totalViewTime: Float,
+    visibilityRatio: Float,
+    promise: Promise
+  ) {
+    postCreativeAnalytic?.trackTotalView(
+      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment,
+      totalViewTime, visibilityRatio
+    )
+    promise.resolve("Total view event sent")
+  }
+
+  fun trackClick(
+    campaignId: String,
+    adSpaceId: String,
+    publisherId: String,
+    apiKey: String,
+    bidId: String,
+    isTestEnvironment: Boolean,
+    promise: Promise
+  ) {
+    postCreativeAnalytic?.trackClick(
+      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment
+    )
+    promise.resolve("Click event sent")
+  }
+
+  fun trackVideoPlayback(
+    campaignId: String,
+    adSpaceId: String,
+    publisherId: String,
+    apiKey: String,
+    bidId: String,
+    isTestEnvironment: Boolean,
+    totalPlaybackTime: Float,
+    promise: Promise
+  ) {
+    postCreativeAnalytic?.trackVideoPlayback(
+      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, totalPlaybackTime
+    )
+    promise.resolve("Video playback event sent")
+  }
+
+  fun trackVideoQuartile(
+    campaignId: String,
+    adSpaceId: String,
+    publisherId: String,
+    apiKey: String,
+    bidId: String,
+    isTestEnvironment: Boolean,
+    quartile: String,
+    promise: Promise
+  ) {
+    postCreativeAnalytic?.trackVideoQuartile(
+      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, quartile
+    )
+    promise.resolve("Video quartile event sent")
+  }
+
   companion object {
     const val NAME = "Adgeist"
   }

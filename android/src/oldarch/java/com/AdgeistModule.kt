@@ -24,10 +24,6 @@ class AdgeistModule internal constructor(reactContext: ReactApplicationContext) 
         implementation.fetchCreative(apiKey, origin, adSpaceId, publisherId, isTestEnvironment, promise)
     }
 
-    @ReactMethod
-    fun sendCreativeAnalytic(campaignId: String, adSpaceId: String, publisherId: String, eventType: String, origin: String, apiKey: String, bidId: String, isTestEnvironment: Boolean , promise: Promise) {
-        implementation.sendCreativeAnalytic(campaignId, adSpaceId, publisherId, eventType, origin, apiKey, bidId, isTestEnvironment, promise)
-    }
 
     @ReactMethod
     fun setUserDetails(userDetails: ReadableMap) {
@@ -47,5 +43,106 @@ class AdgeistModule internal constructor(reactContext: ReactApplicationContext) 
     @ReactMethod
     fun updateConsentStatus(consent: Boolean) {
         implementation.updateConsentStatus(consent)
+    }
+
+    @ReactMethod
+    fun trackImpression(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Boolean,
+        renderTime: Double,
+        promise: Promise
+    ) {
+        implementation.trackImpression(
+            campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, renderTime.toFloat(), promise
+        )
+    }
+
+    @ReactMethod
+    fun trackView(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Boolean,
+        viewTime: Double,
+        visibilityRatio: Double,
+        scrollDepth: Double,
+        timeToVisible: Double,
+        promise: Promise
+    ) {
+        implementation.trackView(
+            campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment,
+            viewTime.toFloat(), visibilityRatio.toFloat(), scrollDepth.toFloat(), timeToVisible.toFloat(), promise
+        )
+    }
+
+    @ReactMethod
+    fun trackTotalView(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Boolean,
+        totalViewTime: Double,
+        visibilityRatio: Double,
+        promise: Promise
+    ) {
+        implementation.trackTotalView(
+            campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment,
+            totalViewTime.toFloat(), visibilityRatio.toFloat(), promise
+        )
+    }
+
+    @ReactMethod
+    fun trackClick(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Boolean,
+        promise: Promise
+    ) {
+        implementation.trackClick(
+            campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, promise
+        )
+    }
+
+    @ReactMethod
+    fun trackVideoPlayback(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Boolean,
+        totalPlaybackTime: Double,
+        promise: Promise
+    ) {
+        implementation.trackVideoPlayback(
+            campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, totalPlaybackTime.toFloat(), promise
+        )
+    }
+
+    @ReactMethod
+    fun trackVideoQuartile(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Boolean,
+        quartile: String,
+        promise: Promise
+    ) {
+        implementation.trackVideoQuartile(
+            campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, quartile, promise
+        )
     }
 }

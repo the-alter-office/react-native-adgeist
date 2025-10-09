@@ -1,4 +1,11 @@
-import { View, StyleSheet, Text, Pressable } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  Pressable,
+  Dimensions,
+  ScrollView,
+} from 'react-native';
 import {
   BannerAd,
   setUserDetails,
@@ -7,7 +14,7 @@ import {
   useAdgeistContext,
   getConsentStatus,
 } from '@thealteroffice/react-native-adgeist';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ContentContainer() {
   const { setAdgeistConsentModal } = useAdgeistContext();
@@ -20,9 +27,10 @@ export default function ContentContainer() {
       }
     })();
   }, [setAdgeistConsentModal]);
+  const [isAdVisible, setIsAdVisible] = useState(false);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Pressable
         style={styles.button}
         onPress={() =>
@@ -57,24 +65,45 @@ export default function ContentContainer() {
         <Text>Update Consent</Text>
       </Pressable>
 
-      <BannerAd
-        dataAdSlot="68a4af38c752b36e62d2672c"
-        width={360}
-        height={360}
-        isResponsive={false}
-        dataSlotType="video"
-      />
-    </View>
+      <Pressable style={styles.button} onPress={() => setIsAdVisible(true)}>
+        <Text>Show Ad</Text>
+      </Pressable>
+
+      <Pressable
+        style={[styles.button, { marginBottom: 50 }]}
+        onPress={() => setIsAdVisible(false)}
+      >
+        <Text>Remove Ad</Text>
+      </Pressable>
+
+      {isAdVisible && (
+        <View
+          style={{
+            width: Dimensions.get('window').width,
+            height: 360,
+            alignItems: 'center',
+          }}
+        >
+          <BannerAd
+            dataAdSlot="68e5f0478860a7500f859085"
+            width={360}
+            height={360}
+            // isResponsive={true}
+            dataSlotType="video"
+          />
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    paddingTop: 200,
     alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: 'black',
     gap: 4,
+    height: 1000,
   },
   button: {
     backgroundColor: '#63AA75',
