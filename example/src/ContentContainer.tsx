@@ -82,10 +82,11 @@ export default function ContentContainer() {
             width: Dimensions.get('window').width,
             height: 360,
             alignItems: 'center',
+            marginTop: 500,
           }}
         >
           <BannerAd
-            dataAdSlot="68e5f0478860a7500f859085"
+            dataAdSlot="68ef39e281029bf4edcd62ea"
             width={360}
             height={360}
             // isResponsive={true}
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'black',
     gap: 4,
-    height: 1000,
+    height: 1500,
   },
   button: {
     backgroundColor: '#63AA75',

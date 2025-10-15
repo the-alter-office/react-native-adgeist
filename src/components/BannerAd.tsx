@@ -95,6 +95,9 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasImpression, setHasImpression] = useState<boolean>(false);
   const [hasView, setHasView] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(true);
+  const [isManuallyControlled, setIsManuallyControlled] =
+    useState<boolean>(false);
   const renderStartTime = useRef(Date.now());
   const adRef = useRef<View>(null);
   const visibilityStartTime = useRef<number | null>(null);
@@ -103,8 +106,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   const lastCheckTime = useRef<number>(Date.now());
   const currentVisibilityRatio = useRef<number>(0);
   const videoRef = useRef<any>(null);
-  const lastPausedTime = useRef<number>(0);
-  const isInView = useRef<boolean>(false);
 
   const { isInitialized, publisherId, apiKey, domain, isTestEnvironment } =
     useAdgeistContext();
@@ -191,7 +192,7 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   ]);
 
   /**
-   * Tracks view event for banner ads when visible for >=1s and >=50% in viewport
+   * Tracks view event for ads when visible for >=1s (banner) or >=2s (video) and >=50% in viewport
    */
   const trackView = useCallback(async () => {
     if (hasView || !hasImpression || !bidId || !campaignId) return;
@@ -237,7 +238,15 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   ]);
 
   /**
-   * Calculates visibility ratio and updates view metrics
+   * Toggles play/pause state manually
+   */
+  const togglePlayPause = useCallback(() => {
+    setIsManuallyControlled(true);
+    setIsPaused((prev) => !prev);
+  }, []);
+
+  /**
+   * Calculates visibility ratio, updates view metrics, and controls video playback
    */
   const checkVisibility = useCallback(() => {
     if (!adRef.current || !hasImpression) return;
@@ -270,28 +279,34 @@ export const BannerAd: React.FC<AdBannerProps> = ({
         if (!visibilityStartTime.current) {
           visibilityStartTime.current = currentTime;
         }
+        if (dataSlotType === 'video' && isPaused && !isManuallyControlled) {
+          setIsPaused(false);
+        }
       } else {
         visibilityStartTime.current = null;
+        if (dataSlotType === 'video' && !isPaused) {
+          setIsPaused(true);
+          setIsManuallyControlled(false);
+        }
       }
 
+      // Only check for view tracking if view event hasn't been tracked yet
       if (
+        !hasView &&
         viewTime.current >= (dataSlotType === 'video' ? 2000 : 1000) &&
         visibilityRatio >= 0.5
       ) {
         trackView();
       }
-
-      if (dataSlotType === 'video' && videoRef.current) {
-        if (visibilityRatio >= 0.5) {
-          isInView.current = true;
-          videoRef.current.seek(lastPausedTime.current || 0);
-        } else {
-          isInView.current = false;
-          lastPausedTime.current = videoRef.current.currentTime || 0;
-        }
-      }
     });
-  }, [hasImpression, trackView, dataSlotType]);
+  }, [
+    hasImpression,
+    trackView,
+    dataSlotType,
+    isPaused,
+    hasView,
+    isManuallyControlled,
+  ]);
 
   /**
    * Handles ad click and sends click analytics
@@ -331,14 +346,16 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   }, [fetchAd]);
 
   useEffect(() => {
-    if (!hasImpression || hasView) return;
+    if (!hasImpression) return;
+
+    if (dataSlotType === 'banner' && hasView) return;
 
     const intervalId = setInterval(checkVisibility, 200);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [hasImpression, hasView, checkVisibility]);
+  }, [hasImpression, checkVisibility, dataSlotType, hasView]);
 
   if (isLoading) {
     return (
@@ -392,23 +409,39 @@ export const BannerAd: React.FC<AdBannerProps> = ({
                 style={{ width: '100%', height: '100%' }}
                 repeat={true}
                 muted={isMuted}
+                paused={isPaused}
                 onLoad={trackImpressionOnMediaLoad}
                 onError={() => {
                   setError(new Error('Failed to load ad video'));
                 }}
               />
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback onPress={() => setIsMuted(!isMuted)}>
-              <Image
-                style={styles.soundIcon}
-                source={{
-                  uri: isMuted
-                    ? 'https://d2cfeg6k9cklz9.cloudfront.net/ad-icons/Muted.png'
-                    : 'https://d2cfeg6k9cklz9.cloudfront.net/ad-icons/Unmuted.png',
-                }}
-                accessibilityLabel={isMuted ? 'Unmute video' : 'Mute video'}
-              />
-            </TouchableWithoutFeedback>
+            <View style={styles.videoControls}>
+              <TouchableWithoutFeedback onPress={togglePlayPause}>
+                <Image
+                  style={styles.playPauseIcon}
+                  source={{
+                    uri: isPaused
+                      ? 'https://d2cfeg6k9cklz9.cloudfront.net/ad-icons/Play.png'
+                      : 'https://d2cfeg6k9cklz9.cloudfront.net/ad-icons/Pause.png',
+                  }}
+                  accessibilityLabel={
+                    isPaused ? 'Paused video' : 'Playing video'
+                  }
+                />
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback onPress={() => setIsMuted(!isMuted)}>
+                <Image
+                  style={styles.soundIcon}
+                  source={{
+                    uri: isMuted
+                      ? 'https://d2cfeg6k9cklz9.cloudfront.net/ad-icons/Muted.png'
+                      : 'https://d2cfeg6k9cklz9.cloudfront.net/ad-icons/Unmuted.png',
+                  }}
+                  accessibilityLabel={isMuted ? 'Unmute video' : 'Mute video'}
+                />
+              </TouchableWithoutFeedback>
+            </View>
           </View>
         )}
 
@@ -468,6 +501,14 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     height: '70%',
+  },
+  videoControls: {},
+  playPauseIcon: {
+    position: 'absolute',
+    bottom: 8,
+    left: 10,
+    width: 30,
+    height: 30,
   },
   soundIcon: {
     position: 'absolute',
