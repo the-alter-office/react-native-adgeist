@@ -457,13 +457,15 @@ export const BannerAd: React.FC<AdBannerProps> = ({
             >
               {creativeData.creativeDescription}
             </Text>
-            <Text
-              style={styles.brandName}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {creativeData?.creativeBrandName || 'The Brand Name'}
-            </Text>
+            {creativeData?.creativeBrandName && (
+              <Text
+                style={styles.brandName}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {creativeData?.creativeBrandName || 'The Brand Name'}
+              </Text>
+            )}
           </View>
           <TouchableWithoutFeedback onPress={handleClick}>
             <Image
