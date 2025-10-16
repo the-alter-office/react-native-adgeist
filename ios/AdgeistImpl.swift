@@ -61,40 +61,6 @@ import React
         }
     }
 
-    @objc public func sendCreativeAnalytic(
-        campaignId: String,
-        adSpaceId: String,
-        publisherId: String,
-        eventType: String,
-        origin: String,
-        apiKey: String,
-        bidId: String,
-        isTestEnvironment: Bool,
-        resolver: @escaping RCTPromiseResolveBlock,
-        rejecter: @escaping RCTPromiseRejectBlock
-    ) {
-        guard let postCreativeAnalytic = postCreativeAnalytic else {
-            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
-            return
-        }
-
-        postCreativeAnalytic.sendTrackingData(
-            campaignId: campaignId,
-            adSpaceId: adSpaceId,
-            publisherId: publisherId,
-            eventType: eventType,
-            origin: origin,
-            apiKey: apiKey,
-            bidId: bidId,
-            isTestEnvironment: isTestEnvironment
-        ) { response in
-            if let response = response {
-                resolver(response)
-            } else {
-                rejecter("NO_AD", "Couldn't find the campaign to update analytics", nil)
-            }
-        }
-    }
 
     @objc public func setUserDetails(_ userDetailsDict: [String: Any]) {
         let filtered = userDetailsDict.compactMapValues { value -> Any? in
@@ -141,6 +107,180 @@ import React
 
         let event = Event(eventType: eventType, eventProperties: eventProps)
         adgeistInstance?.logEvent(event)
+    }
+
+    @objc public func trackImpression(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Bool,
+        renderTime: Double,
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        guard let postCreativeAnalytic = postCreativeAnalytic else {
+            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
+            return
+        }
+        
+        postCreativeAnalytic.trackImpression(
+            campaignId: campaignId,
+            adSpaceId: adSpaceId,
+            publisherId: publisherId,
+            apiKey: apiKey,
+            bidId: bidId,
+            isTestEnvironment: isTestEnvironment,
+            renderTime: Float(renderTime)
+        )
+        resolver("Impression event sent")
+    }
+
+    @objc public func trackView(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Bool,
+        viewTime: Double,
+        visibilityRatio: Double,
+        scrollDepth: Double,
+        timeToVisible: Double,
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        guard let postCreativeAnalytic = postCreativeAnalytic else {
+            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
+            return
+        }
+        
+        postCreativeAnalytic.trackView(
+            campaignId: campaignId,
+            adSpaceId: adSpaceId,
+            publisherId: publisherId,
+            apiKey: apiKey,
+            bidId: bidId,
+            isTestEnvironment: isTestEnvironment,
+            viewTime: Float(viewTime),
+            visibilityRatio: Float(visibilityRatio),
+            scrollDepth: Float(scrollDepth),
+            timeToVisible: Float(timeToVisible)
+        )
+        resolver("View event sent")
+    }
+
+    @objc public func trackTotalView(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Bool,
+        totalViewTime: Double,
+        visibilityRatio: Double,
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        guard let postCreativeAnalytic = postCreativeAnalytic else {
+            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
+            return
+        }
+        
+        postCreativeAnalytic.trackTotalView(
+            campaignId: campaignId,
+            adSpaceId: adSpaceId,
+            publisherId: publisherId,
+            apiKey: apiKey,
+            bidId: bidId,
+            isTestEnvironment: isTestEnvironment,
+            totalViewTime: Float(totalViewTime),
+            visibilityRatio: Float(visibilityRatio)
+        )
+        resolver("Total view event sent")
+    }
+
+    @objc public func trackClick(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Bool,
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        guard let postCreativeAnalytic = postCreativeAnalytic else {
+            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
+            return
+        }
+        
+        postCreativeAnalytic.trackClick(
+            campaignId: campaignId,
+            adSpaceId: adSpaceId,
+            publisherId: publisherId,
+            apiKey: apiKey,
+            bidId: bidId,
+            isTestEnvironment: isTestEnvironment
+        )
+        resolver("Click event sent")
+    }
+
+    @objc public func trackVideoPlayback(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Bool,
+        totalPlaybackTime: Double,
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        guard let postCreativeAnalytic = postCreativeAnalytic else {
+            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
+            return
+        }
+        
+        postCreativeAnalytic.trackVideoPlayback(
+            campaignId: campaignId,
+            adSpaceId: adSpaceId,
+            publisherId: publisherId,
+            apiKey: apiKey,
+            bidId: bidId,
+            isTestEnvironment: isTestEnvironment,
+            totalPlaybackTime: Float(totalPlaybackTime)
+        )
+        resolver("Video playback event sent")
+    }
+
+    @objc public func trackVideoQuartile(
+        campaignId: String,
+        adSpaceId: String,
+        publisherId: String,
+        apiKey: String,
+        bidId: String,
+        isTestEnvironment: Bool,
+        quartile: String,
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        guard let postCreativeAnalytic = postCreativeAnalytic else {
+            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
+            return
+        }
+        
+        postCreativeAnalytic.trackVideoQuartile(
+            campaignId: campaignId,
+            adSpaceId: adSpaceId,
+            publisherId: publisherId,
+            apiKey: apiKey,
+            bidId: bidId,
+            isTestEnvironment: isTestEnvironment,
+            quartile: quartile
+        )
+        resolver("Video quartile event sent")
     }
 
     @objc public static func requiresMainQueueSetup() -> Bool {
