@@ -20,6 +20,7 @@ export interface Spec extends TurboModule {
     origin: string,
     adSpaceId: string,
     publisherId: string,
+    buyType: string,
     isTestEnvironment: boolean
   ): Promise<Object>;
 
@@ -37,6 +38,8 @@ export interface Spec extends TurboModule {
     publisherId: string,
     apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean,
     renderTime: number
   ): Promise<string>;
@@ -47,6 +50,8 @@ export interface Spec extends TurboModule {
     publisherId: string,
     apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean,
     viewTime: number,
     visibilityRatio: number,
@@ -60,6 +65,8 @@ export interface Spec extends TurboModule {
     publisherId: string,
     apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean,
     totalViewTime: number,
     visibilityRatio: number
@@ -71,6 +78,8 @@ export interface Spec extends TurboModule {
     publisherId: string,
     apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean
   ): Promise<string>;
 
@@ -80,6 +89,8 @@ export interface Spec extends TurboModule {
     publisherId: string,
     apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean,
     totalPlaybackTime: number
   ): Promise<string>;
@@ -90,6 +101,8 @@ export interface Spec extends TurboModule {
     publisherId: string,
     apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean,
     quartile: string
   ): Promise<string>;

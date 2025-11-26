@@ -2,18 +2,14 @@ package com.adgeist.implementation
 
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.Arguments
-import com.facebook.react.bridge.WritableMap
 import com.adgeistkit.AdgeistCore
-import com.adgeistkit.FetchCreative
-import com.adgeistkit.CreativeAnalytics
-import com.adgeistkit.CreativeDataModel
-import com.adgeistkit.BidResponseData
-import com.adgeistkit.SeatBid
-import com.adgeistkit.Bid
-import com.adgeistkit.BidExtension
-import com.adgeistkit.UserDetails
-import com.adgeistkit.Event
+import com.adgeistkit.data.models.CPMAdResponse
+import com.adgeistkit.data.models.Event
+import com.adgeistkit.data.models.FixedAdResponse
+import com.adgeistkit.data.models.UserDetails
+import com.adgeistkit.data.network.CreativeAnalytics
+import com.adgeistkit.data.network.FetchCreative
+
 import com.facebook.react.bridge.ReadableMap
 
 class AdgeistModuleImpl internal constructor(private val context: ReactApplicationContext) {
@@ -33,16 +29,25 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     }
   }
 
-  fun fetchCreative(apiKey: String, origin: String, adSpaceId: String, publisherId: String, isTestEnvironment: Boolean, promise: Promise) {
-    getAd?.fetchCreative(apiKey, origin, adSpaceId, publisherId, isTestEnvironment) { adData ->
+  fun fetchCreative(apiKey: String, origin: String, adSpaceId: String, publisherId: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
+    getAd?.fetchCreative(apiKey, origin, adSpaceId, publisherId, buyType, isTestEnvironment) { adData ->
       if (adData != null) {
-        promise.resolve(adData.toWritableMap())
+        when (adData) {
+          is CPMAdResponse -> {
+            promise.resolve(adData.toWritableMap())
+          }
+          is FixedAdResponse -> {
+            promise.resolve(adData.toWritableMap())
+          }
+          else -> {
+            promise.resolve(null)
+          }
+        }
       } else {
         promise.reject("NO_AD", "Ad data not available")
       }
     } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
   }
-
 
   fun setUserDetails(userDetailsMap: ReadableMap) {
     val userDetails = UserDetails(
@@ -83,19 +88,21 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
   fun updateConsentStatus(consent: Boolean) {
     adgeistInstance?.updateConsentStatus(consent)
   }
-  
+
   fun trackImpression(
     campaignId: String,
     adSpaceId: String,
     publisherId: String,
     apiKey: String,
     bidId: String,
+    bidMeta: String,
+    buyType: String,
     isTestEnvironment: Boolean,
     renderTime: Float,
     promise: Promise
   ) {
     postCreativeAnalytic?.trackImpression(
-      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, renderTime
+      campaignId, adSpaceId, publisherId, apiKey, bidId, bidMeta, buyType, isTestEnvironment, renderTime
     )
     promise.resolve("Impression event sent")
   }
@@ -106,6 +113,8 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     publisherId: String,
     apiKey: String,
     bidId: String,
+    bidMeta: String,
+    buyType: String,
     isTestEnvironment: Boolean,
     viewTime: Float,
     visibilityRatio: Float,
@@ -114,7 +123,7 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     promise: Promise
   ) {
     postCreativeAnalytic?.trackView(
-      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment,
+      campaignId, adSpaceId, publisherId, apiKey, bidId,  bidMeta, buyType, isTestEnvironment,
       viewTime, visibilityRatio, scrollDepth, timeToVisible
     )
     promise.resolve("View event sent")
@@ -126,13 +135,15 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     publisherId: String,
     apiKey: String,
     bidId: String,
+    bidMeta: String,
+    buyType: String,
     isTestEnvironment: Boolean,
     totalViewTime: Float,
     visibilityRatio: Float,
     promise: Promise
   ) {
     postCreativeAnalytic?.trackTotalView(
-      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment,
+      campaignId, adSpaceId, publisherId, apiKey, bidId,  bidMeta, buyType, isTestEnvironment,
       totalViewTime, visibilityRatio
     )
     promise.resolve("Total view event sent")
@@ -144,11 +155,13 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     publisherId: String,
     apiKey: String,
     bidId: String,
+    bidMeta: String,
+    buyType: String,
     isTestEnvironment: Boolean,
     promise: Promise
   ) {
     postCreativeAnalytic?.trackClick(
-      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment
+      campaignId, adSpaceId, publisherId, apiKey, bidId,  bidMeta, buyType, isTestEnvironment
     )
     promise.resolve("Click event sent")
   }
@@ -159,12 +172,14 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     publisherId: String,
     apiKey: String,
     bidId: String,
+    bidMeta: String,
+    buyType: String,
     isTestEnvironment: Boolean,
     totalPlaybackTime: Float,
     promise: Promise
   ) {
     postCreativeAnalytic?.trackVideoPlayback(
-      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, totalPlaybackTime
+      campaignId, adSpaceId, publisherId, apiKey, bidId,  bidMeta, buyType, isTestEnvironment, totalPlaybackTime
     )
     promise.resolve("Video playback event sent")
   }
@@ -175,12 +190,14 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
     publisherId: String,
     apiKey: String,
     bidId: String,
+    bidMeta: String,
+    buyType: String,
     isTestEnvironment: Boolean,
     quartile: String,
     promise: Promise
   ) {
     postCreativeAnalytic?.trackVideoQuartile(
-      campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, quartile
+      campaignId, adSpaceId, publisherId, apiKey, bidId,  bidMeta, buyType, isTestEnvironment, quartile
     )
     promise.resolve("Video quartile event sent")
   }
@@ -192,61 +209,3 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
 
 fun ReadableMap.getStringSafe(key: String): String? =
     if (this.hasKey(key) && !this.isNull(key)) this.getString(key) else null
-
-
-// Extension function to convert CreativeDataModel to WritableMap
-fun CreativeDataModel.toWritableMap(): WritableMap {
-    val map = Arguments.createMap()
-    
-    map.putBoolean("success", this.success)
-    map.putString("message", this.message)
-    
-    // Handle null data - store in local variable for smart casting
-    val dataValue = this.data
-    if (dataValue != null) {
-        val dataMap = Arguments.createMap()
-        dataMap.putString("id", dataValue.id)
-        dataMap.putString("bidId", dataValue.bidId)
-        dataMap.putString("cur", dataValue.cur)
-        
-        // Handle null seatBid list - store in local variable
-        val seatBidArray = Arguments.createArray()
-        val seatBidList = dataValue.seatBid
-        if (seatBidList != null) {
-            for (seatBid in seatBidList) {
-                val seatBidMap = Arguments.createMap()
-                seatBidMap.putString("bidId", seatBid.bidId)
-                
-                // Handle null bid list - store in local variable
-                val bidArray = Arguments.createArray()
-                val bidList = seatBid.bid
-                if (bidList != null) {
-                    for (bid in bidList) {
-                        val bidMap = Arguments.createMap()
-                        bidMap.putString("id", bid.id)
-                        bidMap.putString("impId", bid.impId)
-                        bidMap.putDouble("price", bid.price)
-                        
-                        // Handle extension
-                        val extMap = Arguments.createMap()
-                        extMap.putString("creativeUrl", bid.ext.creativeUrl)
-                        extMap.putString("ctaUrl", bid.ext.ctaUrl)
-                        extMap.putString("creativeTitle", bid.ext.creativeTitle)
-                        extMap.putString("creativeDescription", bid.ext.creativeDescription)
-                        
-                        bidMap.putMap("ext", extMap)
-                        bidArray.pushMap(bidMap)
-                    }
-                }
-                seatBidMap.putArray("bid", bidArray)
-                seatBidArray.pushMap(seatBidMap)
-            }
-        }
-        dataMap.putArray("seatBid", seatBidArray)
-        map.putMap("data", dataMap)
-    } else {
-        map.putNull("data")
-    }
-    
-    return map
-}

@@ -15,6 +15,7 @@ import {
   getConsentStatus,
 } from '@thealteroffice/react-native-adgeist';
 import { useEffect, useState } from 'react';
+import AdViewExample from './AdViewExample';
 
 export default function ContentContainer() {
   const { setAdgeistConsentModal } = useAdgeistContext();
@@ -75,6 +76,8 @@ export default function ContentContainer() {
       >
         <Text>Remove Ad</Text>
       </Pressable>
+
+      <AdViewExample />
 
       {isAdVisible && (
         <View

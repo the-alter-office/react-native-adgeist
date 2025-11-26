@@ -18,45 +18,8 @@ import Video from 'react-native-video';
 import Adgeist from '../NativeAdgeist';
 import { useAdgeistContext } from './AdgeistProvider';
 import { normalizeUrl } from '../utilities';
-
-/**
- * Interface for ad data structure
- */
-interface AdData {
-  id: string;
-  bidId: string;
-  cur: string;
-  seatBid: SeatBid[];
-}
-
-/**
- * Interface for seat bid data
- */
-interface SeatBid {
-  bidId: string;
-  bid: Bid[];
-}
-
-/**
- * Interface for individual bid
- */
-interface Bid {
-  id: string;
-  impId: string;
-  price: number;
-  ext: BidExtension;
-}
-
-/**
- * Interface for bid extension data
- */
-interface BidExtension {
-  creativeUrl: string;
-  ctaUrl: string;
-  creativeTitle: string;
-  creativeDescription: string;
-  creativeBrandName?: string;
-}
+import type { FIXEDADRESPONSE } from '../types/FixedAdResponse';
+import type { CPMADRESPONSE } from '../types/CPMAdResponse';
 
 /**
  * Props for the BannerAd component
@@ -66,6 +29,8 @@ interface AdBannerProps {
   dataAdSlot: string;
   /** Type of ad to display */
   dataSlotType?: 'banner' | 'video';
+  /** Buy type for the ad */
+  dataBuyType?: 'FIXED' | 'CPM';
   /** Width of the ad container */
   width?: number;
   /** Height of the ad container */
@@ -77,19 +42,22 @@ interface AdBannerProps {
   /** Callback for ad load errors */
   onAdLoadError?: (error: Error) => void;
   /** Callback for ad load success */
-  onAdLoadSuccess?: (adData: AdData) => void;
+  onAdLoadSuccess?: (adData: FIXEDADRESPONSE | CPMADRESPONSE) => void;
 }
 
 export const BannerAd: React.FC<AdBannerProps> = ({
   dataAdSlot,
   dataSlotType = 'banner',
+  dataBuyType = 'FIXED',
   width = 0,
   height = 0,
   isResponsive = false,
   onAdLoadError,
   onAdLoadSuccess,
 }) => {
-  const [adData, setAdData] = useState<AdData | null>(null);
+  const [adData, setAdData] = useState<FIXEDADRESPONSE | CPMADRESPONSE | null>(
+    null
+  );
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -110,10 +78,40 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   const { isInitialized, publisherId, apiKey, domain, isTestEnvironment } =
     useAdgeistContext();
 
-  const creativeData = adData?.seatBid?.[0]?.bid?.[0]?.ext as BidExtension;
-  const bidId = adData?.id;
-  const campaignId = adData?.seatBid?.[0]?.bid?.[0]?.id;
-  const adSpaceId = dataAdSlot;
+  let creativeBrandName;
+  let creativeUrl;
+  let creativeTitle;
+  let creativeDescription;
+  let ctaUrl;
+  let bidMeta = '';
+
+  let bidId;
+  let campaignId;
+  let adSpaceId = dataAdSlot;
+
+  if (dataBuyType === 'FIXED') {
+    creativeTitle = (adData as FIXEDADRESPONSE)?.creatives?.[0]?.title;
+    creativeDescription = (adData as FIXEDADRESPONSE)?.creatives?.[0]
+      ?.description;
+    creativeBrandName = (adData as FIXEDADRESPONSE)?.advertiser?.name;
+    creativeUrl = (adData as FIXEDADRESPONSE)?.creatives?.[0]?.fileUrl;
+    ctaUrl = (adData as FIXEDADRESPONSE)?.creatives?.[0]?.ctaUrl;
+    bidMeta = (adData as FIXEDADRESPONSE)?.metaData;
+
+    bidId = (adData as FIXEDADRESPONSE)?.id;
+    campaignId = (adData as FIXEDADRESPONSE)?.campaignId;
+  } else {
+    let creativeData = (adData as CPMADRESPONSE)?.seatBid?.[0]?.bid?.[0]?.ext;
+
+    creativeTitle = creativeData?.creativeTitle;
+    creativeDescription = creativeData?.creativeDescription;
+    creativeBrandName = creativeData?.creativeBrandName;
+    creativeUrl = creativeData?.creativeUrl;
+    ctaUrl = creativeData?.ctaUrl;
+
+    bidId = adData?.id;
+    campaignId = (adData as CPMADRESPONSE)?.seatBid?.[0]?.bid?.[0]?.id;
+  }
 
   /**
    * Fetches ad creative data (without tracking impression here)
@@ -132,10 +130,13 @@ export const BannerAd: React.FC<AdBannerProps> = ({
         domain,
         dataAdSlot,
         publisherId,
+        dataBuyType,
         isTestEnvironment
       );
 
-      const creative: { data: AdData } = response as { data: AdData };
+      const creative: { data: FIXEDADRESPONSE | CPMADRESPONSE } = response as {
+        data: FIXEDADRESPONSE | CPMADRESPONSE;
+      };
       setAdData(creative.data);
       onAdLoadSuccess?.(creative.data);
     } catch (err) {
@@ -150,6 +151,7 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   }, [
     isInitialized,
     publisherId,
+    dataBuyType,
     dataAdSlot,
     apiKey,
     domain,
@@ -173,6 +175,8 @@ export const BannerAd: React.FC<AdBannerProps> = ({
         publisherId,
         apiKey,
         bidId,
+        bidMeta,
+        dataBuyType,
         isTestEnvironment,
         renderTime
       );
@@ -187,6 +191,8 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     campaignId,
     adSpaceId,
     publisherId,
+    dataBuyType,
+    bidMeta,
     apiKey,
     isTestEnvironment,
   ]);
@@ -213,6 +219,8 @@ export const BannerAd: React.FC<AdBannerProps> = ({
           publisherId,
           apiKey,
           bidId,
+          bidMeta,
+          dataBuyType,
           isTestEnvironment,
           currentViewTime,
           visibility,
@@ -232,6 +240,8 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     campaignId,
     adSpaceId,
     publisherId,
+    dataBuyType,
+    bidMeta,
     apiKey,
     isTestEnvironment,
     dataSlotType,
@@ -312,7 +322,13 @@ export const BannerAd: React.FC<AdBannerProps> = ({
    * Handles ad click and sends click analytics
    */
   const handleClick = useCallback(async () => {
-    if (!adData || !adData.seatBid.length || !bidId || !campaignId) return;
+    if (
+      !adData ||
+      (dataBuyType == 'CPM' && !(adData as CPMADRESPONSE).seatBid.length) ||
+      !bidId ||
+      !campaignId
+    )
+      return;
 
     try {
       Adgeist.trackClick(
@@ -321,10 +337,12 @@ export const BannerAd: React.FC<AdBannerProps> = ({
         publisherId,
         apiKey,
         bidId,
+        bidMeta,
+        dataBuyType,
         isTestEnvironment
       );
 
-      await Linking.openURL(normalizeUrl(creativeData.ctaUrl));
+      await Linking.openURL(normalizeUrl(ctaUrl as string));
     } catch (err) {
       console.error('Failed to handle ad click:', err);
     }
@@ -334,9 +352,11 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     campaignId,
     adSpaceId,
     publisherId,
+    bidMeta,
+    dataBuyType,
     apiKey,
     isTestEnvironment,
-    creativeData,
+    ctaUrl,
   ]);
 
   useEffect(() => {
@@ -370,7 +390,7 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     );
   }
 
-  if (!creativeData?.creativeUrl || error) return null;
+  if (creativeUrl || error) return null;
 
   return (
     <TouchableWithoutFeedback
@@ -389,7 +409,7 @@ export const BannerAd: React.FC<AdBannerProps> = ({
           <TouchableWithoutFeedback onPress={handleClick}>
             <Image
               style={styles.creative}
-              source={{ uri: creativeData.creativeUrl }}
+              source={{ uri: creativeUrl }}
               accessibilityLabel="Ad Creative"
               resizeMode="contain"
               onLoad={trackImpressionOnMediaLoad}
@@ -404,7 +424,7 @@ export const BannerAd: React.FC<AdBannerProps> = ({
             <TouchableWithoutFeedback onPress={handleClick}>
               <Video
                 ref={videoRef}
-                source={{ uri: creativeData.creativeUrl }}
+                source={{ uri: creativeUrl }}
                 resizeMode="contain"
                 style={{ width: '100%', height: '100%' }}
                 repeat={true}
@@ -448,22 +468,22 @@ export const BannerAd: React.FC<AdBannerProps> = ({
         <View style={styles.adContent}>
           <View style={styles.contentContainer}>
             <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
-              {creativeData.creativeTitle}
+              {creativeTitle}
             </Text>
             <Text
               style={styles.description}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {creativeData.creativeDescription}
+              {creativeDescription}
             </Text>
-            {creativeData?.creativeBrandName && (
+            {creativeBrandName && (
               <Text
                 style={styles.brandName}
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {creativeData?.creativeBrandName || 'The Brand Name'}
+                {creativeBrandName || 'The Brand Name'}
               </Text>
             )}
           </View>
