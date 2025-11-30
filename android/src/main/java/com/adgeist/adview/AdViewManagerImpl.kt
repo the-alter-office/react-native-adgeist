@@ -36,8 +36,8 @@ object AdViewManagerImpl {
     fun setAdSize(view: AdView, adSizeMap: ReadableMap?) {
         if (adSizeMap != null) {
             try {
-                val width = if (adSizeMap.hasKey("width")) adSizeMap.getInt("width") else 320
-                val height = if (adSizeMap.hasKey("height")) adSizeMap.getInt("height") else 50
+                val width = if (adSizeMap.hasKey("width")) adSizeMap.getInt("width") else 360
+                val height = if (adSizeMap.hasKey("height")) adSizeMap.getInt("height") else 360
 
                 val adSize = when {
                     adSizeMap.hasKey("type") -> {
@@ -58,6 +58,18 @@ object AdViewManagerImpl {
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting ad size", e)
             }
+        }
+    }
+
+    fun setCustomOrigin(view: AdView, customOrigin: String?) {
+        if (customOrigin != null) {
+            view.customOrigin = customOrigin
+        }
+    }
+
+    fun setAdType(view: AdView, adType: String?) {
+        if (adType != null) {
+            view.adType = adType
         }
     }
 

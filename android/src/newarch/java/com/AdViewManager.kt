@@ -32,6 +32,16 @@ class AdViewManager : SimpleViewManager<AdView>() {
         AdViewManagerImpl.setAdSize(view, adSizeMap)
     }
 
+    @ReactProp(name = "adType")
+    fun setAdType(view: AdView, adType: String?) {
+        AdViewManagerImpl.setAdType(view, adType)
+    }
+
+    @ReactProp(name = "customOrigin")
+    fun setCustomOrigin(view: AdView, customOrigin: String?) {
+        AdViewManagerImpl.setCustomOrigin(view, customOrigin)
+    }
+
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
         return MapBuilder.of(
             AdViewManagerImpl.EVENT_AD_LOADED, MapBuilder.of("registrationName", AdViewManagerImpl.EVENT_AD_LOADED),
