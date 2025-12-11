@@ -11,11 +11,7 @@ class AdgeistError extends Error {
   }
 }
 
-/**
- * Sets user details in the Adgeist SDK
- * @param userDetails - User details object
- * @throws AdgeistError if the operation fails
- */
+
 export const setUserDetails = (userDetails: UserDetails): void => {
   try {
     Adgeist.setUserDetails(userDetails);
