@@ -1,8 +1,3 @@
-/**
- * @module BannerAd
- * @description A React Native component for displaying banner and video ads with robust error handling and analytics.
- */
-
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import {
   Image,
@@ -15,33 +10,21 @@ import {
   Dimensions,
 } from 'react-native';
 import Video from 'react-native-video';
-import Adgeist from '../NativeAdgeist';
-import { useAdgeistContext } from './AdgeistProvider';
-import { normalizeUrl } from '../utilities';
-import type { FIXEDADRESPONSE } from '../types/FixedAdResponse';
-import type { CPMADRESPONSE } from '../types/CPMAdResponse';
+import Adgeist from '../../specs/NativeAdgeist';
+import { useAdgeistContext } from '../../providers/AdgeistProvider';
+import { normalizeUrl } from '../../utilities';
+import type { FIXEDADRESPONSE } from '../../types/FixedAdResponse';
+import type { CPMADRESPONSE } from '../../types/CPMAdResponse';
 
-/**
- * Props for the BannerAd component
- */
 interface AdBannerProps {
-  /** Unique identifier for the ad slot */
   dataAdSlot: string;
-  /** Type of ad to display */
   dataSlotType?: 'banner' | 'video';
-  /** Buy type for the ad */
   dataBuyType?: 'FIXED' | 'CPM';
-  /** Width of the ad container */
   width?: number;
-  /** Height of the ad container */
   height?: number;
-  /** Enable responsive layout */
   isResponsive?: boolean;
-  /** Responsive layout type */
   responsiveType?: 'SQUARE' | 'VERTICAL' | 'WIDE';
-  /** Callback for ad load errors */
   onAdLoadError?: (error: Error) => void;
-  /** Callback for ad load success */
   onAdLoadSuccess?: (adData: FIXEDADRESPONSE | CPMADRESPONSE) => void;
 }
 
@@ -75,8 +58,7 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   const currentVisibilityRatio = useRef<number>(0);
   const videoRef = useRef<any>(null);
 
-  const { isInitialized, publisherId, apiKey, domain, isTestEnvironment } =
-    useAdgeistContext();
+  const { isInitialized, isTestEnvironment } = useAdgeistContext();
 
   let creativeBrandName;
   let creativeUrl;
@@ -113,9 +95,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     campaignId = (adData as CPMADRESPONSE)?.seatBid?.[0]?.bid?.[0]?.id;
   }
 
-  /**
-   * Fetches ad creative data (without tracking impression here)
-   */
   const fetchAd = useCallback(async () => {
     if (!isInitialized) return;
 
@@ -126,10 +105,7 @@ export const BannerAd: React.FC<AdBannerProps> = ({
       setHasView(false);
 
       const response = await Adgeist.fetchCreative(
-        apiKey,
-        domain,
         dataAdSlot,
-        publisherId,
         dataBuyType,
         isTestEnvironment
       );
@@ -150,19 +126,13 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     }
   }, [
     isInitialized,
-    publisherId,
     dataBuyType,
     dataAdSlot,
-    apiKey,
-    domain,
     isTestEnvironment,
     onAdLoadError,
     onAdLoadSuccess,
   ]);
 
-  /**
-   * Tracks impression when media (image/video) is fully loaded
-   */
   const trackImpressionOnMediaLoad = useCallback(async () => {
     if (hasImpression || !bidId || !campaignId) return;
 
@@ -172,8 +142,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
       await Adgeist.trackImpression(
         campaignId,
         adSpaceId,
-        publisherId,
-        apiKey,
         bidId,
         bidMeta,
         dataBuyType,
@@ -190,16 +158,11 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     bidId,
     campaignId,
     adSpaceId,
-    publisherId,
     dataBuyType,
     bidMeta,
-    apiKey,
     isTestEnvironment,
   ]);
 
-  /**
-   * Tracks view event for ads when visible for >=1s (banner) or >=2s (video) and >=50% in viewport
-   */
   const trackView = useCallback(async () => {
     if (hasView || !hasImpression || !bidId || !campaignId) return;
 
@@ -216,8 +179,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
         await Adgeist.trackView(
           campaignId,
           adSpaceId,
-          publisherId,
-          apiKey,
           bidId,
           bidMeta,
           dataBuyType,
@@ -239,25 +200,17 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     bidId,
     campaignId,
     adSpaceId,
-    publisherId,
     dataBuyType,
     bidMeta,
-    apiKey,
     isTestEnvironment,
     dataSlotType,
   ]);
 
-  /**
-   * Toggles play/pause state manually
-   */
   const togglePlayPause = useCallback(() => {
     setIsManuallyControlled(true);
     setIsPaused((prev) => !prev);
   }, []);
 
-  /**
-   * Calculates visibility ratio, updates view metrics, and controls video playback
-   */
   const checkVisibility = useCallback(() => {
     if (!adRef.current || !hasImpression) return;
 
@@ -300,7 +253,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
         }
       }
 
-      // Only check for view tracking if view event hasn't been tracked yet
       if (
         !hasView &&
         viewTime.current >= (dataSlotType === 'video' ? 2000 : 1000) &&
@@ -318,9 +270,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     isManuallyControlled,
   ]);
 
-  /**
-   * Handles ad click and sends click analytics
-   */
   const handleClick = useCallback(async () => {
     if (
       !adData ||
@@ -334,8 +283,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
       Adgeist.trackClick(
         campaignId,
         adSpaceId,
-        publisherId,
-        apiKey,
         bidId,
         bidMeta,
         dataBuyType,
@@ -351,10 +298,8 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     bidId,
     campaignId,
     adSpaceId,
-    publisherId,
     bidMeta,
     dataBuyType,
-    apiKey,
     isTestEnvironment,
     ctaUrl,
   ]);

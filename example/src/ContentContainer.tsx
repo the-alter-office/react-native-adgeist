@@ -3,19 +3,17 @@ import {
   StyleSheet,
   Text,
   Pressable,
-  Dimensions,
   ScrollView,
+  TextInput,
+  Alert,
 } from 'react-native';
 import {
-  BannerAd,
-  setUserDetails,
-  logEvent,
-  updateConsentStatus,
   useAdgeistContext,
   getConsentStatus,
+  HTML5AdView,
 } from '@thealteroffice/react-native-adgeist';
 import { useEffect, useState } from 'react';
-import AdViewExample from './AdViewExample';
+import { AdSizes } from '../../src/constants';
 
 export default function ContentContainer() {
   const { setAdgeistConsentModal } = useAdgeistContext();
@@ -28,74 +26,91 @@ export default function ContentContainer() {
       }
     })();
   }, [setAdgeistConsentModal]);
-  const [isAdVisible, setIsAdVisible] = useState(false);
+
+  const [adSpaceId, setAdSpaceId] = useState('');
+  const [adType, setAdType] = useState('');
+
+  const [width, setWidth] = useState('');
+  const [height, setHeight] = useState('');
+  const [showAd, setShowAd] = useState(false);
+  const [snippet, setSnippet] = useState('');
+
+  const handleParseSnippet = () => {
+    const adSlotMatch = snippet.match(/dataAdSlot="([^"]*)"/);
+    const widthMatch = snippet.match(/width="([^"]*)"/);
+    const heightMatch = snippet.match(/height="([^"]*)"/);
+    const slotTypeMatch = snippet.match(/dataSlotType="([^"]*)"/);
+
+    if (adSlotMatch && adSlotMatch[1]) setAdSpaceId(adSlotMatch[1]);
+    if (widthMatch && widthMatch[1]) setWidth(widthMatch[1]);
+    if (heightMatch && heightMatch[1]) setHeight(heightMatch[1]);
+    if (slotTypeMatch && slotTypeMatch[1]) setAdType(slotTypeMatch[1]);
+  };
+
+  const handleSubmit = () => {
+    handleParseSnippet();
+    setShowAd(true);
+  };
+
+  const handleCancel = () => {
+    setShowAd(false);
+    setAdSpaceId('');
+    setAdType('');
+    setWidth('');
+    setHeight('');
+    setSnippet('');
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Pressable
-        style={styles.button}
-        onPress={() =>
-          setUserDetails({
-            userId: '12345',
-            userName: 'John Doe',
-            email: 'john.doe@example.com',
-          })
-        }
-      >
-        <Text>Set User Details</Text>
-      </Pressable>
+      <View style={styles.formContainer}>
+        <Text style={styles.label}>
+          Paste Ad Code Snippet (HTML5AdView Component)
+        </Text>
 
-      <Pressable
-        style={styles.button}
-        onPress={() =>
-          logEvent({
-            eventType: 'search',
-            eventProperties: {
-              search_query: 'test in example app',
-            },
-          })
-        }
-      >
-        <Text>Send Search Event</Text>
-      </Pressable>
+        <TextInput
+          style={[styles.input, { height: 150, textAlignVertical: 'top' }]}
+          value={snippet}
+          onChangeText={setSnippet}
+          placeholder="Paste code snippet here..."
+          placeholderTextColor="#999"
+          multiline
+        />
 
-      <Pressable
-        style={styles.button}
-        onPress={() => updateConsentStatus(true)}
-      >
-        <Text>Update Consent</Text>
-      </Pressable>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Pressable
+            style={[styles.submitButton, showAd && styles.disabledButton]}
+            onPress={handleSubmit}
+            disabled={showAd}
+          >
+            <Text style={styles.submitButtonText}>Generate Ad</Text>
+          </Pressable>
 
-      <Pressable style={styles.button} onPress={() => setIsAdVisible(true)}>
-        <Text>Show Ad</Text>
-      </Pressable>
-
-      <Pressable
-        style={[styles.button, { marginBottom: 50 }]}
-        onPress={() => setIsAdVisible(false)}
-      >
-        <Text>Remove Ad</Text>
-      </Pressable>
-
-      <AdViewExample />
-
-      {isAdVisible && (
-        <View
-          style={{
-            width: Dimensions.get('window').width,
-            height: 360,
-            alignItems: 'center',
-            marginTop: 500,
-          }}
-        >
-          <BannerAd
-            dataAdSlot="68ef39e281029bf4edcd62ea"
-            width={360}
-            height={360}
-            // isResponsive={true}
-            dataSlotType="video"
-          />
+          <Pressable
+            style={[styles.submitButton, !showAd && styles.disabledButton]}
+            onPress={handleCancel}
+            disabled={!showAd}
+          >
+            <Text style={styles.submitButtonText}>Cancel</Text>
+          </Pressable>
         </View>
+      </View>
+
+      {showAd && (
+        <HTML5AdView
+          adUnitID={adSpaceId}
+          adSize={AdSizes.custom(parseInt(width), parseInt(height))}
+          adType={adType}
+          onAdLoaded={() => {}}
+          onAdFailedToLoad={() => {
+            setShowAd(false);
+            setSnippet('');
+            Alert.alert('Ad Failed to Load', 'Please check the ad snippet.');
+          }}
+          onAdOpened={() => {}}
+          onAdClosed={() => {}}
+          onAdClicked={() => {}}
+        />
       )}
     </ScrollView>
   );
@@ -103,11 +118,52 @@ export default function ContentContainer() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 200,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
     alignItems: 'center',
     backgroundColor: 'black',
     gap: 4,
-    height: 1500,
+    paddingBottom: 100,
+  },
+  formContainer: {
+    width: '100%',
+    backgroundColor: '#1a1a1a',
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  label: {
+    color: '#ccc',
+    fontSize: 14,
+    marginBottom: 15,
+  },
+  input: {
+    backgroundColor: '#2a2a2a',
+    color: 'white',
+    padding: 12,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#3a3a3a',
+    fontSize: 14,
+  },
+  submitButton: {
+    backgroundColor: '#63AA75',
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 20,
+    alignItems: 'center',
+    width: '48%',
+  },
+  disabledButton: {
+    backgroundColor: '#555',
+    opacity: 0.5,
+  },
+  submitButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   button: {
     backgroundColor: '#63AA75',

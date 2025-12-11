@@ -1,4 +1,4 @@
-package com.adgeist.implementation
+package com.adgeist.utils
 
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap

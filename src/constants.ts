@@ -18,4 +18,4 @@ export const AdSizes = {
   custom: (width: number, height: number): AdSize => ({ width, height }),
 };
 
-export const NATIVE_AD_COMPONENT_NAME = 'RNAdgeistAdView';
+export const HTML_5_AD_NATIVE_COMPONENT_NAME = 'HTML5AdNativeComponent';

@@ -13,13 +13,16 @@ export interface Event {
   eventProperties: Object;
 }
 export interface Spec extends TurboModule {
-  initializeSdk(customDomain: string): Promise<boolean>;
+  initializeSdk(
+    customBidRequestBackendDomain: string,
+    customPackageOrBundleID: string,
+    customAdgeistAppID: string
+  ): Promise<boolean>;
+
+  destroySdk(): Promise<boolean>;
 
   fetchCreative(
-    apiKey: string,
-    origin: string,
     adSpaceId: string,
-    publisherId: string,
     buyType: string,
     isTestEnvironment: boolean
   ): Promise<Object>;
@@ -35,8 +38,6 @@ export interface Spec extends TurboModule {
   trackImpression(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
     bidMeta: string,
     buyType: string,
@@ -47,8 +48,6 @@ export interface Spec extends TurboModule {
   trackView(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
     bidMeta: string,
     buyType: string,
@@ -62,8 +61,6 @@ export interface Spec extends TurboModule {
   trackTotalView(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
     bidMeta: string,
     buyType: string,
@@ -75,8 +72,6 @@ export interface Spec extends TurboModule {
   trackClick(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
     bidMeta: string,
     buyType: string,
@@ -86,8 +81,6 @@ export interface Spec extends TurboModule {
   trackVideoPlayback(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
     bidMeta: string,
     buyType: string,
@@ -98,8 +91,6 @@ export interface Spec extends TurboModule {
   trackVideoQuartile(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
     bidMeta: string,
     buyType: string,

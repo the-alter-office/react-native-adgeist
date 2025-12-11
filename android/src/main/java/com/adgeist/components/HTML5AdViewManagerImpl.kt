@@ -1,4 +1,4 @@
-package com.adgeist.adview
+package com.adgeist.components
 
 import android.util.Log
 import android.view.View
@@ -13,9 +13,9 @@ import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.events.RCTEventEmitter
 
-object AdViewManagerImpl {
-    const val NAME = "RNAdgeistAdView"
-    private const val TAG = "AdViewManagerImpl"
+object HTML5AdViewManagerImpl {
+    const val NAME = "HTML5AdNativeComponent"
+    private const val TAG = "HTML5AdViewManagerImpl"
 
     const val EVENT_AD_LOADED = "onAdLoaded"
     const val EVENT_AD_FAILED_TO_LOAD = "onAdFailedToLoad"
@@ -27,9 +27,9 @@ object AdViewManagerImpl {
         return AdView(reactContext)
     }
 
-    fun setAdUnitId(view: AdView, adUnitId: String?) {
-        if (adUnitId != null) {
-            view.adUnitId = adUnitId
+    fun setAdUnitID(view: AdView, adUnitID: String?) {
+        if (adUnitID != null) {
+            view.adUnitId = adUnitID
         }
     }
 
@@ -61,12 +61,6 @@ object AdViewManagerImpl {
         }
     }
 
-    fun setCustomOrigin(view: AdView, customOrigin: String?) {
-        if (customOrigin != null) {
-            view.customOrigin = customOrigin
-        }
-    }
-
     fun setAdType(view: AdView, adType: String?) {
         if (adType != null) {
             view.adType = adType
@@ -74,15 +68,11 @@ object AdViewManagerImpl {
     }
 
     @RequiresPermission("android.permission.INTERNET")
-    fun loadAd(view: AdView, adRequestMap: ReadableMap?) {
+    fun loadAd(view: AdView, isTestMode: Boolean) {
         try {
             val adRequestBuilder = AdRequest.Builder()
+            adRequestBuilder.setTestMode(isTestMode)
 
-            if (adRequestMap != null) {
-                if (adRequestMap.hasKey("isTestMode")) {
-                    adRequestBuilder.setTestMode(adRequestMap.getBoolean("isTestMode"))
-                }
-            }
 
             val adRequest = adRequestBuilder.build()
 
@@ -123,15 +113,16 @@ object AdViewManagerImpl {
         }
     }
 
-    private fun measureAndLayout(view: AdView) {
-        view.measure(
-            View.MeasureSpec.makeMeasureSpec(view.measuredWidth, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(view.measuredHeight, View.MeasureSpec.EXACTLY)
-        )
-        view.layout(view.left, view.top, view.right, view.bottom)
+    fun destroyAd(view: AdView) {
+        view.destroy()
     }
 
-    fun destroyAd(view: AdView) {
+    private fun measureAndLayout(view: AdView) {
+        view.measure(
+            View.MeasureSpec.makeMeasureSpec(view.width, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(view.height, View.MeasureSpec.EXACTLY)
+        )
+        view.layout(view.left, view.top, view.right, view.bottom)
     }
 
     private fun sendEvent(view: AdView, eventName: String, params: WritableMap) {

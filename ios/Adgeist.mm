@@ -20,31 +20,37 @@ RCT_EXPORT_MODULE(Adgeist)
     return self;
 }
 
-RCT_EXPORT_METHOD(initializeSdk:(NSString *)customDomain
+RCT_EXPORT_METHOD(initializeSdk:(NSString *)customBidRequestBackendDomain
+                  customPackageOrBundleID:(NSString *)customPackageOrBundleID
+                  customAdgeistAppID:(NSString *)customAdgeistAppID
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
-    [adgeist initializeSdkWithCustomDomain:customDomain
-                                   resolver:resolve
-                                   rejecter:reject];
+    [adgeist initializeSdkWithCustomDomain:customBidRequestBackendDomain
+                  customPackageOrBundleID:customPackageOrBundleID
+                       customAdgeistAppID:customAdgeistAppID
+                                 resolver:resolve
+                                 rejecter:reject];
 }
 
-// Exported methods for JS
-RCT_EXPORT_METHOD(fetchCreative:(NSString *)apiKey
-                  origin:(NSString *)origin
-                  adSpaceId:(NSString *)adSpaceId
-                  publisherId:(NSString *)publisherId
+RCT_EXPORT_METHOD(destroySdk:(RCTPromiseResolveBlock)resolve 
+                  reject:(RCTPromiseRejectBlock)reject) {
+    [adgeist destroySdkWithResolver:resolve 
+                         rejecter:reject];
+}
+
+
+RCT_EXPORT_METHOD(fetchCreative:(NSString *)adSpaceId
+                  buyType:(NSString *)buyType
                   isTestEnvironment:(BOOL)isTestEnvironment
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
-    [adgeist fetchCreativeWithApiKey:apiKey
-                               origin:origin
-                           adSpaceId:adSpaceId
-                          publisherId:publisherId
-                  isTestEnvironment:isTestEnvironment
-                             resolver:resolve
-                             rejecter:reject];
+    [adgeist fetchCreativeWithApiKey:adSpaceId
+                              buyTyp:buyType
+                   isTestEnvironment:isTestEnvironment
+                            resolver:resolve
+                            rejecter:reject];
 }
 
 
@@ -68,9 +74,9 @@ RCT_EXPORT_METHOD(logEvent:(NSDictionary *)eventDict) {
 
 RCT_EXPORT_METHOD(trackImpression:(NSString *)campaignId
                   adSpaceId:(NSString *)adSpaceId
-                  publisherId:(NSString *)publisherId
-                  apiKey:(NSString *)apiKey
                   bidId:(NSString *)bidId
+                  bidMeta:(NSString *)bidMeta
+                  buyType:(NSString *)buyType
                   isTestEnvironment:(BOOL)isTestEnvironment
                   renderTime:(double)renderTime
                   resolve:(RCTPromiseResolveBlock)resolve
@@ -78,9 +84,9 @@ RCT_EXPORT_METHOD(trackImpression:(NSString *)campaignId
 {
     [adgeist trackImpressionWithCampaignId:campaignId
                                  adSpaceId:adSpaceId
-                               publisherId:publisherId
-                                    apiKey:apiKey
                                      bidId:bidId
+                                   bidMeta:bidMeta
+                                   buyType:buyType
                          isTestEnvironment:isTestEnvironment
                                 renderTime:renderTime
                                   resolver:resolve
@@ -89,9 +95,9 @@ RCT_EXPORT_METHOD(trackImpression:(NSString *)campaignId
 
 RCT_EXPORT_METHOD(trackView:(NSString *)campaignId
                   adSpaceId:(NSString *)adSpaceId
-                  publisherId:(NSString *)publisherId
-                  apiKey:(NSString *)apiKey
                   bidId:(NSString *)bidId
+                  bidMeta:(NSString *)bidMeta
+                  buyType:(NSString *)buyType
                   isTestEnvironment:(BOOL)isTestEnvironment
                   viewTime:(double)viewTime
                   visibilityRatio:(double)visibilityRatio
@@ -102,9 +108,9 @@ RCT_EXPORT_METHOD(trackView:(NSString *)campaignId
 {
     [adgeist trackViewWithCampaignId:campaignId
                            adSpaceId:adSpaceId
-                         publisherId:publisherId
-                              apiKey:apiKey
                                bidId:bidId
+                             bidMeta:bidMeta
+                             buyType:buyType
                    isTestEnvironment:isTestEnvironment
                             viewTime:viewTime
                      visibilityRatio:visibilityRatio
@@ -116,9 +122,9 @@ RCT_EXPORT_METHOD(trackView:(NSString *)campaignId
 
 RCT_EXPORT_METHOD(trackTotalView:(NSString *)campaignId
                   adSpaceId:(NSString *)adSpaceId
-                  publisherId:(NSString *)publisherId
-                  apiKey:(NSString *)apiKey
                   bidId:(NSString *)bidId
+                  bidMeta:(NSString *)bidMeta
+                  buyType:(NSString *)buyType
                   isTestEnvironment:(BOOL)isTestEnvironment
                   totalViewTime:(double)totalViewTime
                   visibilityRatio:(double)visibilityRatio
@@ -127,9 +133,9 @@ RCT_EXPORT_METHOD(trackTotalView:(NSString *)campaignId
 {
     [adgeist trackTotalViewWithCampaignId:campaignId
                                 adSpaceId:adSpaceId
-                              publisherId:publisherId
-                                   apiKey:apiKey
                                     bidId:bidId
+                                  bidMeta:bidMeta
+                                  buyType:buyType
                         isTestEnvironment:isTestEnvironment
                             totalViewTime:totalViewTime
                           visibilityRatio:visibilityRatio
@@ -139,18 +145,18 @@ RCT_EXPORT_METHOD(trackTotalView:(NSString *)campaignId
 
 RCT_EXPORT_METHOD(trackClick:(NSString *)campaignId
                   adSpaceId:(NSString *)adSpaceId
-                  publisherId:(NSString *)publisherId
-                  apiKey:(NSString *)apiKey
                   bidId:(NSString *)bidId
+                  bidMeta:(NSString *)bidMeta
+                  buyType:(NSString *)buyType
                   isTestEnvironment:(BOOL)isTestEnvironment
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
     [adgeist trackClickWithCampaignId:campaignId
                             adSpaceId:adSpaceId
-                          publisherId:publisherId
-                               apiKey:apiKey
                                 bidId:bidId
+                              bidMeta:bidMeta
+                              buyType:buyType
                     isTestEnvironment:isTestEnvironment
                              resolver:resolve
                              rejecter:reject];
@@ -158,9 +164,9 @@ RCT_EXPORT_METHOD(trackClick:(NSString *)campaignId
 
 RCT_EXPORT_METHOD(trackVideoPlayback:(NSString *)campaignId
                   adSpaceId:(NSString *)adSpaceId
-                  publisherId:(NSString *)publisherId
-                  apiKey:(NSString *)apiKey
                   bidId:(NSString *)bidId
+                  bidMeta:(NSString *)bidMeta
+                  buyType:(NSString *)buyType
                   isTestEnvironment:(BOOL)isTestEnvironment
                   totalPlaybackTime:(double)totalPlaybackTime
                   resolve:(RCTPromiseResolveBlock)resolve
@@ -168,9 +174,9 @@ RCT_EXPORT_METHOD(trackVideoPlayback:(NSString *)campaignId
 {
     [adgeist trackVideoPlaybackWithCampaignId:campaignId
                                     adSpaceId:adSpaceId
-                                  publisherId:publisherId
-                                       apiKey:apiKey
                                         bidId:bidId
+                                      bidMeta:bidMeta
+                                      buyType:buyType
                             isTestEnvironment:isTestEnvironment
                             totalPlaybackTime:totalPlaybackTime
                                      resolver:resolve
@@ -179,9 +185,9 @@ RCT_EXPORT_METHOD(trackVideoPlayback:(NSString *)campaignId
 
 RCT_EXPORT_METHOD(trackVideoQuartile:(NSString *)campaignId
                   adSpaceId:(NSString *)adSpaceId
-                  publisherId:(NSString *)publisherId
-                  apiKey:(NSString *)apiKey
                   bidId:(NSString *)bidId
+                  bidMeta:(NSString *)bidMeta
+                  buyType:(NSString *)buyType
                   isTestEnvironment:(BOOL)isTestEnvironment
                   quartile:(NSString *)quartile
                   resolve:(RCTPromiseResolveBlock)resolve
@@ -189,9 +195,9 @@ RCT_EXPORT_METHOD(trackVideoQuartile:(NSString *)campaignId
 {
     [adgeist trackVideoQuartileWithCampaignId:campaignId
                                     adSpaceId:adSpaceId
-                                  publisherId:publisherId
-                                       apiKey:apiKey
                                         bidId:bidId
+                                      bidMeta:bidMeta
+                                      buyType:buyType
                             isTestEnvironment:isTestEnvironment
                                      quartile:quartile
                                      resolver:resolve

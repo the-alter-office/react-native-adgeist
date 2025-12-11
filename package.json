@@ -143,6 +143,7 @@
     "source": "src",
     "output": "lib",
     "targets": [
+      "codegen",
       [
         "module",
         {
@@ -159,11 +160,21 @@
   },
   "codegenConfig": {
     "name": "RNAdgeistSpec",
-    "type": "modules",
-    "jsSrcsDir": "src",
+    "type": "all",
+    "jsSrcsDir": "src/specs",
+    "outputDir": {
+      "ios": "ios/generated",
+      "android": "android/generated"
+    },
     "android": {
       "javaPackageName": "com.adgeist"
-    }
+    },
+    "ios": {
+      "componentProvider": {
+        "HTML5AdNativeComponent": "RCTNativeHTML5AdManager"
+      }
+    },
+    "includesGeneratedCode": true
   },
   "create-react-native-library": {
     "type": "turbo-module",
