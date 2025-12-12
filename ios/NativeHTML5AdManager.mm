@@ -13,10 +13,10 @@
 @import adgeist;
 #endif
 
-#import "generated/RNAdgeistSpec/ComponentDescriptors.h"
-#import "generated/RNAdgeistSpec/EventEmitters.h"
-#import "generated/RNAdgeistSpec/Props.h"
-#import "generated/RNAdgeistSpec/RCTComponentViewHelpers.h"
+#import "react/renderer/components/RNAdgeistSpec/ComponentDescriptors.h"
+#import "react/renderer/components/RNAdgeistSpec/EventEmitters.h"
+#import "react/renderer/components/RNAdgeistSpec/Props.h"
+#import "react/renderer/components/RNAdgeistSpec/RCTComponentViewHelpers.h"
 
 using namespace facebook::react;
 

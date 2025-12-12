@@ -41,15 +41,28 @@ export default function ContentContainer() {
     const heightMatch = snippet.match(/height="([^"]*)"/);
     const slotTypeMatch = snippet.match(/dataSlotType="([^"]*)"/);
 
+    if (
+      !widthMatch ||
+      !heightMatch ||
+      (widthMatch[1] === '0' && heightMatch[1] === '0')
+    ) {
+      Alert.alert('Ad Failed to Load', 'Please check the ad snippet.');
+      setSnippet('');
+      return false;
+    }
+
     if (adSlotMatch && adSlotMatch[1]) setAdSpaceId(adSlotMatch[1]);
     if (widthMatch && widthMatch[1]) setWidth(widthMatch[1]);
     if (heightMatch && heightMatch[1]) setHeight(heightMatch[1]);
     if (slotTypeMatch && slotTypeMatch[1]) setAdType(slotTypeMatch[1]);
+
+    return true;
   };
 
   const handleSubmit = () => {
-    handleParseSnippet();
-    setShowAd(true);
+    if (handleParseSnippet()) {
+      setShowAd(true);
+    }
   };
 
   const handleCancel = () => {

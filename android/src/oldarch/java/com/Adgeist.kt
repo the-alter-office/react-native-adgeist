@@ -31,50 +31,81 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, renderTime: Double, promise: Promise) {
+    fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, renderTime: Double, promise: Promise) {
+        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
+
+        builder = when (buyType.uppercase()) {
+          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
+          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
+          else -> builder
+        }
+
+        implementation.sendCreativeAnalytics(builder.trackImpression(renderTime.toFloat()).build(), promise)
+    }
+
+    @ReactMethod
+    fun trackView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, viewTime: Double, visibilityRatio: Double, scrollDepth: Double, timeToVisible: Double, promise: Promise) {
+        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
+
+        builder = when (buyType.uppercase()) {
+          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
+          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
+          else -> builder
+        }
+
         implementation.sendCreativeAnalytics(
-          AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
-            .trackImpression(renderTime.toFloat()).build(),
+          builder.trackViewableImpression(timeToVisible.toFloat(),
+            scrollDepth.toFloat(),
+            visibilityRatio.toFloat(),
+            viewTime.toFloat()).build(),
           promise
         )
     }
 
     @ReactMethod
-    fun trackView(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, viewTime: Double, visibilityRatio: Double, scrollDepth: Double, timeToVisible: Double, promise: Promise) {
-          implementation.sendCreativeAnalytics(
-            AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
-              .trackViewableImpression(timeToVisible.toFloat(),
-                scrollDepth.toFloat(),
-                visibilityRatio.toFloat(),
-                viewTime.toFloat())
-              .build(),
-            promise
-          )
-    }
+    fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalViewTime: Double, visibilityRatio: Double, promise: Promise) {
+        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
 
-    @ReactMethod
-    fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, totalViewTime: Double, visibilityRatio: Double, promise: Promise) {
-          implementation.sendCreativeAnalytics(
-            AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
-              .trackTotalViewTime(totalViewTime.toFloat()).build(),
-            promise
-          )
-    }
+        builder = when (buyType.uppercase()) {
+          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
+          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
+          else -> builder
+        }
 
-    @ReactMethod
-    fun trackClick(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, promise: Promise) {
-          implementation.sendCreativeAnalytics(
-            AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
-              .trackClick().build(),
-            promise
-          )
-    }
-
-    @ReactMethod
-    fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, totalPlaybackTime: Double, promise: Promise) {
         implementation.sendCreativeAnalytics(
-          AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
-            .trackTotalPlaybackTime(totalPlaybackTime.toFloat()).build(),
+          builder.trackTotalViewTime(totalViewTime.toFloat()).build(),
+          promise
+        )
+    }
+
+    @ReactMethod
+    fun trackClick(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
+        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
+
+        builder = when (buyType.uppercase()) {
+          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
+          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
+          else -> builder
+        }
+
+        implementation.sendCreativeAnalytics(
+          builder.trackClick().build(),
+          promise
+        )
+    }
+
+    @ReactMethod
+    fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalPlaybackTime: Double, promise: Promise) {
+        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
+
+        builder = when (buyType.uppercase()) {
+          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
+          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
+          else -> builder
+        }
+
+        implementation.sendCreativeAnalytics(
+          builder.trackTotalPlaybackTime(totalPlaybackTime.toFloat()).build(),
           promise
         )
     }

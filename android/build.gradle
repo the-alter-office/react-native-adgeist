@@ -82,11 +82,8 @@ android {
           "src/newarch",
 
           // This is needed to build Kotlin project with NewArch enabled
-          // "${project.buildDir}/generated/source/codegen/java",
-          // "${project.buildDir}/generated/source/codegen/jni"
-
-          "generated/java",
-          "generated/jni"
+          "${project.buildDir}/generated/source/codegen/java",
+          "${project.buildDir}/generated/source/codegen/jni"
         ]
       }else{
         java.srcDirs += ["src/oldarch"]
@@ -104,7 +101,7 @@ def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
   implementation "com.facebook.react:react-android"
-  implementation "ai.adgeist:adgeistkit:1.0.8"
+  implementation "ai.adgeist:adgeistkit:1.0.9"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
