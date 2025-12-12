@@ -12,15 +12,15 @@
       android:supportsRtl="true">
 
       <meta-data
-      android:name="com.adgeistkit.ads.APP_ID"
+      android:name="com.adgeistkit.ads.ADGEIST_APP_ID"
       android:value="69326f9fbb280f9241cabc94"/>
 
       <meta-data
-      android:name="com.adgeistkit.ads.API_KEY"
+      android:name="com.adgeistkit.ads.ADGEIST_API_KEY"
       android:value="b4e33bb73061d4e33670f229033f14bf770d35b15512dc1f106529e38946e49c"/>
 
       <meta-data
-          android:name="com.adgeistkit.ads.ORIGIN"
+          android:name="com.adgeistkit.ads.ADGEIST_CUSTOM_PACKAGE_OR_BUNDLE_ID"
           android:value="https://hackathon-lake-nine.vercel.app/ad"
       />
 

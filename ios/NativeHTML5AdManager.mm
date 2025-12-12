@@ -42,7 +42,6 @@ using namespace facebook::react;
     _swiftView.delegate = nil;
 }
 
-// MARK: - Layout & Lifecycle
 - (void)layoutSubviews
 {
     [super layoutSubviews];
@@ -57,7 +56,6 @@ using namespace facebook::react;
     }
 }
 
-// MARK: - Props Update
 - (void)updateProps:(const facebook::react::Props::Shared &)props
            oldProps:(const facebook::react::Props::Shared &)oldProps
 {
@@ -69,14 +67,12 @@ using namespace facebook::react;
         ? *std::static_pointer_cast<const HTML5AdNativeComponentProps>(oldProps)
         : defaultOldProps;
   
-    // adUnitID
     if (oldPropsStruct.adUnitID != newProps.adUnitID) {
         _swiftView.adUnitID = newProps.adUnitID.empty()
             ? nil
             : [NSString stringWithUTF8String:newProps.adUnitID.c_str()];
     }
 
-    // adSize
     if (oldPropsStruct.adSize.type != newProps.adSize.type ||
         oldPropsStruct.adSize.width != newProps.adSize.width ||
         oldPropsStruct.adSize.height != newProps.adSize.height) {
@@ -94,7 +90,6 @@ using namespace facebook::react;
         _swiftView.adSize = dict.count > 0 ? dict : nil;
     }
 
-    // adType
     if (oldPropsStruct.adType != newProps.adType) {
         _swiftView.adType = newProps.adType.empty()
             ? nil
@@ -104,7 +99,6 @@ using namespace facebook::react;
     [super updateProps:props oldProps:oldProps];
 }
 
-// MARK: - Event Emission (Correct EventEmitter name)
 - (void)onAdLoaded
 {
     if (_eventEmitter) {
@@ -165,7 +159,6 @@ using namespace facebook::react;
     [_swiftView destroy];
 }
 
-// MARK: - Component Descriptor
 + (ComponentDescriptorProvider)componentDescriptorProvider
 {
     return concreteComponentDescriptorProvider<HTML5AdNativeComponentComponentDescriptor>();
