@@ -13,6 +13,8 @@ import com.adgeistkit.data.network.FetchCreative
 
 import com.facebook.react.bridge.ReadableMap
 import com.adgeist.utils.toWritableMap
+import com.adgeistkit.ads.network.AnalyticsRequest
+import com.adgeistkit.ads.network.AnalyticsRequestDEPRECATED
 
 class AdgeistImpl internal constructor(private val context: ReactApplicationContext) {
 
@@ -56,40 +58,9 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
     } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
   }
 
-  fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, renderTime: Float, promise: Promise
-  ) {
-    postCreativeAnalytic?.trackImpression(campaignId, adSpaceId, bidId, bidMeta, buyType, isTestEnvironment, renderTime)
-    promise.resolve("Impression event sent")
-  }
-
-  fun trackView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, viewTime: Float, visibilityRatio: Float, scrollDepth: Float, timeToVisible: Float, promise: Promise
-  ) {
-    postCreativeAnalytic?.trackView(campaignId, adSpaceId, bidId,  bidMeta, buyType, isTestEnvironment, viewTime, visibilityRatio, scrollDepth, timeToVisible)
-    promise.resolve("View event sent")
-  }
-
-  fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String,isTestEnvironment: Boolean, totalViewTime: Float, visibilityRatio: Float, promise: Promise
-  ) {
-    postCreativeAnalytic?.trackTotalView(campaignId, adSpaceId, bidId,  bidMeta, buyType, isTestEnvironment, totalViewTime, visibilityRatio)
-    promise.resolve("Total view event sent")
-  }
-
-  fun trackClick(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, promise: Promise
-  ) {
-    postCreativeAnalytic?.trackClick(campaignId, adSpaceId, bidId,  bidMeta, buyType, isTestEnvironment)
-    promise.resolve("Click event sent")
-  }
-
-  fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalPlaybackTime: Float, promise: Promise
-  ) {
-    postCreativeAnalytic?.trackVideoPlayback(campaignId, adSpaceId, bidId,  bidMeta, buyType, isTestEnvironment, totalPlaybackTime)
-    promise.resolve("Video playback event sent")
-  }
-
-  fun trackVideoQuartile(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, quartile: String, promise: Promise
-  ) {
-    postCreativeAnalytic?.trackVideoQuartile(campaignId, adSpaceId, bidId,  bidMeta, buyType, isTestEnvironment, quartile)
-    promise.resolve("Video quartile event sent")
+  fun sendCreativeAnalytics(analyticsRequestDEPRECATED : AnalyticsRequestDEPRECATED, promise: Promise) {
+    postCreativeAnalytic?.sendTrackingData(analyticsRequestDEPRECATED)
+    promise.resolve("Event sent successfully")
   }
 
   fun setUserDetails(userDetailsMap: ReadableMap) {

@@ -65,7 +65,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   let creativeTitle;
   let creativeDescription;
   let ctaUrl;
-  let bidMeta = '';
 
   let bidId;
   let campaignId;
@@ -78,7 +77,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     creativeBrandName = (adData as FIXEDADRESPONSE)?.advertiser?.name;
     creativeUrl = (adData as FIXEDADRESPONSE)?.creatives?.[0]?.fileUrl;
     ctaUrl = (adData as FIXEDADRESPONSE)?.creatives?.[0]?.ctaUrl;
-    bidMeta = (adData as FIXEDADRESPONSE)?.metaData;
 
     bidId = (adData as FIXEDADRESPONSE)?.id;
     campaignId = (adData as FIXEDADRESPONSE)?.campaignId;
@@ -126,8 +124,8 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     }
   }, [
     isInitialized,
-    dataBuyType,
     dataAdSlot,
+    dataBuyType,
     isTestEnvironment,
     onAdLoadError,
     onAdLoadSuccess,
@@ -143,8 +141,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
         campaignId,
         adSpaceId,
         bidId,
-        bidMeta,
-        dataBuyType,
         isTestEnvironment,
         renderTime
       );
@@ -153,15 +149,7 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     } catch (err) {
       console.error('Failed to track impression:', err);
     }
-  }, [
-    hasImpression,
-    bidId,
-    campaignId,
-    adSpaceId,
-    dataBuyType,
-    bidMeta,
-    isTestEnvironment,
-  ]);
+  }, [hasImpression, bidId, campaignId, adSpaceId, isTestEnvironment]);
 
   const trackView = useCallback(async () => {
     if (hasView || !hasImpression || !bidId || !campaignId) return;
@@ -180,8 +168,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
           campaignId,
           adSpaceId,
           bidId,
-          bidMeta,
-          dataBuyType,
           isTestEnvironment,
           currentViewTime,
           visibility,
@@ -200,8 +186,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     bidId,
     campaignId,
     adSpaceId,
-    dataBuyType,
-    bidMeta,
     isTestEnvironment,
     dataSlotType,
   ]);
@@ -280,14 +264,7 @@ export const BannerAd: React.FC<AdBannerProps> = ({
       return;
 
     try {
-      Adgeist.trackClick(
-        campaignId,
-        adSpaceId,
-        bidId,
-        bidMeta,
-        dataBuyType,
-        isTestEnvironment
-      );
+      Adgeist.trackClick(campaignId, adSpaceId, bidId, isTestEnvironment);
 
       await Linking.openURL(normalizeUrl(ctaUrl as string));
     } catch (err) {
@@ -298,7 +275,6 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     bidId,
     campaignId,
     adSpaceId,
-    bidMeta,
     dataBuyType,
     isTestEnvironment,
     ctaUrl,

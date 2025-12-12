@@ -3,6 +3,7 @@ package com.adgeist
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.adgeist.modules.AdgeistImpl
+import com.adgeistkit.ads.network.AnalyticsRequestDEPRECATED
 
 import com.facebook.react.bridge.ReadableMap
 
@@ -25,29 +26,49 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
         implementation.fetchCreative(adSpaceId, buyType, isTestEnvironment, promise)
     }
 
-    override fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, renderTime: Double, promise: Promise) {
-        implementation.trackImpression(campaignId, adSpaceId, bidId, bidMeta, buyType, isTestEnvironment, renderTime.toFloat(), promise)
+    override fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, renderTime: Double, promise: Promise) {
+        implementation.sendCreativeAnalytics(
+          AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
+            .trackImpression(renderTime.toFloat()).build(),
+          promise
+        )
     }
 
-    override fun trackView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, viewTime: Double, visibilityRatio: Double, scrollDepth: Double, timeToVisible: Double, promise: Promise) {
-        implementation.trackView(campaignId, adSpaceId, bidId, bidMeta, buyType, isTestEnvironment, viewTime.toFloat(), visibilityRatio.toFloat(), scrollDepth.toFloat(), timeToVisible.toFloat(), promise)
+    override fun trackView(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, viewTime: Double, visibilityRatio: Double, scrollDepth: Double, timeToVisible: Double, promise: Promise) {
+          implementation.sendCreativeAnalytics(
+            AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
+              .trackViewableImpression(timeToVisible.toFloat(),
+                scrollDepth.toFloat(),
+                visibilityRatio.toFloat(),
+                viewTime.toFloat())
+              .build(),
+            promise
+          )
     }
 
-    override fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalViewTime: Double, visibilityRatio: Double, promise: Promise) {
-        implementation.trackTotalView(campaignId, adSpaceId, bidId, bidMeta, buyType, isTestEnvironment, totalViewTime.toFloat(), visibilityRatio.toFloat(), promise)
+    override fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, totalViewTime: Double, promise: Promise) {
+          implementation.sendCreativeAnalytics(
+            AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
+              .trackTotalViewTime(totalViewTime.toFloat()).build(),
+            promise
+          )
     }
 
-    override fun trackClick(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
-        implementation.trackClick(campaignId, adSpaceId, bidId, bidMeta, buyType, isTestEnvironment, promise)
-    }
+     override fun trackClick(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, promise: Promise) {
+          implementation.sendCreativeAnalytics(
+            AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
+              .trackClick().build(),
+            promise
+          )
+     }
 
-    override fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalPlaybackTime: Double, promise: Promise) {
-        implementation.trackVideoPlayback(campaignId, adSpaceId, bidId, bidMeta, buyType, isTestEnvironment, totalPlaybackTime.toFloat(), promise)
-    }
-
-    override fun trackVideoQuartile(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, quartile: String, promise: Promise) {
-        implementation.trackVideoQuartile(campaignId, adSpaceId, bidId, bidMeta, buyType, isTestEnvironment, quartile, promise)
-    }
+     override fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, isTestEnvironment: Boolean, totalPlaybackTime: Double, promise: Promise) {
+        implementation.sendCreativeAnalytics(
+          AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(campaignId, adSpaceId, bidId, isTestEnvironment)
+            .trackTotalPlaybackTime(totalPlaybackTime.toFloat()).build(),
+          promise
+        )
+     }
 
     override fun setUserDetails(userDetails: ReadableMap) {
         implementation.setUserDetails(userDetails)

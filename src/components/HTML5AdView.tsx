@@ -18,7 +18,6 @@ import type {
   HTML5AdRequest,
   HTML5AdViewRef,
 } from '../types/HTML5AdNativeComponentProps';
-import { AdSizes } from '../constants';
 
 export const HTML5AdView = forwardRef<
   HTML5AdViewRef,
@@ -27,7 +26,7 @@ export const HTML5AdView = forwardRef<
   (
     {
       adUnitID,
-      adSize = AdSizes.BANNER,
+      adSize,
       adType,
       onAdLoaded,
       onAdFailedToLoad,

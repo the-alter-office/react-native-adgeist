@@ -39,8 +39,6 @@ export interface Spec extends TurboModule {
     campaignId: string,
     adSpaceId: string,
     bidId: string,
-    bidMeta: string,
-    buyType: string,
     isTestEnvironment: boolean,
     renderTime: number
   ): Promise<string>;
@@ -49,8 +47,6 @@ export interface Spec extends TurboModule {
     campaignId: string,
     adSpaceId: string,
     bidId: string,
-    bidMeta: string,
-    buyType: string,
     isTestEnvironment: boolean,
     viewTime: number,
     visibilityRatio: number,
@@ -62,19 +58,14 @@ export interface Spec extends TurboModule {
     campaignId: string,
     adSpaceId: string,
     bidId: string,
-    bidMeta: string,
-    buyType: string,
     isTestEnvironment: boolean,
-    totalViewTime: number,
-    visibilityRatio: number
+    totalViewTime: number
   ): Promise<string>;
 
   trackClick(
     campaignId: string,
     adSpaceId: string,
     bidId: string,
-    bidMeta: string,
-    buyType: string,
     isTestEnvironment: boolean
   ): Promise<string>;
 
@@ -82,21 +73,17 @@ export interface Spec extends TurboModule {
     campaignId: string,
     adSpaceId: string,
     bidId: string,
-    bidMeta: string,
-    buyType: string,
     isTestEnvironment: boolean,
     totalPlaybackTime: number
   ): Promise<string>;
 
-  trackVideoQuartile(
-    campaignId: string,
-    adSpaceId: string,
-    bidId: string,
-    bidMeta: string,
-    buyType: string,
-    isTestEnvironment: boolean,
-    quartile: string
-  ): Promise<string>;
+  // trackVideoQuartile(
+  //   campaignId: string,
+  //   adSpaceId: string,
+  //   bidId: string,
+  //   isTestEnvironment: boolean,
+  //   quartile: string
+  // ): Promise<string>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('Adgeist');

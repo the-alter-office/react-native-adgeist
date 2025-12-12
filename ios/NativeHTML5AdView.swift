@@ -81,19 +81,7 @@ public class NativeHTML5AdView: UIView {
         adView.adUnitId = adUnitID
 
         if let dict = adSize as? [String: Any] {
-            if let type = dict["type"] as? String {
-                let size: AdSize
-                switch type.uppercased() {
-                case "BANNER":           size = .BANNER
-                case "LARGE_BANNER":     size = .LARGE_BANNER
-                case "MEDIUM_RECTANGLE": size = .MEDIUM_RECTANGLE
-                case "FULL_BANNER":      size = .FULL_BANNER
-                case "LEADERBOARD":      size = .LEADERBOARD
-                case "WIDE_SKYSCRAPER":  size = .WIDE_SKYSCRAPER
-                default:                 size = AdSize(width: 320, height: 50)
-                }
-                adView.setAdDimension(size)
-            } else if let w = dict["width"] as? Int, let h = dict["height"] as? Int {
+            if let w = dict["width"] as? Int, let h = dict["height"] as? Int {
                 adView.setAdDimension(AdSize(width: w, height: h))
             }
         }

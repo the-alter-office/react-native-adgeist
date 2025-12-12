@@ -36,23 +36,10 @@ object HTML5AdViewManagerImpl {
     fun setAdSize(view: AdView, adSizeMap: ReadableMap?) {
         if (adSizeMap != null) {
             try {
-                val width = if (adSizeMap.hasKey("width")) adSizeMap.getInt("width") else 360
-                val height = if (adSizeMap.hasKey("height")) adSizeMap.getInt("height") else 360
+                val width = adSizeMap.getInt("width")
+                val height = adSizeMap.getInt("height")
 
-                val adSize = when {
-                    adSizeMap.hasKey("type") -> {
-                        when (adSizeMap.getString("type")) {
-                            "BANNER" -> AdSize.BANNER
-                            "LARGE_BANNER" -> AdSize.LARGE_BANNER
-                            "MEDIUM_RECTANGLE" -> AdSize.MEDIUM_RECTANGLE
-                            "FULL_BANNER" -> AdSize.FULL_BANNER
-                            "LEADERBOARD" -> AdSize.LEADERBOARD
-                            "WIDE_SKYSCRAPER" -> AdSize.WIDE_SKYSCRAPER
-                            else -> AdSize(width, height)
-                        }
-                    }
-                    else -> AdSize(width, height)
-                }
+                val adSize = AdSize(width, height)
 
                 view.setAdDimension(adSize)
             } catch (e: Exception) {

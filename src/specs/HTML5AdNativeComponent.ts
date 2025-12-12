@@ -8,7 +8,6 @@ import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativ
 import * as React from 'react';
 
 export interface AdSize {
-  type?: string;
   width?: Double;
   height?: Double;
 }
@@ -19,8 +18,8 @@ export interface AdFailedToLoadEvent {
 
 export interface NativeProps extends ViewProps {
   adUnitID: string;
-  adSize?: AdSize;
-  adType?: string;
+  adSize: AdSize;
+  adType: string;
 
   onAdLoaded?: DirectEventHandler<null>;
   onAdFailedToLoad?: DirectEventHandler<AdFailedToLoadEvent>;
