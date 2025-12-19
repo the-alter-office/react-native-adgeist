@@ -114,6 +114,12 @@ import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
 <HTML5AdView
   adUnitID="6932a4c022f6786424ce3b84"
   adSize={{ width: 320, height: 480 }}
+  onAdLoaded={}
+  onAdFailedToLoad={}
+  onAdOpened={}
+  onAdClosed={}
+  onAdClicked={}
   adType="display"
 />;
+
 ```

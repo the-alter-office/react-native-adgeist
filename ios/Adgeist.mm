@@ -26,17 +26,17 @@ RCT_EXPORT_METHOD(initializeSdk:(NSString *)customBidRequestBackendDomain
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
-    [adgeist initializeSdkWithCustomDomain:customBidRequestBackendDomain
-                  customPackageOrBundleID:customPackageOrBundleID
-                       customAdgeistAppID:customAdgeistAppID
-                                 resolver:resolve
-                                 rejecter:reject];
+    [adgeist initializeSdkWithCustomBidRequestBackendDomain:customBidRequestBackendDomain
+                                          customPackageOrBundleID:customPackageOrBundleID
+                                               customAdgeistAppID:customAdgeistAppID
+                                                         resolver:resolve
+                                                         rejecter:reject];
 }
 
 RCT_EXPORT_METHOD(destroySdk:(RCTPromiseResolveBlock)resolve 
                   reject:(RCTPromiseRejectBlock)reject) {
     [adgeist destroySdkWithResolver:resolve 
-                         rejecter:reject];
+                                  rejecter:reject];
 }
 
 
@@ -46,11 +46,11 @@ RCT_EXPORT_METHOD(fetchCreative:(NSString *)adSpaceId
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
-    [adgeist fetchCreativeWithApiKey:adSpaceId
-                              buyTyp:buyType
-                   isTestEnvironment:isTestEnvironment
-                            resolver:resolve
-                            rejecter:reject];
+    [adgeist fetchCreativeWithAdSpaceId:adSpaceId
+                                       buyType:buyType
+                             isTestEnvironment:isTestEnvironment
+                                      resolver:resolve
+                                      rejecter:reject];
 }
 
 
@@ -61,7 +61,7 @@ RCT_EXPORT_METHOD(setUserDetails:(NSObject *)userDetails) {
 RCT_EXPORT_METHOD(getConsentStatus:(RCTPromiseResolveBlock)resolve 
                   reject:(RCTPromiseRejectBlock)reject) {
     [adgeist getConsentStatusWithResolver:resolve 
-                                 rejecter:reject];
+                                        rejecter:reject];
 }
 
 RCT_EXPORT_METHOD(updateConsentStatus:(BOOL)consent) {
@@ -88,7 +88,7 @@ RCT_EXPORT_METHOD(trackImpression:(NSString *)campaignId
                                    bidMeta:bidMeta
                                    buyType:buyType
                          isTestEnvironment:isTestEnvironment
-                                renderTime:renderTime
+                                renderTime:(float)renderTime
                                   resolver:resolve
                                   rejecter:reject];
 }
@@ -112,10 +112,10 @@ RCT_EXPORT_METHOD(trackView:(NSString *)campaignId
                              bidMeta:bidMeta
                              buyType:buyType
                    isTestEnvironment:isTestEnvironment
-                            viewTime:viewTime
-                     visibilityRatio:visibilityRatio
-                         scrollDepth:scrollDepth
-                       timeToVisible:timeToVisible
+                            viewTime:(float)viewTime
+                     visibilityRatio:(float)visibilityRatio
+                         scrollDepth:(float)scrollDepth
+                       timeToVisible:(float)timeToVisible
                             resolver:resolve
                             rejecter:reject];
 }
@@ -137,8 +137,8 @@ RCT_EXPORT_METHOD(trackTotalView:(NSString *)campaignId
                                   bidMeta:bidMeta
                                   buyType:buyType
                         isTestEnvironment:isTestEnvironment
-                            totalViewTime:totalViewTime
-                          visibilityRatio:visibilityRatio
+                            totalViewTime:(float)totalViewTime
+                          visibilityRatio:(float)visibilityRatio
                                  resolver:resolve
                                  rejecter:reject];
 }
@@ -178,31 +178,31 @@ RCT_EXPORT_METHOD(trackVideoPlayback:(NSString *)campaignId
                                       bidMeta:bidMeta
                                       buyType:buyType
                             isTestEnvironment:isTestEnvironment
-                            totalPlaybackTime:totalPlaybackTime
+                            totalPlaybackTime:(float)totalPlaybackTime
                                      resolver:resolve
                                      rejecter:reject];
 }
 
-RCT_EXPORT_METHOD(trackVideoQuartile:(NSString *)campaignId
-                  adSpaceId:(NSString *)adSpaceId
-                  bidId:(NSString *)bidId
-                  bidMeta:(NSString *)bidMeta
-                  buyType:(NSString *)buyType
-                  isTestEnvironment:(BOOL)isTestEnvironment
-                  quartile:(NSString *)quartile
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
-{
-    [adgeist trackVideoQuartileWithCampaignId:campaignId
-                                    adSpaceId:adSpaceId
-                                        bidId:bidId
-                                      bidMeta:bidMeta
-                                      buyType:buyType
-                            isTestEnvironment:isTestEnvironment
-                                     quartile:quartile
-                                     resolver:resolve
-                                     rejecter:reject];
-}
+// RCT_EXPORT_METHOD(trackVideoQuartile:(NSString *)campaignId
+//                   adSpaceId:(NSString *)adSpaceId
+//                   bidId:(NSString *)bidId
+//                   bidMeta:(NSString *)bidMeta
+//                   buyType:(NSString *)buyType
+//                   isTestEnvironment:(BOOL)isTestEnvironment
+//                   quartile:(NSString *)quartile
+//                   resolve:(RCTPromiseResolveBlock)resolve
+//                   reject:(RCTPromiseRejectBlock)reject)
+// {
+//     [adgeist trackVideoQuartileWithCampaignId:campaignId
+//                                     adSpaceId:adSpaceId
+//                                         bidId:bidId
+//                                       bidMeta:bidMeta
+//                                       buyType:buyType
+//                             isTestEnvironment:isTestEnvironment
+//                                      quartile:quartile
+//                                      resolver:resolve
+//                                      rejecter:reject];
+// }
 
 // TurboModule support for the new architecture
 #ifdef RCT_NEW_ARCH_ENABLED
