@@ -18,7 +18,8 @@ export interface AdFailedToLoadEvent {
 
 export interface NativeProps extends ViewProps {
   adUnitID: string;
-  adSize: AdSize;
+  adIsResponsive?: boolean;
+  adSize?: AdSize;
   adType: string;
 
   onAdLoaded?: DirectEventHandler<null>;

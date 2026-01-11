@@ -33,6 +33,10 @@ object HTML5AdViewManagerImpl {
         }
     }
 
+    fun setAdIsResponsive(view: AdView, adIsResponsive: Boolean) {
+        view.adIsResponsive = adIsResponsive
+    }
+
     fun setAdSize(view: AdView, adSizeMap: ReadableMap?) {
         if (adSizeMap != null) {
             try {

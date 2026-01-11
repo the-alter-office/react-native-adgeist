@@ -16,18 +16,20 @@ import {
 } from 'react-native';
 
 export default function App() {
-  const [appId, setAppId] = useState('69326f9fbb280f9241cabc94');
-  const [bundleId, setBundleId] = useState(
-    'https://adgeist-ad-integration.d49kd6luw1c4m.amplifyapp.com'
+  const [appId, setAppId] = useState('6954e6859ab54390db01e3d7');
+  const [bundleId, setBundleId] = useState('adgeist.example');
+  const [backendDomain, setbackendDomain] = useState(
+    'https://beta.v2.bg-services.adgeist.ai'
   );
-  const [isTest, setIsTest] = useState(true);
+  const [isTest, setIsTest] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showProvider, setShowProvider] = useState(true);
 
   const [config, setConfig] = useState({
-    appId: '69326f9fbb280f9241cabc94',
-    bundleId: 'https://adgeist-ad-integration.d49kd6luw1c4m.amplifyapp.com',
+    appId: '6954e6859ab54390db01e3d7',
+    bundleId: 'adgeist.example',
     isTest: true,
+    backendDomain: 'https://beta.v2.bg-services.adgeist.ai',
   });
 
   const handleSubmit = () => {
@@ -39,6 +41,7 @@ export default function App() {
         appId,
         bundleId,
         isTest,
+        backendDomain,
       });
       setShowProvider(true);
       setIsLoading(false);
@@ -50,6 +53,15 @@ export default function App() {
       <ScrollView>
         <View style={styles.configContainer}>
           <Text style={styles.header}>SDK Configuration</Text>
+
+          <Text style={styles.label}>Backend Domain</Text>
+          <TextInput
+            style={styles.input}
+            value={backendDomain}
+            onChangeText={setbackendDomain}
+            placeholder="Enter Backend Domain"
+            placeholderTextColor="#999"
+          />
 
           <Text style={styles.label}>Adgeist App ID</Text>
           <TextInput
@@ -93,6 +105,7 @@ export default function App() {
 
         {showProvider && (
           <AdgeistProvider
+            customBidRequestBackendDomain={backendDomain}
             customPackageOrBundleID={config.bundleId}
             customAdgeistAppID={config.appId}
             isTestEnvironment={config.isTest}
@@ -147,6 +160,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 15,
     marginBottom: 15,
+    display: 'none',
   },
   button: {
     backgroundColor: '#63AA75',

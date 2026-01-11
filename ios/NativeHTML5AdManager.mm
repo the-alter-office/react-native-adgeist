@@ -40,6 +40,13 @@ using namespace facebook::react;
 - (void)dealloc
 {
     _swiftView.delegate = nil;
+    [_swiftView destroy];
+}
+
+- (void)prepareForRecycle
+{
+    [super prepareForRecycle];
+    [_swiftView destroy];
 }
 
 - (void)layoutSubviews
@@ -73,14 +80,14 @@ using namespace facebook::react;
             : [NSString stringWithUTF8String:newProps.adUnitID.c_str()];
     }
 
-    if (oldPropsStruct.adSize.type != newProps.adSize.type ||
-        oldPropsStruct.adSize.width != newProps.adSize.width ||
+    if (oldPropsStruct.adIsResponsive != newProps.adIsResponsive) {
+        _swiftView.adIsResponsive = newProps.adIsResponsive;
+    }
+
+    if (oldPropsStruct.adSize.width != newProps.adSize.width ||
         oldPropsStruct.adSize.height != newProps.adSize.height) {
 
         NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-        if (!newProps.adSize.type.empty()) {
-            dict[@"type"] = [NSString stringWithUTF8String:newProps.adSize.type.c_str()];
-        }
         if (newProps.adSize.width != 0.0) {
             dict[@"width"] = @(newProps.adSize.width);
         }
@@ -88,6 +95,10 @@ using namespace facebook::react;
             dict[@"height"] = @(newProps.adSize.height);
         }
         _swiftView.adSize = dict.count > 0 ? dict : nil;
+        
+        if (_swiftView.adUnitID != nil) {
+            [_swiftView reloadAd];
+        }
     }
 
     if (oldPropsStruct.adType != newProps.adType) {

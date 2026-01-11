@@ -3,7 +3,8 @@ import type { AdSize } from './AdSize';
 
 export interface HTML5AdNativeComponentProps {
   adUnitID: string;
-  adSize: AdSize;
+  adIsResponsive?: boolean;
+  adSize?: AdSize;
   adType: string;
 
   onAdLoaded?: () => void;

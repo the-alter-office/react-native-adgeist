@@ -7,7 +7,7 @@ import {
   useState,
   useMemo,
 } from 'react';
-import type { ViewStyle } from 'react-native';
+import type { ViewStyle, DimensionValue } from 'react-native';
 
 import { useAdgeistContext } from '../providers/AdgeistProvider';
 import HTML5AdNativeComponent, {
@@ -18,6 +18,7 @@ import type {
   HTML5AdRequest,
   HTML5AdViewRef,
 } from '../types/HTML5AdNativeComponentProps';
+import { AdSizes } from '../constants';
 
 export const HTML5AdView = forwardRef<
   HTML5AdViewRef,
@@ -26,6 +27,7 @@ export const HTML5AdView = forwardRef<
   (
     {
       adUnitID,
+      adIsResponsive,
       adSize,
       adType,
       onAdLoaded,
@@ -42,11 +44,14 @@ export const HTML5AdView = forwardRef<
     const [isViewReady, setIsViewReady] = useState(false);
     const pendingLoadRef = useRef<HTML5AdRequest | null>(null);
 
-    const dimensions = useMemo(() => {
-      const width = adSize.width ?? 360;
-      const height = adSize.height ?? 360;
+    const dimensions = useMemo<{
+      width: DimensionValue;
+      height: DimensionValue;
+    }>(() => {
+      const width: DimensionValue = adSize?.width ?? '100%';
+      const height: DimensionValue = adSize?.height ?? '100%';
       return { width, height };
-    }, [adSize.width, adSize.height]);
+    }, [adSize?.width, adSize?.height]);
 
     const containerStyle = useMemo<ViewStyle>(
       () => ({
@@ -139,7 +144,8 @@ export const HTML5AdView = forwardRef<
         style={containerStyle}
         // Required Props, it will take values from React Component props
         adUnitID={adUnitID}
-        adSize={adSize}
+        adSize={adIsResponsive ? AdSizes.Responsive : adSize}
+        adIsResponsive={adIsResponsive}
         adType={adType}
         // Required Event Callbacks
         onAdLoaded={onAdLoaded}

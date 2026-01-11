@@ -20,6 +20,7 @@ public class NativeHTML5AdView: UIView {
     @objc public var adUnitID: String?
     @objc public var adSize: NSDictionary?
     @objc public var adType: String?
+    @objc public var adIsResponsive: Bool = false
 
     // MARK: Delegate (used to send events back to Fabric manager)
     @objc public weak var delegate: NativeHTML5AdDelegate?
@@ -65,6 +66,7 @@ public class NativeHTML5AdView: UIView {
     }
     
     private func cleanupAdView() {
+        adView?.destroy()
         adView?.removeFromSuperview()
         adView = nil
         adListener = nil
@@ -79,6 +81,7 @@ public class NativeHTML5AdView: UIView {
         let adView = AdView()
         adView.frame = bounds
         adView.adUnitId = adUnitID
+        adView.adIsResposive = adIsResponsive
 
         if let dict = adSize as? [String: Any] {
             if let w = dict["width"] as? Int, let h = dict["height"] as? Int {

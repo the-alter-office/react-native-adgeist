@@ -36,6 +36,11 @@ class HTML5AdViewManager : SimpleViewManager<AdView>(), HTML5AdNativeComponentMa
         HTML5AdViewManagerImpl.setAdUnitID(view, adUnitID)
     }
 
+    @ReactProp(name = "adIsResponsive", defaultBoolean = false)
+    override fun setAdIsResponsive(view: AdView, adIsResponsive: Boolean) {
+        HTML5AdViewManagerImpl.setAdIsResponsive(view, adIsResponsive)
+    }
+    
     @ReactProp(name = "adSize")
     override fun setAdSize(view: AdView, adSizeMap: ReadableMap?) {
         HTML5AdViewManagerImpl.setAdSize(view, adSizeMap)

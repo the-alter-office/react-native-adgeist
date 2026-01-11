@@ -2,6 +2,7 @@ import type { AdSize } from './types/AdSize';
 
 export const AdSizes = {
   custom: (width: number, height: number): AdSize => ({ width, height }),
+  Responsive: { width: -1, height: -1 },
 };
 
 export const HTML_5_AD_NATIVE_COMPONENT_NAME = 'HTML5AdNativeComponent';

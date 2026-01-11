@@ -32,6 +32,7 @@ export default function ContentContainer() {
 
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
+  const [isResponsive, setIsResponsive] = useState(false);
   const [showAd, setShowAd] = useState(false);
   const [snippet, setSnippet] = useState('');
 
@@ -40,21 +41,26 @@ export default function ContentContainer() {
     const widthMatch = snippet.match(/width="([^"]*)"/);
     const heightMatch = snippet.match(/height="([^"]*)"/);
     const slotTypeMatch = snippet.match(/dataSlotType="([^"]*)"/);
+    const isResponsive = snippet.includes('isResponsive=true');
 
     if (
-      !widthMatch ||
-      !heightMatch ||
-      (widthMatch[1] === '0' && heightMatch[1] === '0')
+      !isResponsive &&
+      widthMatch?.[1] &&
+      heightMatch?.[1] &&
+      parseInt(widthMatch[1]) < 240 &&
+      parseInt(heightMatch[1]) < 50
     ) {
-      Alert.alert('Ad Failed to Load', 'Please check the ad snippet.');
+      Alert.alert('Please provide valid ad dimensions.');
       setSnippet('');
       return false;
     }
 
     if (adSlotMatch && adSlotMatch[1]) setAdSpaceId(adSlotMatch[1]);
-    if (widthMatch && widthMatch[1]) setWidth(widthMatch[1]);
-    if (heightMatch && heightMatch[1]) setHeight(heightMatch[1]);
+    if (!isResponsive && widthMatch && widthMatch[1]) setWidth(widthMatch[1]);
+    if (!isResponsive && heightMatch && heightMatch[1])
+      setHeight(heightMatch[1]);
     if (slotTypeMatch && slotTypeMatch[1]) setAdType(slotTypeMatch[1]);
+    if (isResponsive) setIsResponsive(true);
 
     return true;
   };
@@ -110,20 +116,49 @@ export default function ContentContainer() {
       </View>
 
       {showAd && (
-        <HTML5AdView
-          adUnitID={adSpaceId}
-          adSize={AdSizes.custom(parseInt(width), parseInt(height))}
-          adType={adType}
-          onAdLoaded={() => {}}
-          onAdFailedToLoad={() => {
-            setShowAd(false);
-            setSnippet('');
-            Alert.alert('Ad Failed to Load', 'Please check the ad snippet.');
-          }}
-          onAdOpened={() => {}}
-          onAdClosed={() => {}}
-          onAdClicked={() => {}}
-        />
+        <>
+          {isResponsive ? (
+            <View style={{ height: 360, width: 360 }}>
+              <HTML5AdView
+                key={'isReponsive'}
+                adUnitID={adSpaceId}
+                adIsResponsive={isResponsive}
+                adType={adType}
+                onAdLoaded={() => {}}
+                onAdFailedToLoad={() => {
+                  setShowAd(false);
+                  setSnippet('');
+                  Alert.alert(
+                    'Ad Failed to Load',
+                    'Please check the ad snippet.'
+                  );
+                }}
+                onAdOpened={() => {}}
+                onAdClosed={() => {}}
+                onAdClicked={() => {}}
+              />
+            </View>
+          ) : (
+            <HTML5AdView
+              key={width + height}
+              adUnitID={adSpaceId}
+              adSize={AdSizes.custom(parseInt(width), parseInt(height))}
+              adType={adType}
+              onAdLoaded={() => {}}
+              onAdFailedToLoad={() => {
+                setShowAd(false);
+                setSnippet('');
+                Alert.alert(
+                  'Ad Failed to Load',
+                  'Please check the ad snippet.'
+                );
+              }}
+              onAdOpened={() => {}}
+              onAdClosed={() => {}}
+              onAdClicked={() => {}}
+            />
+          )}
+        </>
       )}
     </ScrollView>
   );

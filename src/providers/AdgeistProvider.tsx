@@ -20,7 +20,7 @@ const AdgeistContext = createContext<AdgeistContextType>({
 
 export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
   children,
-  customBidRequestBackendDomain = 'beta.v2.bg-services.adgeist.ai',
+  customBidRequestBackendDomain = 'https://beta.v2.bg-services.adgeist.ai',
   customPackageOrBundleID = '',
   customAdgeistAppID = '',
   isTestEnvironment = false,
