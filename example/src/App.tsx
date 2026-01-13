@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 6,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 20,
   },
   buttonDisabled: {
     opacity: 0.7,
