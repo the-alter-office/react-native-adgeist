@@ -176,3 +176,8 @@ using namespace facebook::react;
 }
 
 @end
+
+Class<RCTComponentViewProtocol> HTML5AdNativeComponentCls(void)
+{
+    return RCTNativeHTML5AdManager.class;
+}

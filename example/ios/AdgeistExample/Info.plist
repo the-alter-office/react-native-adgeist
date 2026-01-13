@@ -53,5 +53,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>We use your advertising identifier to provide personalized ads and measure ad performance.</string>
 </dict>
 </plist>

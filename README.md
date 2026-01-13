@@ -31,7 +31,7 @@ yarn add @thealteroffice/react-native-adgeist
 
 ### Android Configuration
 
-Add your Adgeist publisher ID, api key and package id, as identified in the Adgeist web interface, to your app's `AndroidManifest.xml` file. To do so, add a `<meta-data>` tag with `android:name="com.adgeistkit.ads.ADGEIST_APP_ID"`, `android:name="com.adgeistkit.ads.ADGEIST_API_KEY"`, and `android:name="com.adgeistkit.ads.ADGEIST_CUSTOM_PACKAGE_OR_BUNDLE_ID"`.
+Add your Adgeist publisher ID, api key and package id, as identified in the Adgeist web interface, to your app's `AndroidManifest.xml` file. To do so, add a `<meta-data>` tag with `android:name="com.adgeistkit.ads.ADGEIST_APP_ID"` and `android:name="com.adgeistkit.ads.ADGEIST_API_KEY"`
 
 You can find your app ID in the Adgeist web interface. For `android:value`, insert your own Adgeist publisher ID, surrounded by quotation marks.
 
@@ -40,7 +40,6 @@ You can find your app ID in the Adgeist web interface. For `android:value`, inse
   <application>
     <!-- Sample Adgeist app ID: 69326f9fbb280f9241cabc94 -->
     <!-- Sample Adgeist api key: b4e33bb73061d4e33670f229033f14bf770d35b15512dc1f106529e38946e49c -->
-    <!-- Sample Adgeist package id: https://adgeist-ad-integration.d49kd6luw1c4m.amplifyapp.com -->
 
     <meta-data
         android:name="com.adgeistkit.ads.ADGEIST_APP_ID"
@@ -49,15 +48,11 @@ You can find your app ID in the Adgeist web interface. For `android:value`, inse
     <meta-data
         android:name="com.adgeistkit.ads.ADGEIST_API_KEY"
         android:value="ADGEIST_API_KEY"/>
-
-    <meta-data
-        android:name="com.adgeistkit.ads.ADGEIST_CUSTOM_PACKAGE_OR_BUNDLE_ID"
-        android:value="ADGEIST_CUSTOM_PACKAGE_OR_BUNDLE_ID"/>
   </application>
 </manifest>
 ```
 
-Replace `ADGEIST_APP_ID`, `ADGEIST_API_KEY`, `ADGEIST_CUSTOM_PACKAGE_OR_BUNDLE_ID` with your Adgeist IDs.
+Replace `ADGEIST_APP_ID`, `ADGEIST_API_KEY` with your Adgeist IDs.
 
 ### iOS Configuration
 
@@ -77,15 +72,13 @@ cd ios && pod install --repo-update
 
 Update your app's `Info.plist` file to add three keys:
 
-A `ADGEIST_APP_ID`, `ADGEIST_API_KEY`, `ADGEIST_CUSTOM_PACKAGE_OR_BUNDLE_ID` key with a string value of your Adgeist IDs found in the Adgeist UI.
+A `ADGEIST_APP_ID` and `ADGEIST_API_KEY` key with a string value of your Adgeist IDs found in the Adgeist UI.
 
 ```xml
 <key>ADGEIST_API_KEY</key>
 <string>e31edf10067897a3904b64b6a4b5f18b1260470183ae203cc521b0479166d597</string>
 <key>ADGEIST_APP_ID</key>
 <string>69326f9fbb280f9241cabc94</string>
-<key>ADGEIST_CUSTOM_PACKAGE_OR_BUNDLE_ID</key>
-<string>https://adgeist-ad-integration.d49kd6luw1c4m.amplifyapp.com/</string>
 ```
 
 ## Perform the Configuration of AdgeistProvider
@@ -121,5 +114,4 @@ import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
   onAdClicked={}
   adType="display"
 />;
-
 ```
