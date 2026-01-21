@@ -16,20 +16,20 @@ import {
 } from 'react-native';
 
 export default function App() {
-  const [appId, setAppId] = useState('6954e6859ab54390db01e3d7');
-  const [bundleId, setBundleId] = useState('adgeist.example');
+  const [appId, setAppId] = useState('695e797d6fcfb14c38cfd1d6');
+  const [bundleId, setBundleId] = useState('com.kke.adid');
   const [backendDomain, setbackendDomain] = useState(
-    'https://beta.v2.bg-services.adgeist.ai'
+    'https://qa.v2.bg-services.adgeist.ai'
   );
   const [isTest, setIsTest] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showProvider, setShowProvider] = useState(true);
 
   const [config, setConfig] = useState({
-    appId: '6954e6859ab54390db01e3d7',
-    bundleId: 'adgeist.example',
+    appId: '695e797d6fcfb14c38cfd1d6',
+    bundleId: 'com.kke.adid',
     isTest: true,
-    backendDomain: 'https://beta.v2.bg-services.adgeist.ai',
+    backendDomain: 'https://qa.v2.bg-services.adgeist.ai',
   });
 
   const handleSubmit = () => {
