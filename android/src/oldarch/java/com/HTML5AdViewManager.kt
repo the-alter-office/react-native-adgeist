@@ -1,5 +1,6 @@
 package com.adgeist.components
 
+import androidx.annotation.RequiresPermission
 import com.adgeistkit.ads.AdView
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.MapBuilder
@@ -25,7 +26,7 @@ class HTML5AdViewManager : SimpleViewManager<AdView>() {
     fun setAdIsResponsive(view: AdView, adIsResponsive: Boolean) {
         HTML5AdViewManagerImpl.setAdIsResponsive(view, adIsResponsive)
     }
-    
+
     @ReactProp(name = "adSize")
     fun setAdSize(view: AdView, adSizeMap: ReadableMap?) {
         HTML5AdViewManagerImpl.setAdSize(view, adSizeMap)
@@ -47,12 +48,11 @@ class HTML5AdViewManager : SimpleViewManager<AdView>() {
     }
 
     @RequiresPermission("android.permission.INTERNET")
-    fun loadAd(view: AdView, args: ReadableArray?) {
-        val isTestMode = if (args != null && args.size() > 0) args.getBoolean(0) else false
+    fun loadAd(view: AdView, isTestMode: Boolean) {
         HTML5AdViewManagerImpl.loadAd(view, isTestMode)
     }
 
-    override fun destroy(view: AdView) {
+    fun destroy(view: AdView) {
         HTML5AdViewManagerImpl.destroyAd(view)
     }
 

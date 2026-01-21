@@ -29,6 +29,8 @@ npm install @thealteroffice/react-native-adgeist
 yarn add @thealteroffice/react-native-adgeist
 ```
 
+### STEP 2: Update Configuration for Android and iOS
+
 ### Android Configuration
 
 Add your Adgeist publisher ID, api key and package id, as identified in the Adgeist web interface, to your app's `AndroidManifest.xml` file. To do so, add a `<meta-data>` tag with `android:name="com.adgeistkit.ads.ADGEIST_APP_ID"` and `android:name="com.adgeistkit.ads.ADGEIST_API_KEY"`
@@ -81,7 +83,9 @@ A `ADGEIST_APP_ID` and `ADGEIST_API_KEY` key with a string value of your Adgeist
 <string>69326f9fbb280f9241cabc94</string>
 ```
 
-## Perform the Configuration of AdgeistProvider
+### STEP 3: React Native Configuration and Ad Placement
+
+### Configure AdgeistProvider
 
 Add an `AdgeistProvider` at the root level of your app.
 
@@ -97,7 +101,7 @@ export default function App() {
 }
 ```
 
-## Implement the Embedding of Ad Slots
+### Implement Ad Placement
 
 Use the `HTML5AdView` component to display banner ads anywhere in your app. Place this component where you want the ads to appear and the SDK will automatically load and render the ad content.
 
