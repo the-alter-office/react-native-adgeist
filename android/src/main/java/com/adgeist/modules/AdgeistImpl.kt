@@ -22,9 +22,9 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
   private var getAd: FetchCreative? = null
   private var postCreativeAnalytic: CreativeAnalytics? = null
 
-  fun initializeSdk(customBidRequestBackendDomain: String?, customPackageOrBundleID: String?, customAdgeistAppID: String?, promise: Promise) {
+  fun initializeSdk(customBidRequestBackendDomain: String?, customPackageOrBundleID: String?, customAdgeistAppID: String?, customVersioning: String?, promise: Promise) {
     try {
-      adgeistInstance = AdgeistCore.initialize(context.applicationContext, customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID)
+      adgeistInstance = AdgeistCore.initialize(context.applicationContext, customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID, customVersioning)
       getAd = adgeistInstance?.getCreative()
       postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()
       promise.resolve("SDK initialized with domain: ${customBidRequestBackendDomain ?: "default"}")

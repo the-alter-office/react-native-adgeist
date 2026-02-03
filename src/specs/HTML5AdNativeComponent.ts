@@ -6,6 +6,7 @@ import type {
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
 import * as React from 'react';
+import { UIManager, findNodeHandle } from 'react-native';
 
 export interface AdSize {
   width?: Double;
@@ -44,3 +45,32 @@ export const Commands: NativeCommands = codegenNativeCommands<NativeCommands>({
 export default codegenNativeComponent<NativeProps>(
   'HTML5AdNativeComponent'
 ) as HostComponent<NativeProps>;
+
+const isFabric = (global as any)?.nativeFabricUIManager !== undefined;
+
+export const AdCommands = {
+  loadAd: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>,
+    isTestMode: boolean
+  ) => {
+    if (isFabric) {
+      Commands.loadAd(viewRef, isTestMode);
+    } else {
+      const reactTag = findNodeHandle(viewRef);
+      if (reactTag != null) {
+        UIManager.dispatchViewManagerCommand(reactTag, 1, [isTestMode]);
+      }
+    }
+  },
+
+  destroy: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => {
+    if (Commands?.destroy) {
+      Commands.destroy(viewRef);
+    } else {
+      const reactTag = findNodeHandle(viewRef);
+      if (reactTag != null) {
+        UIManager.dispatchViewManagerCommand(reactTag, 2, []);
+      }
+    }
+  },
+} as const;

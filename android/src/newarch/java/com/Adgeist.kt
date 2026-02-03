@@ -4,7 +4,6 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.adgeist.modules.AdgeistImpl
 import com.adgeistkit.ads.network.AnalyticsRequestDEPRECATED
-
 import com.facebook.react.bridge.ReadableMap
 
 class Adgeist internal constructor(reactContext: ReactApplicationContext) :
@@ -14,8 +13,8 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
 
     override fun getName(): String = AdgeistImpl.NAME
 
-    override fun initializeSdk(customBidRequestBackendDomain: String, customPackageOrBundleID: String, customAdgeistAppID: String, promise: Promise) {
-        implementation.initializeSdk(customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID, promise)
+    override fun initializeSdk(customBidRequestBackendDomain: String?, customPackageOrBundleID: String?, customAdgeistAppID: String?, customVersioning: String? , promise: Promise) {
+        implementation.initializeSdk(customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID, customVersioning, promise)
     }
 
     override fun destroySdk(promise: Promise) {

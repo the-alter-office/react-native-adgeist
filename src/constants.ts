@@ -1,5 +1,7 @@
 import type { AdSize } from './types/AdSize';
 
+export const PACKAGE_VERSION_TAG = 'RN';
+
 export const AdSizes = {
   custom: (width: number, height: number): AdSize => ({ width, height }),
   Responsive: { width: -1, height: -1 },

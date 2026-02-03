@@ -24,7 +24,9 @@ object HTML5AdViewManagerImpl {
     const val EVENT_AD_CLICKED = "onAdClicked"
 
     fun createViewInstance(reactContext: ThemedReactContext): AdView {
-        return AdView(reactContext)
+        val adView = AdView(reactContext.applicationContext)
+        adView.setTag(com.facebook.react.R.id.view_tag_native_id, reactContext)
+        return adView
     }
 
     fun setAdUnitID(view: AdView, adUnitID: String?) {
@@ -117,9 +119,13 @@ object HTML5AdViewManagerImpl {
     }
 
     private fun sendEvent(view: AdView, eventName: String, params: WritableMap) {
-        val reactContext = view.context as ThemedReactContext
-        reactContext
-            .getJSModule(RCTEventEmitter::class.java)
-            .receiveEvent(view.id, eventName, params)
+        val reactContext = view.getTag(com.facebook.react.R.id.view_tag_native_id) as? ThemedReactContext
+        if (reactContext != null) {
+            reactContext
+                .getJSModule(RCTEventEmitter::class.java)
+                .receiveEvent(view.id, eventName, params)
+        } else {
+            Log.e(TAG, "Unable to send event $eventName: ThemedReactContext not found")
+        }
     }
 }

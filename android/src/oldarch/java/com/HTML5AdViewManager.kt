@@ -1,8 +1,10 @@
 package com.adgeist.components
 
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.adgeistkit.ads.AdView
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.SimpleViewManager
@@ -47,6 +49,32 @@ class HTML5AdViewManager : SimpleViewManager<AdView>() {
         )
     }
 
+    override fun getCommandsMap(): Map<String, Int> {
+        return MapBuilder.of(
+            "loadAd", COMMAND_LOAD_AD,
+            "destroy", COMMAND_DESTROY
+        )
+    }
+
+    override fun receiveCommand(root: AdView, commandId: Int, args: ReadableArray?) {
+        try {
+            when (commandId) {
+                COMMAND_LOAD_AD -> {
+                    val isTestMode = args?.getBoolean(0) ?: false
+                    loadAd(root, isTestMode)
+                }
+                COMMAND_DESTROY -> {
+                    destroy(root)
+                }
+                else -> {
+                    Log.w("HTML5AdViewManager", "Unknown command received: $commandId")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("HTML5AdViewManager", "Error in receiveCommand: ${e.message}", e)
+        }
+    }
+
     @RequiresPermission("android.permission.INTERNET")
     fun loadAd(view: AdView, isTestMode: Boolean) {
         HTML5AdViewManagerImpl.loadAd(view, isTestMode)
@@ -59,5 +87,10 @@ class HTML5AdViewManager : SimpleViewManager<AdView>() {
     override fun onDropViewInstance(view: AdView) {
         super.onDropViewInstance(view)
         HTML5AdViewManagerImpl.destroyAd(view)
+    }
+
+    companion object {
+        private const val COMMAND_LOAD_AD = 1
+        private const val COMMAND_DESTROY = 2
     }
 }

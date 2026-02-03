@@ -14,9 +14,10 @@ export interface Event {
 }
 export interface Spec extends TurboModule {
   initializeSdk(
-    customBidRequestBackendDomain: string,
-    customPackageOrBundleID: string,
-    customAdgeistAppID: string
+    customBidRequestBackendDomain: string | null,
+    customPackageOrBundleID: string | null,
+    customAdgeistAppID: string | null,
+    customVersioning: string | null
   ): Promise<boolean>;
 
   destroySdk(): Promise<boolean>;

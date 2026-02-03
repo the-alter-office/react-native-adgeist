@@ -1,11 +1,8 @@
 package com.adgeist.components
 
-import android.content.res.Resources
 import android.util.Log
-import android.view.ViewGroup
 import androidx.annotation.RequiresPermission
 import com.adgeistkit.ads.AdView
-import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.module.annotations.ReactModule
@@ -18,7 +15,7 @@ import com.facebook.react.viewmanagers.HTML5AdNativeComponentManagerInterface
 
 @ReactModule(name = HTML5AdViewManagerImpl.NAME)
 class HTML5AdViewManager : SimpleViewManager<AdView>(), HTML5AdNativeComponentManagerInterface<AdView> {
-    
+
     private val mDelegate: ViewManagerDelegate<AdView> = HTML5AdNativeComponentManagerDelegate(this)
 
     override fun getDelegate(): ViewManagerDelegate<AdView> {
@@ -40,7 +37,7 @@ class HTML5AdViewManager : SimpleViewManager<AdView>(), HTML5AdNativeComponentMa
     override fun setAdIsResponsive(view: AdView, adIsResponsive: Boolean) {
         HTML5AdViewManagerImpl.setAdIsResponsive(view, adIsResponsive)
     }
-    
+
     @ReactProp(name = "adSize")
     override fun setAdSize(view: AdView, adSizeMap: ReadableMap?) {
         HTML5AdViewManagerImpl.setAdSize(view, adSizeMap)

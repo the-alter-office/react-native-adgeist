@@ -11,7 +11,7 @@ import type { ViewStyle, DimensionValue } from 'react-native';
 
 import { useAdgeistContext } from '../providers/AdgeistProvider';
 import HTML5AdNativeComponent, {
-  Commands,
+  AdCommands,
 } from '../specs/HTML5AdNativeComponent';
 import type {
   HTML5AdNativeComponentProps,
@@ -74,7 +74,7 @@ export const HTML5AdView = forwardRef<
         };
 
         try {
-          Commands.loadAd(nativeRef.current, finalRequest.isTestMode);
+          AdCommands.loadAd(nativeRef.current, finalRequest.isTestMode);
         } catch (error) {
           if (__DEV__) {
             console.warn('HTML5AdView: Error loading ad:', error);
@@ -124,7 +124,7 @@ export const HTML5AdView = forwardRef<
         destroy: () => {
           if (nativeRef.current) {
             try {
-              Commands.destroy(nativeRef.current);
+              AdCommands.destroy(nativeRef.current);
             } catch (e) {
               console.warn('Error destroying ad view:', e);
             }

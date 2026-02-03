@@ -16,8 +16,8 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     override fun getName(): String = AdgeistImpl.NAME
 
     @ReactMethod
-    fun initializeSdk(customBidRequestBackendDomain: String, customPackageOrBundleID: String, customAdgeistAppID: String, promise: Promise) {
-        implementation.initializeSdk(customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID, promise)
+    fun initializeSdk(customBidRequestBackendDomain: String?, customPackageOrBundleID: String?, customAdgeistAppID: String?, customVersioning: String?, promise: Promise) {
+        implementation.initializeSdk(customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID, customVersioning, promise)
     }
 
     @ReactMethod

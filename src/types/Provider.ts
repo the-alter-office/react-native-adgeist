@@ -7,9 +7,9 @@ export interface AdgeistContextType {
 
 export interface AdgeistProviderProps {
   children: React.ReactNode;
-  customBidRequestBackendDomain?: string;
-  customPackageOrBundleID?: string;
-  customAdgeistAppID?: string;
+  customBidRequestBackendDomain?: string | null;
+  customPackageOrBundleID?: string | null;
+  customAdgeistAppID?: string | null;
   isTestEnvironment?: boolean;
   onInitializationError?: (error: Error) => void;
   onInitializationSuccess?: () => void;
