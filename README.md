@@ -33,7 +33,7 @@ yarn add @thealteroffice/react-native-adgeist
 
 ### Android Configuration
 
-Add your Adgeist publisher ID, api key and package id, as identified in the Adgeist web interface, to your app's `AndroidManifest.xml` file. To do so, add a `<meta-data>` tag with `android:name="com.adgeistkit.ads.ADGEIST_APP_ID"` and `android:name="com.adgeistkit.ads.ADGEIST_API_KEY"`
+Add your Adgeist publisher ID as identified in the Adgeist web interface, to your app's `AndroidManifest.xml` file. To do so, add a `<meta-data>` tag with `android:name="com.adgeistkit.ads.ADGEIST_APP_ID"`
 
 You can find your app ID in the Adgeist web interface. For `android:value`, insert your own Adgeist publisher ID, surrounded by quotation marks.
 
@@ -41,20 +41,15 @@ You can find your app ID in the Adgeist web interface. For `android:value`, inse
 <manifest>
   <application>
     <!-- Sample Adgeist app ID: 69326f9fbb280f9241cabc94 -->
-    <!-- Sample Adgeist api key: b4e33bb73061d4e33670f229033f14bf770d35b15512dc1f106529e38946e49c -->
 
     <meta-data
         android:name="com.adgeistkit.ads.ADGEIST_APP_ID"
         android:value="ADGEIST_APP_ID"/>
-
-    <meta-data
-        android:name="com.adgeistkit.ads.ADGEIST_API_KEY"
-        android:value="ADGEIST_API_KEY"/>
   </application>
 </manifest>
 ```
 
-Replace `ADGEIST_APP_ID`, `ADGEIST_API_KEY` with your Adgeist IDs.
+Replace `ADGEIST_APP_ID` with your Adgeist Publisher ID.
 
 ### iOS Configuration
 
