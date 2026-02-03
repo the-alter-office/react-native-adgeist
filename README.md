@@ -14,7 +14,7 @@ To prepare your app, complete the steps in the following sections.
 
 Make sure that your app's build file uses the following values:
 
-- Minimum SDK version of 24 or higher
+- Minimum SDK version of 23 or higher
 - Compile SDK version of 35 or higher
 
 ## Configure your app
@@ -74,11 +74,9 @@ cd ios && pod install --repo-update
 
 Update your app's `Info.plist` file to add three keys:
 
-A `ADGEIST_APP_ID` and `ADGEIST_API_KEY` key with a string value of your Adgeist IDs found in the Adgeist UI.
+A `ADGEIST_APP_ID` key with a string value of your Adgeist ID found in the Adgeist UI.
 
 ```xml
-<key>ADGEIST_API_KEY</key>
-<string>e31edf10067897a3904b64b6a4b5f18b1260470183ae203cc521b0479166d597</string>
 <key>ADGEIST_APP_ID</key>
 <string>69326f9fbb280f9241cabc94</string>
 ```
