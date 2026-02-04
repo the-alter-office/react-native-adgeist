@@ -34,7 +34,8 @@
     "typecheck": "tsc",
     "lint": "eslint \"src/**/*.{js,ts,tsx}\" \"example/**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
-    "prepare": "bob build",
+    "sync-version": "node scripts/sync-version.js",
+    "prepare": "yarn sync-version && bob build",
     "release": "release-it"
   },
   "keywords": [

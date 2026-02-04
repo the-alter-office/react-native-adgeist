@@ -11,13 +11,15 @@ import React
         customBidRequestBackendDomain: String?,
         customPackageOrBundleID: String?,
         customAdgeistAppID: String?,
+        customVersioning: String?,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
         do {
             adgeistInstance = AdgeistCore.initialize(customBidRequestBackendDomain: customBidRequestBackendDomain,
                                                      customPackageOrBundleID: customPackageOrBundleID,
-                                                     customAdgeistAppID: customAdgeistAppID)
+                                                     customAdgeistAppID: customAdgeistAppID,
+                                                     customVersioning: customVersioning)
             getAd = adgeistInstance?.getCreative()
             postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()
             resolver("SDK initialized with domain: \(customBidRequestBackendDomain ?? "default")")

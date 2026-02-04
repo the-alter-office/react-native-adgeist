@@ -11,22 +11,7 @@ import type {
   AdgeistContextType,
   AdgeistProviderProps,
 } from '../types/Provider';
-import { PACKAGE_VERSION_TAG } from '../constants';
-
-// Metro doesn't allow ESM JSON imports by default.
-// Prefer resolving via package name so it works from built output too.
-const version: string = (() => {
-  try {
-    return require('@thealteroffice/react-native-adgeist/package.json')
-      .version as string;
-  } catch {
-    try {
-      return require('../../package.json').version as string;
-    } catch {
-      return 'unknown';
-    }
-  }
-})();
+import { PACKAGE_VERSION_TAG, PACKAGE_VERSION } from '../constants';
 
 const AdgeistContext = createContext<AdgeistContextType>({
   isTestEnvironment: false,
@@ -64,7 +49,7 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
         customBidRequestBackendDomain,
         customPackageOrBundleID,
         customAdgeistAppID,
-        `${PACKAGE_VERSION_TAG}-${version}`
+        `${PACKAGE_VERSION_TAG}-${PACKAGE_VERSION}`
       );
 
       setIsInitialized(true);

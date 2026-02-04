@@ -23,12 +23,14 @@ RCT_EXPORT_MODULE(Adgeist)
 RCT_EXPORT_METHOD(initializeSdk:(NSString *)customBidRequestBackendDomain
                   customPackageOrBundleID:(NSString *)customPackageOrBundleID
                   customAdgeistAppID:(NSString *)customAdgeistAppID
+                  customVersioning:(NSString *)customVersioning
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
     [adgeist initializeSdkWithCustomBidRequestBackendDomain:customBidRequestBackendDomain
                                           customPackageOrBundleID:customPackageOrBundleID
                                                customAdgeistAppID:customAdgeistAppID
+                                                 customVersioning:customVersioning
                                                          resolver:resolve
                                                          rejecter:reject];
 }
