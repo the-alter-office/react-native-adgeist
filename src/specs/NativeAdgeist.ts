@@ -13,13 +13,18 @@ export interface Event {
   eventProperties: Object;
 }
 export interface Spec extends TurboModule {
-  initializeSdk(customDomain: string): Promise<boolean>;
+  initializeSdk(
+    customBidRequestBackendDomain: string | null,
+    customPackageOrBundleID: string | null,
+    customAdgeistAppID: string | null,
+    customVersioning: string | null
+  ): Promise<boolean>;
+
+  destroySdk(): Promise<boolean>;
 
   fetchCreative(
-    apiKey: string,
-    origin: string,
     adSpaceId: string,
-    publisherId: string,
+    buyType: string,
     isTestEnvironment: boolean
   ): Promise<Object>;
 
@@ -34,9 +39,9 @@ export interface Spec extends TurboModule {
   trackImpression(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean,
     renderTime: number
   ): Promise<string>;
@@ -44,9 +49,9 @@ export interface Spec extends TurboModule {
   trackView(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean,
     viewTime: number,
     visibilityRatio: number,
@@ -57,42 +62,39 @@ export interface Spec extends TurboModule {
   trackTotalView(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean,
-    totalViewTime: number,
-    visibilityRatio: number
+    totalViewTime: number
   ): Promise<string>;
 
   trackClick(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean
   ): Promise<string>;
 
   trackVideoPlayback(
     campaignId: string,
     adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
     bidId: string,
+    bidMeta: string,
+    buyType: string,
     isTestEnvironment: boolean,
     totalPlaybackTime: number
   ): Promise<string>;
 
-  trackVideoQuartile(
-    campaignId: string,
-    adSpaceId: string,
-    publisherId: string,
-    apiKey: string,
-    bidId: string,
-    isTestEnvironment: boolean,
-    quartile: string
-  ): Promise<string>;
+  // trackVideoQuartile(
+  //   campaignId: string,
+  //   adSpaceId: string,
+  //   bidId: string,
+  //   isTestEnvironment: boolean,
+  //   quartile: string
+  // ): Promise<string>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('Adgeist');

@@ -8,25 +8,37 @@ import React
     private var postCreativeAnalytic: CreativeAnalytics?
     
     @objc public func initializeSdk(
-        customDomain: String?,
+        customBidRequestBackendDomain: String?,
+        customPackageOrBundleID: String?,
+        customAdgeistAppID: String?,
+        customVersioning: String?,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
         do {
-            adgeistInstance = AdgeistCore.initialize(customDomain: customDomain ?? "bg-services-api.adgeist.ai")
+            adgeistInstance = AdgeistCore.initialize(customBidRequestBackendDomain: customBidRequestBackendDomain,
+                                                     customPackageOrBundleID: customPackageOrBundleID,
+                                                     customAdgeistAppID: customAdgeistAppID,
+                                                     customVersioning: customVersioning)
             getAd = adgeistInstance?.getCreative()
             postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()
-            resolver("SDK initialized with domain: \(customDomain ?? "default")")
+            resolver("SDK initialized with domain: \(customBidRequestBackendDomain ?? "default")")
         } catch {
             rejecter("INIT_FAILED", "SDK initialization failed", error)
         }
     }
 
+    @objc public func destroySdk(
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        AdgeistCore.destroy()
+        resolver("SDK destroyed")
+    }
+
     @objc public func fetchCreative(
-        apiKey: String,
-        origin: String,
         adSpaceId: String,
-        publisherId: String,
+        buyType: String,
         isTestEnvironment: Bool,
         resolver: @escaping RCTPromiseResolveBlock, 
         rejecter: @escaping RCTPromiseRejectBlock
@@ -37,24 +49,22 @@ import React
         }
 
         getAd.fetchCreative(
-            apiKey: apiKey,
-            origin: origin,
-            adSpaceId: adSpaceId,
-            companyId: publisherId,
+            adUnitID: adSpaceId,
+            buyType: buyType,
             isTestEnvironment: isTestEnvironment
         ) { creativeData in
             if let creativeData = creativeData {
-                do {
-                    let encoder = JSONEncoder()
-                    let data = try encoder.encode(creativeData)
-                    if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    resolver(json)
-                    } else {
-                        rejecter("JSON_ERROR", "Failed to convert ad data to JSON", nil)
+                var result: [String: Any] = [:]
+                
+                // Use Mirror to reflect the object's properties
+                let mirror = Mirror(reflecting: creativeData)
+                for child in mirror.children {
+                    if let label = child.label {
+                        result[label] = child.value
                     }
-                } catch {
-                    rejecter("JSON_ERROR", "Failed to encode ad data", error)
                 }
+                
+                resolver(result)
             } else {
                 rejecter("NO_AD", "Ad data not available", nil)
             }
@@ -109,179 +119,166 @@ import React
         adgeistInstance?.logEvent(event)
     }
 
-    @objc public func trackImpression(
-        campaignId: String,
-        adSpaceId: String,
-        publisherId: String,
-        apiKey: String,
-        bidId: String,
-        isTestEnvironment: Bool,
-        renderTime: Double,
+    public func sendCreativeAnalytics(
+        analyticsRequest: AnalyticsRequestDEPRECATED,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        guard let postCreativeAnalytic = postCreativeAnalytic else {
-            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
-            return
+        postCreativeAnalytic?.sendTrackingData(analyticsRequestDEPRECATED: analyticsRequest)
+        resolver("Event sent successfully")
+    }
+
+    @objc public func trackImpression(
+        campaignId: String,
+        adSpaceId: String,
+        bidId: String,
+        bidMeta: String,
+        buyType: String,
+        isTestEnvironment: Bool,
+        renderTime: Float,
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
+        
+        let upperBuyType = buyType.uppercased()
+        if upperBuyType == "CPM" {
+            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
+        } else if upperBuyType == "FIXED" {
+            builder = builder.buildFIXEDRequest(metaData: bidMeta)
         }
         
-        postCreativeAnalytic.trackImpression(
-            campaignId: campaignId,
-            adSpaceId: adSpaceId,
-            publisherId: publisherId,
-            apiKey: apiKey,
-            bidId: bidId,
-            isTestEnvironment: isTestEnvironment,
-            renderTime: Float(renderTime)
-        )
-        resolver("Impression event sent")
+        let request = builder.trackImpression(renderTime: renderTime).build()
+        sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
     }
 
     @objc public func trackView(
         campaignId: String,
         adSpaceId: String,
-        publisherId: String,
-        apiKey: String,
         bidId: String,
+        bidMeta: String,
+        buyType: String,
         isTestEnvironment: Bool,
-        viewTime: Double,
-        visibilityRatio: Double,
-        scrollDepth: Double,
-        timeToVisible: Double,
+        viewTime: Float,
+        visibilityRatio: Float,
+        scrollDepth: Float,
+        timeToVisible: Float,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        guard let postCreativeAnalytic = postCreativeAnalytic else {
-            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
-            return
+        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
+        
+        let upperBuyType = buyType.uppercased()
+        if upperBuyType == "CPM" {
+            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
+        } else if upperBuyType == "FIXED" {
+            builder = builder.buildFIXEDRequest(metaData: bidMeta)
         }
         
-        postCreativeAnalytic.trackView(
-            campaignId: campaignId,
-            adSpaceId: adSpaceId,
-            publisherId: publisherId,
-            apiKey: apiKey,
-            bidId: bidId,
-            isTestEnvironment: isTestEnvironment,
-            viewTime: Float(viewTime),
-            visibilityRatio: Float(visibilityRatio),
-            scrollDepth: Float(scrollDepth),
-            timeToVisible: Float(timeToVisible)
-        )
-        resolver("View event sent")
+        let request = builder.trackViewableImpression(
+            timeToVisible: timeToVisible,
+            scrollDepth: scrollDepth,
+            visibilityRatio: visibilityRatio,
+            viewTime: viewTime
+        ).build()
+        sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
     }
 
     @objc public func trackTotalView(
         campaignId: String,
         adSpaceId: String,
-        publisherId: String,
-        apiKey: String,
         bidId: String,
+        bidMeta: String,
+        buyType: String,
         isTestEnvironment: Bool,
-        totalViewTime: Double,
-        visibilityRatio: Double,
+        totalViewTime: Float,
+        visibilityRatio: Float,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        guard let postCreativeAnalytic = postCreativeAnalytic else {
-            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
-            return
+        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
+        
+        let upperBuyType = buyType.uppercased()
+        if upperBuyType == "CPM" {
+            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
+        } else if upperBuyType == "FIXED" {
+            builder = builder.buildFIXEDRequest(metaData: bidMeta)
         }
         
-        postCreativeAnalytic.trackTotalView(
-            campaignId: campaignId,
-            adSpaceId: adSpaceId,
-            publisherId: publisherId,
-            apiKey: apiKey,
-            bidId: bidId,
-            isTestEnvironment: isTestEnvironment,
-            totalViewTime: Float(totalViewTime),
-            visibilityRatio: Float(visibilityRatio)
-        )
-        resolver("Total view event sent")
+        let request = builder.trackTotalViewTime(totalViewTime: totalViewTime).build()
+        sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
     }
 
     @objc public func trackClick(
         campaignId: String,
         adSpaceId: String,
-        publisherId: String,
-        apiKey: String,
         bidId: String,
+        bidMeta: String,
+        buyType: String,
         isTestEnvironment: Bool,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        guard let postCreativeAnalytic = postCreativeAnalytic else {
-            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
-            return
+        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
+        
+        let upperBuyType = buyType.uppercased()
+        if upperBuyType == "CPM" {
+            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
+        } else if upperBuyType == "FIXED" {
+            builder = builder.buildFIXEDRequest(metaData: bidMeta)
         }
         
-        postCreativeAnalytic.trackClick(
-            campaignId: campaignId,
-            adSpaceId: adSpaceId,
-            publisherId: publisherId,
-            apiKey: apiKey,
-            bidId: bidId,
-            isTestEnvironment: isTestEnvironment
-        )
-        resolver("Click event sent")
+        let request = builder.trackClick().build()
+        sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
     }
 
     @objc public func trackVideoPlayback(
         campaignId: String,
         adSpaceId: String,
-        publisherId: String,
-        apiKey: String,
         bidId: String,
+        bidMeta: String,
+        buyType: String,
         isTestEnvironment: Bool,
-        totalPlaybackTime: Double,
+        totalPlaybackTime: Float,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        guard let postCreativeAnalytic = postCreativeAnalytic else {
-            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
-            return
+        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
+        
+        let upperBuyType = buyType.uppercased()
+        if upperBuyType == "CPM" {
+            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
+        } else if upperBuyType == "FIXED" {
+            builder = builder.buildFIXEDRequest(metaData: bidMeta)
         }
         
-        postCreativeAnalytic.trackVideoPlayback(
-            campaignId: campaignId,
-            adSpaceId: adSpaceId,
-            publisherId: publisherId,
-            apiKey: apiKey,
-            bidId: bidId,
-            isTestEnvironment: isTestEnvironment,
-            totalPlaybackTime: Float(totalPlaybackTime)
-        )
-        resolver("Video playback event sent")
+        let request = builder.trackTotalPlaybackTime(totalPlaybackTime: totalPlaybackTime).build()
+        sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
     }
 
-    @objc public func trackVideoQuartile(
-        campaignId: String,
-        adSpaceId: String,
-        publisherId: String,
-        apiKey: String,
-        bidId: String,
-        isTestEnvironment: Bool,
-        quartile: String,
-        resolver: @escaping RCTPromiseResolveBlock,
-        rejecter: @escaping RCTPromiseRejectBlock
-    ) {
-        guard let postCreativeAnalytic = postCreativeAnalytic else {
-            rejecter("SDK_NOT_INITIALIZED", "SDK not initialized. Call initializeSdk() first.", nil)
-            return
-        }
-        
-        postCreativeAnalytic.trackVideoQuartile(
-            campaignId: campaignId,
-            adSpaceId: adSpaceId,
-            publisherId: publisherId,
-            apiKey: apiKey,
-            bidId: bidId,
-            isTestEnvironment: isTestEnvironment,
-            quartile: quartile
-        )
-        resolver("Video quartile event sent")
-    }
+//    @objc public func trackVideoQuartile(
+//        campaignId: String,
+//        adSpaceId: String,
+//        bidId: String,
+//        bidMeta: String,
+//        buyType: String,
+//        isTestEnvironment: Bool,
+//        quartile: String,
+//        resolver: @escaping RCTPromiseResolveBlock,
+//        rejecter: @escaping RCTPromiseRejectBlock
+//    ) {
+//        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
+//        
+//        let upperBuyType = buyType.uppercased()
+//        if upperBuyType == "CPM" {
+//            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
+//        } else if upperBuyType == "FIXED" {
+//            builder = builder.buildFIXEDRequest(metaData: bidMeta)
+//        }
+//        
+//        let request = builder.trackVideoQuartile(quartile: quartile).build()
+//        sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
+//    }
 
     @objc public static func requiresMainQueueSetup() -> Bool {
         return true

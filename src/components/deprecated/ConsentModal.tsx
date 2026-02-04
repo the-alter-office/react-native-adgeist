@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { StyleSheet, View, Text, Pressable } from 'react-native';
-import { useAdgeistContext } from './AdgeistProvider';
-import Adgeist from '../NativeAdgeist';
+import { useAdgeistContext } from '../../providers/AdgeistProvider';
+import Adgeist from '../../specs/NativeAdgeist';
 
 interface ConsentModalPropsType {}
 
