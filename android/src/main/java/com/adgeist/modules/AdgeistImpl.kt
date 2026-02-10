@@ -1,5 +1,6 @@
 package com.adgeist.modules
 
+import android.net.Uri
 import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -25,7 +26,6 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
   fun initializeSdk(customBidRequestBackendDomain: String?, customPackageOrBundleID: String?, customAdgeistAppID: String?, customVersioning: String?, promise: Promise) {
     try {
       adgeistInstance = AdgeistCore.initialize(context.applicationContext, customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID, customVersioning)
-      adgeistInstance?.initializeInstallReferrer()
       getAd = adgeistInstance?.getCreative()
       postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()
       promise.resolve("SDK initialized with domain: ${customBidRequestBackendDomain ?: "default"}")
@@ -108,7 +108,7 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
 
   fun trackDeeplinkUtm(url: String) {
     val uri = Uri.parse(url)
-    adgeistInstance.trackUtmFromDeeplink(uri)
+    adgeistInstance?.trackUtmFromDeeplink(uri)
   }
 
   companion object {
