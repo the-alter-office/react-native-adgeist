@@ -145,4 +145,9 @@ class AdgeistModule internal constructor(reactContext: ReactApplicationContext) 
             campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, quartile, promise
         )
     }
+
+    @ReactMethod
+    fun trackDeeplinkUtm(url: String) {
+        implementation.trackDeeplinkUtm(url)
+    }
 }

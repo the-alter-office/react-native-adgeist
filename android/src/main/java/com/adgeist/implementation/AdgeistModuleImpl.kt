@@ -25,6 +25,7 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
   fun initializeSdk(customDomain: String?, promise: Promise) {
     try {
       adgeistInstance = AdgeistCore.initialize(context.applicationContext, customDomain)
+      adgeistInstance?.initializeInstallReferrer()
       getAd = adgeistInstance?.getCreative()
       postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()
       promise.resolve("SDK initialized with domain: ${customDomain ?: "default"}")
@@ -183,6 +184,11 @@ class AdgeistModuleImpl internal constructor(private val context: ReactApplicati
       campaignId, adSpaceId, publisherId, apiKey, bidId, isTestEnvironment, quartile
     )
     promise.resolve("Video quartile event sent")
+  }
+
+  fun trackDeeplinkUtm(url: String) {
+        val uri = Uri.parse(url)
+        adgeistInstance.trackUtmFromDeeplink(uri)
   }
 
   companion object {

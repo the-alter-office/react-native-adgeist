@@ -227,7 +227,129 @@ setUser({
 });
 ```
 
-## 📱 Components
+## � Deeplink Tracking Integration
+
+The SDK provides deeplink tracking capabilities to attribute campaign data and track user acquisition through external links. This is essential for measuring the effectiveness of your advertising campaigns and understanding user acquisition sources.
+
+### Why Deeplink Tracking Matters
+
+- **Campaign Attribution**: Track which campaigns drive app opens and user engagement
+- **UTM Parameter Capture**: Automatically capture and process UTM parameters from marketing links
+- **Cross-platform Analytics**: Unified tracking across different marketing channels and platforms
+- **ROI Measurement**: Measure return on investment for different advertising campaigns
+
+### Implementation
+
+You need to integrate deeplink tracking in your app's main navigation setup to ensure all incoming deeplinks are captured:
+
+#### React Navigation Integration
+
+```tsx
+import React, { useEffect } from 'react';
+import { Linking } from 'react-native';
+import { trackDeeplinkUtm } from '@thealteroffice/react-native-adgeist';
+
+function App() {
+  useEffect(() => {
+    const handleDeeplink = (url: string) => {
+      // Track the deeplink first for attribution
+      trackDeeplinkUtm(url);
+      
+      // Then handle your normal navigation logic
+      // Example: navigate to specific screen based on URL
+      handleNavigation(url);
+    };
+
+    // Handle initial URL if app was opened from a deeplink
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeeplink(url);
+      }
+    });
+
+    // Handle deeplinks while app is running
+    const subscription = Linking.addEventListener('url', (event) => {
+      handleDeeplink(event.url);
+    });
+
+    return () => subscription?.remove();
+  }, []);
+
+  return (
+    <AdgeistProvider
+      publisherId="your-publisher-id"
+      apiKey="your-api-key"
+      domain="your-domain"
+      isTestEnvironment={false}
+    >
+      {/* Your app content */}
+    </AdgeistProvider>
+  );
+}
+```
+
+#### Expo Integration
+
+For Expo projects, use the `expo-linking` module:
+
+```tsx
+import * as Linking from 'expo-linking';
+import { trackDeeplinkUtm } from '@thealteroffice/react-native-adgeist';
+
+function App() {
+  useEffect(() => {
+    const handleDeeplink = (url: string) => {
+      trackDeeplinkUtm(url);
+      // Your navigation logic here
+    };
+
+    // Handle initial URL
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeeplink(url);
+      }
+    });
+
+    // Listen for URL changes
+    const subscription = Linking.addEventListener('url', (event) => {
+      if (event.url) {
+        handleDeeplink(event.url);
+      }
+    });
+
+    return () => subscription?.remove();
+  }, []);
+
+  // Rest of your app...
+}
+```
+
+### Supported UTM Parameters
+
+The SDK automatically extracts and tracks these common UTM parameters:
+
+- `utm_source`: Identifies the advertiser, site, publication, etc.
+- `utm_medium`: Advertising or marketing medium (e.g., email, banner, social)
+- `utm_campaign`: Campaign name, slogan, promo code, etc.
+- `utm_term`: Paid search keywords
+- `utm_content`: Used to differentiate ads or links that point to the same URL
+
+### Example Deeplink URLs
+
+```
+myapp://product/123?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale
+myapp://home?utm_source=facebook&utm_medium=social&utm_campaign=brand_awareness
+https://myapp.com/special-offer?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_deals
+```
+
+### Best Practices
+
+1. **Call Early**: Always call `trackDeeplinkUtm()` before any other navigation logic to ensure accurate attribution
+2. **Handle All Entry Points**: Track both cold app launches and warm app resumes from deeplinks
+3. **Test Thoroughly**: Test deeplink tracking with various UTM parameter combinations
+4. **Monitor Analytics**: Use the AdGeist dashboard to monitor deeplink performance and attribution data
+
+## �📱 Components
 
 ### AdgeistProvider
 
@@ -385,6 +507,7 @@ import {
   logEvent,
   getConsentStatus,
   updateConsentStatus,
+  trackDeeplinkUtm,
 } from '@thealteroffice/react-native-adgeist';
 ```
 
@@ -434,6 +557,43 @@ Updates the user's consent status.
 updateConsentStatus(true); // User granted consent
 updateConsentStatus(false); // User denied consent
 ```
+
+#### `trackDeeplinkUtm(url: string)`
+
+Tracks deeplink UTM parameters for attribution and analytics. This method should be called whenever your app is opened via a deeplink to capture campaign attribution data.
+
+```tsx
+// Track deeplink when app opens from external link
+const handleDeeplink = (url: string) => {
+  trackDeeplinkUtm(url);
+};
+
+// Example usage with React Navigation
+import { Linking } from 'react-native';
+
+useEffect(() => {
+  const handleUrl = (url: string) => {
+    trackDeeplinkUtm(url);
+    // Continue with your normal deeplink handling
+  };
+
+  // Handle initial URL if app was opened from link
+  Linking.getInitialURL().then((url) => {
+    if (url) {
+      handleUrl(url);
+    }
+  });
+
+  // Handle URL changes while app is running
+  const subscription = Linking.addEventListener('url', (event) => {
+    handleUrl(event.url);
+  });
+
+  return () => subscription?.remove();
+}, []);
+```
+
+**Important**: This method should be called as early as possible when handling deeplinks to ensure accurate attribution tracking.
 
 ## 🎨 Customization
 

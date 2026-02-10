@@ -132,4 +132,8 @@ class AdgeistModule internal constructor(reactContext: ReactApplicationContext) 
     override fun updateConsentStatus(consent: Boolean) {
         implementation.updateConsentStatus(consent)
     }
+
+    override fun trackDeeplinkUtm(url: String) {
+        implementation.trackDeeplinkUtm(url)
+    }
 }
