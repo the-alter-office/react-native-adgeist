@@ -4,23 +4,24 @@
 
 # @thealteroffice/react-native-adgeist
 
-A React Native SDK that enables publishers to seamlessly integrate their ad spaces with the AdGeist marketplace. Built with TypeScript, Kotlin, and Swift, supporting both Old and New React Native architectures with TurboModule support.
+Integrating Adgeist Mobile Ads SDK into an app is the first step toward displaying ads and earning revenue. Once you've integrated the SDK, you can choose an ad format (such as banner or display) and follow the steps to implement it.
 
-## 🚀 Features
+## Before you begin
 
-- ✅ **Cross-platform**: iOS and Android support
-- ✅ **Modern Architecture**: Support for both legacy and new React Native architectures
-- ✅ **TurboModule**: Enhanced performance with TurboModule implementation
-- ✅ **TypeScript**: Full TypeScript support with type definitions
-- ✅ **Expo Compatible**: Config plugin for seamless Expo integration
-- ✅ **Analytics**: Built-in impression and click tracking
-- ✅ **Customizable**: Flexible ad display options
-- ✅ **Consent Management**: Support for user consent collection for personalized ads
-- ✅ **User Data Platform**: Built-in CDP client for user data and event tracking
+To prepare your app, complete the steps in the following sections.
 
-## 📦 Installation
+### App prerequisites
 
-### React Native CLI
+Make sure that your app's build file uses the following values:
+
+- Minimum SDK version of 23 or higher
+- Compile SDK version of 35 or higher
+
+## Configure your app
+
+### STEP 1: Initiate the Installation Process for the SDK
+
+Install the Adgeist SDK in your React Native project using npm or yarn. This step sets up the necessary package for ad integration.
 
 ```bash
 npm install @thealteroffice/react-native-adgeist
@@ -28,113 +29,88 @@ npm install @thealteroffice/react-native-adgeist
 yarn add @thealteroffice/react-native-adgeist
 ```
 
-For iOS, run pod install:
+### STEP 2: Update Configuration for Android and iOS
+
+### Android Configuration
+
+Add your Adgeist publisher ID as identified in the Adgeist web interface, to your app's `AndroidManifest.xml` file. To do so, add a `<meta-data>` tag with `android:name="com.adgeistkit.ads.ADGEIST_APP_ID"`
+
+You can find your app ID in the Adgeist web interface. For `android:value`, insert your own Adgeist publisher ID, surrounded by quotation marks.
+
+```xml
+<manifest>
+  <application>
+    <!-- Sample Adgeist app ID: 69326f9fbb280f9241cabc94 -->
+
+    <meta-data
+        android:name="com.adgeistkit.ads.ADGEIST_APP_ID"
+        android:value="ADGEIST_APP_ID"/>
+  </application>
+</manifest>
+```
+
+Replace `ADGEIST_APP_ID` with your Adgeist Publisher ID.
+
+### iOS Configuration
+
+#### CocoaPods
+
+Before you continue, review Using CocoaPods for information on creating and using Podfiles.
+
+To use CocoaPods, follow these steps:
+
+In a terminal, run:
 
 ```bash
-cd ios && pod install
+cd ios && pod install --repo-update
 ```
 
-### Expo Managed Workflow
+#### Update your Info.plist
 
-```bash
-npx expo install @thealteroffice/react-native-adgeist
+Update your app's `Info.plist` file to add three keys:
+
+A `ADGEIST_APP_ID` key with a string value of your Adgeist ID found in the Adgeist UI.
+
+```xml
+<key>ADGEIST_APP_ID</key>
+<string>69326f9fbb280f9241cabc94</string>
 ```
 
-Rebuild your app:
+### STEP 3: React Native Configuration and Ad Placement
 
-```bash
-npx expo prebuild --clean
-```
+### Configure AdgeistProvider
 
-> **Note**: Requires Expo SDK 50+ and Kotlin template support.
-
-## ⚙️ Peer Dependencies
-
-This package uses `react-native-video` internally for media rendering.
-
-### Why Peer Dependency?
-
-React Native native modules like `react-native-video` should not be bundled inside libraries to prevent native build conflicts.
-
-We declare `react-native-video` as a peer dependency, so your app controls the version.
-
-### What You Need to Do
-
-- **If your app already uses `react-native-video`**: No action needed.
-- **If your app does not have `react-native-video` installed**: Please install it manually:
-
-```bash
-npm install react-native-video@^4.5.2
-```
-
-or
-
-```bash
-yarn add react-native-video@^4.5.2
-```
-
-### What Happens If You Skip This?
-
-If `react-native-video` is not installed, your app will crash at runtime with:
-
-```javascript
-Error: Cannot find module 'react-native-video'
-```
-
-### Why Not Include It in dependencies?
-
-Adding `react-native-video` to dependencies directly in this library would:
-
-- ❌ Cause duplicate native module linking
-- ❌ Lead to iOS/Android build failures
-- ❌ Break compatibility with apps already using `react-native-video`
-
-### Dependency Summary
-
-| Package              | Install It?           | Why?                                                               |
-| -------------------- | --------------------- | ------------------------------------------------------------------ |
-| `react-native-video` | ✅ **Yes (required)** | Your app must install this manually to satisfy the peer dependency |
-
-## 🔧 Setup & Configuration
-
-### Basic Setup
-
-Wrap your app with `AdgeistProvider` to configure global settings:
+Add an `AdgeistProvider` at the root level of your app.
 
 ```tsx
-import React from 'react';
-import {
-  AdgeistProvider,
-  BannerAd,
-} from '@thealteroffice/react-native-adgeist';
+import { AdgeistProvider } from '@thealteroffice/react-native-adgeist';
 
 export default function App() {
   return (
-    <AdgeistProvider
-      publisherId="your-publisher-id"
-      apiKey="your-api-key"
-      domain="your-domain"
-      isTestEnvironment={false}
-    >
-      <YourAppContent />
+    <AdgeistProvider isTestEnvironment={false}>
+      {/* Your app content */}
     </AdgeistProvider>
   );
 }
 ```
 
-### Environment Configuration
+### Implement Ad Placement
 
-Set `isTestEnvironment` based on your app's environment:
+Use the `HTML5AdView` component to display banner ads anywhere in your app. Place this component where you want the ads to appear and the SDK will automatically load and render the ad content.
 
 ```tsx
-const isTestMode = __DEV__ || process.env.NODE_ENV === 'development';
+import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
 
-<AdgeistProvider
-  publisherId="your-publisher-id"
-  apiKey="your-api-key"
-  domain="your-domain"
-  isTestEnvironment={isTestMode}
->
+<HTML5AdView
+  adUnitID="6932a4c022f6786424ce3b84"
+  adSize={{ width: 320, height: 480 }}
+  onAdLoaded={}
+  onAdFailedToLoad={}
+  onAdOpened={}
+  onAdClosed={}
+  onAdClicked={}
+  adType="display"
+/>;
 ```
 
 ## 🛡️ Consent Management for Personalized Ads
@@ -227,127 +203,6 @@ setUser({
 });
 ```
 
-## � Deeplink Tracking Integration
-
-The SDK provides deeplink tracking capabilities to attribute campaign data and track user acquisition through external links. This is essential for measuring the effectiveness of your advertising campaigns and understanding user acquisition sources.
-
-### Why Deeplink Tracking Matters
-
-- **Campaign Attribution**: Track which campaigns drive app opens and user engagement
-- **UTM Parameter Capture**: Automatically capture and process UTM parameters from marketing links
-- **Cross-platform Analytics**: Unified tracking across different marketing channels and platforms
-- **ROI Measurement**: Measure return on investment for different advertising campaigns
-
-### Implementation
-
-You need to integrate deeplink tracking in your app's main navigation setup to ensure all incoming deeplinks are captured:
-
-#### React Navigation Integration
-
-```tsx
-import React, { useEffect } from 'react';
-import { Linking } from 'react-native';
-import { trackDeeplinkUtm } from '@thealteroffice/react-native-adgeist';
-
-function App() {
-  useEffect(() => {
-    const handleDeeplink = (url: string) => {
-      // Track the deeplink first for attribution
-      trackDeeplinkUtm(url);
-      
-      // Then handle your normal navigation logic
-      // Example: navigate to specific screen based on URL
-      handleNavigation(url);
-    };
-
-    // Handle initial URL if app was opened from a deeplink
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleDeeplink(url);
-      }
-    });
-
-    // Handle deeplinks while app is running
-    const subscription = Linking.addEventListener('url', (event) => {
-      handleDeeplink(event.url);
-    });
-
-    return () => subscription?.remove();
-  }, []);
-
-  return (
-    <AdgeistProvider
-      publisherId="your-publisher-id"
-      apiKey="your-api-key"
-      domain="your-domain"
-      isTestEnvironment={false}
-    >
-      {/* Your app content */}
-    </AdgeistProvider>
-  );
-}
-```
-
-#### Expo Integration
-
-For Expo projects, use the `expo-linking` module:
-
-```tsx
-import * as Linking from 'expo-linking';
-import { trackDeeplinkUtm } from '@thealteroffice/react-native-adgeist';
-
-function App() {
-  useEffect(() => {
-    const handleDeeplink = (url: string) => {
-      trackDeeplinkUtm(url);
-      // Your navigation logic here
-    };
-
-    // Handle initial URL
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleDeeplink(url);
-      }
-    });
-
-    // Listen for URL changes
-    const subscription = Linking.addEventListener('url', (event) => {
-      if (event.url) {
-        handleDeeplink(event.url);
-      }
-    });
-
-    return () => subscription?.remove();
-  }, []);
-
-  // Rest of your app...
-}
-```
-
-### Supported UTM Parameters
-
-The SDK automatically extracts and tracks these common UTM parameters:
-
-- `utm_source`: Identifies the advertiser, site, publication, etc.
-- `utm_medium`: Advertising or marketing medium (e.g., email, banner, social)
-- `utm_campaign`: Campaign name, slogan, promo code, etc.
-- `utm_term`: Paid search keywords
-- `utm_content`: Used to differentiate ads or links that point to the same URL
-
-### Example Deeplink URLs
-
-```
-myapp://product/123?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale
-myapp://home?utm_source=facebook&utm_medium=social&utm_campaign=brand_awareness
-https://myapp.com/special-offer?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_deals
-```
-
-### Best Practices
-
-1. **Call Early**: Always call `trackDeeplinkUtm()` before any other navigation logic to ensure accurate attribution
-2. **Handle All Entry Points**: Track both cold app launches and warm app resumes from deeplinks
-3. **Test Thoroughly**: Test deeplink tracking with various UTM parameter combinations
-4. **Monitor Analytics**: Use the AdGeist dashboard to monitor deeplink performance and attribution data
 
 ## �📱 Components
 
@@ -700,6 +555,130 @@ Enable debug logging to troubleshoot issues:
    ```
 
 4. Run `cd ios && pod install` for iOS projects
+
+
+## � Deeplink Tracking Integration
+
+The SDK provides deeplink tracking capabilities to attribute campaign data and track user acquisition through external links. This is essential for measuring the effectiveness of your advertising campaigns and understanding user acquisition sources.
+
+### Why Deeplink Tracking Matters
+
+- **Campaign Attribution**: Track which campaigns drive app opens and user engagement
+- **UTM Parameter Capture**: Automatically capture and process UTM parameters from marketing links
+- **Cross-platform Analytics**: Unified tracking across different marketing channels and platforms
+- **ROI Measurement**: Measure return on investment for different advertising campaigns
+
+### Implementation
+
+You need to integrate deeplink tracking in your app's main navigation setup to ensure all incoming deeplinks are captured:
+
+#### React Navigation Integration
+
+```tsx
+import React, { useEffect } from 'react';
+import { Linking } from 'react-native';
+import { trackDeeplinkUtm } from '@thealteroffice/react-native-adgeist';
+
+function App() {
+  useEffect(() => {
+    const handleDeeplink = (url: string) => {
+      // Track the deeplink first for attribution
+      trackDeeplinkUtm(url);
+      
+      // Then handle your normal navigation logic
+      // Example: navigate to specific screen based on URL
+      handleNavigation(url);
+    };
+
+    // Handle initial URL if app was opened from a deeplink
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeeplink(url);
+      }
+    });
+
+    // Handle deeplinks while app is running
+    const subscription = Linking.addEventListener('url', (event) => {
+      handleDeeplink(event.url);
+    });
+
+    return () => subscription?.remove();
+  }, []);
+
+  return (
+    <AdgeistProvider
+      publisherId="your-publisher-id"
+      apiKey="your-api-key"
+      domain="your-domain"
+      isTestEnvironment={false}
+    >
+      {/* Your app content */}
+    </AdgeistProvider>
+  );
+}
+```
+
+#### Expo Integration
+
+For Expo projects, use the `expo-linking` module:
+
+```tsx
+import * as Linking from 'expo-linking';
+import { trackDeeplinkUtm } from '@thealteroffice/react-native-adgeist';
+
+function App() {
+  useEffect(() => {
+    const handleDeeplink = (url: string) => {
+      trackDeeplinkUtm(url);
+      // Your navigation logic here
+    };
+
+    // Handle initial URL
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeeplink(url);
+      }
+    });
+
+    // Listen for URL changes
+    const subscription = Linking.addEventListener('url', (event) => {
+      if (event.url) {
+        handleDeeplink(event.url);
+      }
+    });
+
+    return () => subscription?.remove();
+  }, []);
+
+  // Rest of your app...
+}
+```
+
+### Supported UTM Parameters
+
+The SDK automatically extracts and tracks these common UTM parameters:
+
+- `utm_source`: Identifies the advertiser, site, publication, etc.
+- `utm_medium`: Advertising or marketing medium (e.g., email, banner, social)
+- `utm_campaign`: Campaign name, slogan, promo code, etc.
+- `utm_term`: Paid search keywords
+- `utm_content`: Used to differentiate ads or links that point to the same URL
+
+### Example Deeplink URLs
+
+```
+myapp://product/123?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale
+myapp://home?utm_source=facebook&utm_medium=social&utm_campaign=brand_awareness
+https://myapp.com/special-offer?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_deals
+```
+
+### Best Practices
+
+1. **Call Early**: Always call `trackDeeplinkUtm()` before any other navigation logic to ensure accurate attribution
+2. **Handle All Entry Points**: Track both cold app launches and warm app resumes from deeplinks
+3. **Test Thoroughly**: Test deeplink tracking with various UTM parameter combinations
+4. **Monitor Analytics**: Use the AdGeist dashboard to monitor deeplink performance and attribution data
+
 
 ## 🤝 Contributing
 

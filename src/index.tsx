@@ -1,5 +1,8 @@
-export * from './components/BannerAd';
-export * from './components/AdgeistProvider';
+export * from './providers/AdgeistProvider';
+
+export * from './components/HTML5AdView';
+
+export * from './components/deprecated/BannerAdView';
 
 export * from './cdpclient/index';
 

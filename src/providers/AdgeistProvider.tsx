@@ -1,8 +1,3 @@
-/**
- * @module AdgeistProvider
- * @description Context provider for Adgeist ad-serving configuration and initialization
- */
-
 import React, {
   createContext,
   useContext,
@@ -10,64 +5,26 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import Adgeist from '../NativeAdgeist';
-import { ConsentModal } from './ConsentModal';
-
-/**
- * Interface for Adgeist context
- */
-interface AdgeistContextType {
-  publisherId: string;
-  apiKey: string;
-  domain: string;
-  isTestEnvironment: boolean;
-  isInitialized: boolean;
-  initializationError?: Error;
-  setAdgeistConsentModal: (value: boolean) => void;
-}
-
-/**
- * Props for AdgeistProvider
- */
-interface AdgeistProviderProps {
-  children: React.ReactNode;
-  /** Custom API origin for Adgeist SDK */
-  customAdgeistApiOrigin?: string;
-  /** Publisher identifier */
-  publisherId: string;
-  /** API key for authentication */
-  apiKey: string;
-  /** Domain for ad serving */
-  domain: string;
-  /** Enable test environment mode */
-  isTestEnvironment?: boolean;
-  /** Callback for initialization errors */
-  onInitializationError?: (error: Error) => void;
-  /** Callback for successful initialization */
-  onInitializationSuccess?: () => void;
-}
+import Adgeist from '../specs/NativeAdgeist';
+import { ConsentModal } from '../components/deprecated/ConsentModal';
+import type {
+  AdgeistContextType,
+  AdgeistProviderProps,
+} from '../types/Provider';
+import { PACKAGE_VERSION_TAG, PACKAGE_VERSION } from '../constants';
 
 const AdgeistContext = createContext<AdgeistContextType>({
-  publisherId: '',
-  apiKey: '',
-  domain: '',
-  isTestEnvironment: true,
+  isTestEnvironment: false,
   isInitialized: false,
   setAdgeistConsentModal: () => {},
 });
 
-/**
- * AdgeistProvider component for managing ad-serving configuration
- * @param props - Component properties
- * @returns JSX.Element
- */
 export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
   children,
-  publisherId = '',
-  apiKey = '',
-  domain = '',
-  customAdgeistApiOrigin = 'bg-services-qa-api.adgeist.ai',
-  isTestEnvironment = true,
+  customBidRequestBackendDomain = 'https://beta.v2.bg-services.adgeist.ai',
+  customPackageOrBundleID = null,
+  customAdgeistAppID = null,
+  isTestEnvironment = false,
   onInitializationError,
   onInitializationSuccess,
 }) => {
@@ -86,7 +43,15 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
     setIsInitialized(false);
 
     try {
-      await Adgeist.initializeSdk(customAdgeistApiOrigin);
+      await Adgeist.destroySdk();
+
+      await Adgeist.initializeSdk(
+        customBidRequestBackendDomain,
+        customPackageOrBundleID,
+        customAdgeistAppID,
+        `${PACKAGE_VERSION_TAG}-${PACKAGE_VERSION}`
+      );
+
       setIsInitialized(true);
       onInitializationSuccess?.();
     } catch (error: unknown) {
@@ -96,7 +61,13 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
       setIsInitialized(false);
       onInitializationError?.(err);
     }
-  }, [customAdgeistApiOrigin, onInitializationError, onInitializationSuccess]);
+  }, [
+    customBidRequestBackendDomain,
+    onInitializationError,
+    onInitializationSuccess,
+    customPackageOrBundleID,
+    customAdgeistAppID,
+  ]);
 
   useEffect(() => {
     initializeAdgeist();
@@ -105,9 +76,6 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
   return (
     <AdgeistContext.Provider
       value={{
-        publisherId,
-        apiKey,
-        domain,
         isTestEnvironment,
         isInitialized,
         initializationError,

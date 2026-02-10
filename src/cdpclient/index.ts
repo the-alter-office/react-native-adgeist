@@ -1,4 +1,4 @@
-import Adgeist, { type UserDetails, type Event } from '../NativeAdgeist';
+import Adgeist, { type UserDetails, type Event } from '../specs/NativeAdgeist';
 
 class AdgeistError extends Error {
   code?: string;
@@ -11,11 +11,6 @@ class AdgeistError extends Error {
   }
 }
 
-/**
- * Sets user details in the Adgeist SDK
- * @param userDetails - User details object
- * @throws AdgeistError if the operation fails
- */
 export const setUserDetails = (userDetails: UserDetails): void => {
   try {
     Adgeist.setUserDetails(userDetails);
@@ -26,11 +21,6 @@ export const setUserDetails = (userDetails: UserDetails): void => {
   }
 };
 
-/**
- * Logs an event in the Adgeist SDK
- * @param event - Event object to log
- * @throws AdgeistError if the event is invalid or logging fails
- */
 export const logEvent = (event: Event): void => {
   if (!event || typeof event !== 'object') {
     throw new AdgeistError('Event must be a valid object');
@@ -44,11 +34,6 @@ export const logEvent = (event: Event): void => {
   }
 };
 
-/**
- * Retrieves the consent status from the Adgeist SDK
- * @returns Promise resolving to 'ACCEPTED' or 'DENIED'
- * @throws AdgeistError if the operation fails
- */
 export const getConsentStatus = async (): Promise<'ACCEPTED' | 'DENIED'> => {
   try {
     const status = await Adgeist.getConsentStatus();
@@ -62,11 +47,6 @@ export const getConsentStatus = async (): Promise<'ACCEPTED' | 'DENIED'> => {
   }
 };
 
-/**
- * Updates the consent status in the Adgeist SDK
- * @param consent - Boolean indicating user consent
- * @throws AdgeistError if the operation fails
- */
 export const updateConsentStatus = (consent: boolean): void => {
   try {
     Adgeist.updateConsentStatus(consent);

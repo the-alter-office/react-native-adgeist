@@ -1,5 +1,4 @@
-import Adgeist from '../NativeAdgeist';
-
+import Adgeist from '../specs/NativeAdgeist';
 
 class AdgeistError extends Error {
   code?: string;
