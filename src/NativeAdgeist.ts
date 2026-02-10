@@ -94,7 +94,7 @@ export interface Spec extends TurboModule {
     quartile: string
   ): Promise<string>;
 
-  trackConversionsWithDeepLinks(url: string): void;
+  trackDeeplinkUtm(url: string): void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('Adgeist');
