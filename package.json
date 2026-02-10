@@ -1,6 +1,6 @@
 {
   "name": "@thealteroffice/react-native-adgeist",
-  "version": "0.0.27-beta",
+  "version": "0.0.28-beta",
   "description": "Publishers can integrate our SDK to connect their ad spaces to the AdGeist marketplace.",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
