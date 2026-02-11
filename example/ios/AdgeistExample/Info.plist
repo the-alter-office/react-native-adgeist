@@ -55,5 +55,16 @@
 	<false/>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>We use your advertising identifier to provide personalized ads and measure ad performance.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>adgeistexample</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>com.adgeistexample</string>
+		</dict>
+	</array>
 </dict>
 </plist>
