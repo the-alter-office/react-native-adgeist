@@ -23,7 +23,6 @@ Pod::Spec.new do |s|
   if respond_to?(:install_modules_dependencies, true)
     install_modules_dependencies(s)
   else
-  s.dependency "React-Core"
-
-end
+    s.dependency "React-Core"
+  end
 end

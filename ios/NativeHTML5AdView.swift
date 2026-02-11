@@ -4,11 +4,11 @@ import React
 
 // MARK: - Delegate Protocol (Objective-C compatible)
 @objc public protocol NativeHTML5AdDelegate: NSObjectProtocol {
-    @objc func onAdLoaded()
-    @objc(onAdFailedToLoad:) func onAdFailedToLoad(error: String)
-    @objc func onAdOpened()
-    @objc func onAdClosed()
-    @objc func onAdClicked()
+    @objc func onAdLoaded(_ view: NativeHTML5AdView)
+    @objc(onAdFailedToLoad:error:) func onAdFailedToLoad(_ view: NativeHTML5AdView, error: String)
+    @objc func onAdOpened(_ view: NativeHTML5AdView)
+    @objc func onAdClosed(_ view: NativeHTML5AdView)
+    @objc func onAdClicked(_ view: NativeHTML5AdView)
 }
 
 // MARK: - Main Swift View (Exposed to Objective-C++)
@@ -21,8 +21,15 @@ public class NativeHTML5AdView: UIView {
     @objc public var adSize: NSDictionary?
     @objc public var adType: String?
     @objc public var adIsResponsive: Bool = false
+    
+    // MARK: Events (Old Architecture)
+    @objc public var onAdLoaded: ((_ body: [String: Any]) -> Void)?
+    @objc public var onAdFailedToLoad: ((_ body: [String: Any]) -> Void)?
+    @objc public var onAdOpened: ((_ body: [String: Any]) -> Void)?
+    @objc public var onAdClosed: ((_ body: [String: Any]) -> Void)?
+    @objc public var onAdClicked: ((_ body: [String: Any]) -> Void)?
 
-    // MARK: Delegate (used to send events back to Fabric manager)
+    // MARK: Delegate (used to send events back to manager)
     @objc public weak var delegate: NativeHTML5AdDelegate?
 
     // MARK: Private Ad View & Listener
@@ -74,7 +81,7 @@ public class NativeHTML5AdView: UIView {
 
     private func embedAdView() {
         guard let adUnitID = adUnitID else {
-            delegate?.onAdFailedToLoad(error: "Ad unit ID is required")
+            delegate?.onAdFailedToLoad(self, error: "Ad unit ID is required")
             return
         }
 
@@ -115,22 +122,64 @@ private class NativeHTML5AdListener: AdListener {
     }
 
     override func onAdLoaded() {
-        view?.delegate?.onAdLoaded()
+        if let view = view {
+            // Old Architecture
+            if let onAdLoaded = view.onAdLoaded {
+                onAdLoaded([:])
+            }
+            // New Architecture (or if delegate is used)
+            view.delegate?.onAdLoaded(view)
+        }
     }
 
     override func onAdFailedToLoad(_ errorMessage: String) {
-        view?.delegate?.onAdFailedToLoad(error: errorMessage)
+        if let view = view {
+            // Old Architecture
+            if let onAdFailedToLoad = view.onAdFailedToLoad {
+                let errorDict = ["error": errorMessage]
+                if Thread.isMainThread {
+                    onAdFailedToLoad(errorDict)
+                } else {
+                    DispatchQueue.main.async {
+                        onAdFailedToLoad(errorDict)
+                    }
+                }
+            }
+            // New Architecture (or if delegate is used)
+            view.delegate?.onAdFailedToLoad(view, error: errorMessage)
+        }
     }
 
     override func onAdClicked() {
-        view?.delegate?.onAdClicked()
+        if let view = view {
+            // Old Architecture
+            if let onAdClicked = view.onAdClicked {
+                onAdClicked([:])
+            }
+            // New Architecture (or if delegate is used)
+            view.delegate?.onAdClicked(view)
+        }
     }
 
     override func onAdImpression() {
-        view?.delegate?.onAdOpened()
+        if let view = view {
+            // Old Architecture (mapped to onAdOpened)
+            if let onAdOpened = view.onAdOpened {
+                onAdOpened([:])
+            }
+            // New Architecture (or if delegate is used)
+            view.delegate?.onAdOpened(view)
+        }
     }
 
     override func onAdClosed() {
-        view?.delegate?.onAdClosed()
+        if let view = view {
+            // Old Architecture
+            if let onAdClosed = view.onAdClosed {
+                onAdClosed([:])
+            }
+            // New Architecture (or if delegate is used)
+            view.delegate?.onAdClosed(view)
+        }
     }
 }
