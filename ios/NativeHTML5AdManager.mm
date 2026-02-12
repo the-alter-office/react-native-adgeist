@@ -1,3 +1,4 @@
+#ifdef RCT_NEW_ARCH_ENABLED
 #import "NativeHTML5AdManager.h"
 
 #import <React/RCTFabricComponentsPlugins.h>
@@ -110,7 +111,7 @@ using namespace facebook::react;
     [super updateProps:props oldProps:oldProps];
 }
 
-- (void)onAdLoaded
+- (void)onAdLoaded:(NativeHTML5AdView *)view
 {
     if (_eventEmitter) {
         std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
@@ -118,7 +119,7 @@ using namespace facebook::react;
     }
 }
 
-- (void)onAdFailedToLoad:(NSString *)error
+- (void)onAdFailedToLoad:(NativeHTML5AdView *)view error:(NSString *)error
 {
     if (_eventEmitter) {
         HTML5AdNativeComponentEventEmitter::OnAdFailedToLoad event{};
@@ -128,7 +129,7 @@ using namespace facebook::react;
     }
 }
 
-- (void)onAdOpened
+- (void)onAdOpened:(NativeHTML5AdView *)view
 {
     if (_eventEmitter) {
         std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
@@ -136,7 +137,7 @@ using namespace facebook::react;
     }
 }
 
-- (void)onAdClosed
+- (void)onAdClosed:(NativeHTML5AdView *)view
 {
     if (_eventEmitter) {
         std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
@@ -144,7 +145,7 @@ using namespace facebook::react;
     }
 }
 
-- (void)onAdClicked
+- (void)onAdClicked:(NativeHTML5AdView *)view
 {
     if (_eventEmitter) {
         std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
@@ -181,3 +182,112 @@ Class<RCTComponentViewProtocol> HTML5AdNativeComponentCls(void)
 {
     return RCTNativeHTML5AdManager.class;
 }
+
+#else
+
+#import "NativeHTML5AdManager.h"
+#import <React/RCTViewManager.h>
+#import <React/RCTUIManager.h>
+#import <React/RCTBridge.h>
+#import <objc/runtime.h>
+
+// Swift → ObjC header
+#if __has_include("Adgeist-Swift.h")
+#import "Adgeist-Swift.h"
+#elif __has_include(<adgeist/adgeist-Swift.h>)
+#import <Adgeist/Adgeist-Swift.h>
+#else
+@import adgeist;
+#endif
+
+// Associated object keys for event blocks
+static const char *kOnAdLoadedKey = "onAdLoaded";
+static const char *kOnAdFailedToLoadKey = "onAdFailedToLoad";
+static const char *kOnAdOpenedKey = "onAdOpened";
+static const char *kOnAdClosedKey = "onAdClosed";
+static const char *kOnAdClickedKey = "onAdClicked";
+
+@interface RCTNativeHTML5AdManager () <NativeHTML5AdDelegate>
+@end
+
+@implementation RCTNativeHTML5AdManager
+
+RCT_EXPORT_MODULE(HTML5AdNativeComponent)
+
+- (UIView *)view
+{
+    NativeHTML5AdView *swiftView = [[NativeHTML5AdView alloc] initWithFrame:CGRectZero];
+    swiftView.delegate = self;
+    return swiftView;
+}
+
+RCT_EXPORT_VIEW_PROPERTY(adUnitID, NSString)
+RCT_EXPORT_VIEW_PROPERTY(adIsResponsive, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(adSize, NSDictionary)
+RCT_EXPORT_VIEW_PROPERTY(adType, NSString)
+
+RCT_EXPORT_VIEW_PROPERTY(onAdLoaded, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onAdFailedToLoad, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onAdOpened, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onAdClosed, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onAdClicked, RCTDirectEventBlock)
+
+RCT_EXPORT_METHOD(loadAd:(nonnull NSNumber *)reactTag
+                  isTestMode:(BOOL)isTestMode)
+{
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        NativeHTML5AdView *view = (NativeHTML5AdView *)viewRegistry[reactTag];
+        if ([view isKindOfClass:[NativeHTML5AdView class]]) {
+            NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+            dict[@"isTestMode"] = @(isTestMode);
+            [view loadAd:dict];
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(destroy:(nonnull NSNumber *)reactTag)
+{
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        NativeHTML5AdView *view = (NativeHTML5AdView *)viewRegistry[reactTag];
+        if ([view isKindOfClass:[NativeHTML5AdView class]]) {
+            [view destroy];
+        }
+    }];
+}
+
+- (NSArray<NSString *> *)customDirectEventTypes
+{
+    return @[@"onAdLoaded", @"onAdFailedToLoad", @"onAdOpened", @"onAdClosed", @"onAdClicked"];
+}
+
+// NativeHTML5AdDelegate methods
+// Note: In Old Architecture, events are handled directly by the NativeHTML5AdView via properties.
+// The delegate methods are kept empty or for logging as the View now calls the block directly.
+- (void)onAdLoaded:(NativeHTML5AdView *)view
+{
+    // Handled by view property
+}
+
+- (void)onAdFailedToLoad:(NativeHTML5AdView *)view error:(NSString *)error
+{
+    // Handled by view property
+}
+
+- (void)onAdOpened:(NativeHTML5AdView *)view
+{
+    // Handled by view property
+}
+
+- (void)onAdClosed:(NativeHTML5AdView *)view
+{
+    // Handled by view property
+}
+
+- (void)onAdClicked:(NativeHTML5AdView *)view
+{
+    // Handled by view property
+}
+
+@end
+
+#endif
