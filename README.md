@@ -116,6 +116,16 @@ import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
 
 ### Campaign Conversion Analytics
 
+#### Prerequisites
+
+Before implementing campaign conversion analytics, ensure your app has deeplink support configured. Refer to these resources for setup guidance:
+
+- [React Navigation - Deep Linking](https://reactnavigation.org/docs/deep-linking/)
+- [React Native - Linking](https://reactnative.dev/docs/linking)
+- [Expo - Linking into your app](https://docs.expo.dev/linking/into-your-app/)
+
+#### Implementation
+
 Tracks deeplink UTM parameters for attribution and analytics. This method should be called whenever your app is opened via a deeplink to capture campaign attribution data.
 
 ```tsx
