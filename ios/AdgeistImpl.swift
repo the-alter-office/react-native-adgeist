@@ -102,7 +102,7 @@ import React
 
     @objc public func trackDeeplinkUtm(url: String) {
         guard let urlObj = URL(string: url) else {
-            print("Invalid URL provided for UTM tracking: \(url)")
+            print("Invalid URL provided for UTM tracking")
             return
         }
         adgeistInstance?.trackDeeplink(url: urlObj)
