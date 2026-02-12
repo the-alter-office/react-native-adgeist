@@ -1,5 +1,5 @@
 PODS:
-  - Adgeist (0.0.55-beta):
+  - Adgeist (0.0.27-beta):
     - AdgeistKit (= 1.0.7-beta)
     - DoubleConversion
     - glog
@@ -1833,7 +1833,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  Adgeist: 9c147b5affaca1eed1d058985302c966dc40a5a0
+  Adgeist: 2e5c1dbfb1d8ba6e33f624e1c61840f14e4d7b70
   AdgeistKit: 5aae4c43777956e9f385dfd079d1948bae54ad14
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
