@@ -88,6 +88,8 @@ export interface Spec extends TurboModule {
     totalPlaybackTime: number
   ): Promise<string>;
 
+  trackDeeplinkUtm(url: string): void;
+
   // trackVideoQuartile(
   //   campaignId: string,
   //   adSpaceId: string,

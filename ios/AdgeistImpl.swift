@@ -100,6 +100,13 @@ import React
         adgeistInstance?.updateConsentStatus(consent)
     }
 
+    @objc public func trackDeeplinkUtm(url: String) {
+        guard let urlObj = URL(string: url) else {
+            print("Invalid URL provided for UTM tracking")
+            return
+        }
+        adgeistInstance?.trackDeeplink(url: urlObj)
+    }
 
     @objc public func logEvent(eventDict: [String: Any]) {
         let filtered = eventDict.compactMapValues { value -> Any? in

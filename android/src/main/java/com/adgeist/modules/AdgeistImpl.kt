@@ -1,5 +1,6 @@
 package com.adgeist.modules
 
+import android.net.Uri
 import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -103,6 +104,11 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
 
   fun updateConsentStatus(consent: Boolean) {
     adgeistInstance?.updateConsentStatus(consent)
+  }
+
+  fun trackDeeplinkUtm(url: String) {
+    val uri = Uri.parse(url)
+    adgeistInstance?.trackUtmFromDeeplink(uri)
   }
 
   companion object {

@@ -4,12 +4,15 @@ import {
   Text,
   Pressable,
   ScrollView,
+  Linking,
   TextInput,
   Alert,
 } from 'react-native';
+
 import {
   useAdgeistContext,
   getConsentStatus,
+  trackConversionsWithDeepLinks,
   HTML5AdView,
 } from '@thealteroffice/react-native-adgeist';
 import { useEffect, useState } from 'react';
@@ -26,6 +29,26 @@ export default function ContentContainer() {
       }
     })();
   }, [setAdgeistConsentModal]);
+
+  useEffect(() => {
+    const handleUrl = (url: string) => {
+      trackConversionsWithDeepLinks(url);
+    };
+
+    // Handle initial URL if app was opened from link
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleUrl(url);
+      }
+    });
+
+    // Handle URL changes while app is running
+    const subscription = Linking.addEventListener('url', (event) => {
+      handleUrl(event.url);
+    });
+
+    return () => subscription?.remove();
+  }, []);
 
   const [adSpaceId, setAdSpaceId] = useState('');
   const [adType, setAdType] = useState('');
