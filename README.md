@@ -99,7 +99,7 @@ export default function App() {
 Use the `HTML5AdView` component to display banner ads anywhere in your app. Place this component where you want the ads to appear and the SDK will automatically load and render the ad content.
 
 ```tsx
-import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
+import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
 
 <HTML5AdView
   adUnitID="6932a4c022f6786424ce3b84"
@@ -109,9 +109,14 @@ import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
   onAdOpened={}
   onAdClosed={}
   onAdClicked={}
-  adType="display"
+  adType={AdTypes.DISPLAY}
 />;
 ```
+
+**Ad Types:**
+- `AdTypes.BANNER` - Small rectangular banner ads
+- `AdTypes.DISPLAY` - Standard display ads
+- `AdTypes.COMPANION` - Companion ads (requires minimum 320x320 dimensions)
 
 
 ### Campaign Conversion Analytics

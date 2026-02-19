@@ -98,14 +98,35 @@ android {
 repositories {
   mavenCentral()
   google()
+  /*
+   * Alternative: Use local AAR file instead of remote package
+   * Uncomment the lines below and comment out the remote dependency above to use a local AAR file.
+   * This is useful for testing unreleased versions or when working with custom builds.
+   * Place your AAR file in the 'libs' folder.
+   */
+  // flatDir {
+  //   dirs 'libs'
+  // }
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
   implementation "com.facebook.react:react-android"
-  implementation "ai.adgeist:adgeistkit:1.1.17-beta"
+  implementation "ai.adgeist:adgeistkit:1.1.20-beta"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  /*
+   * Alternative: Use local AAR file instead of remote package
+   * Uncomment the lines below and comment out the remote dependency above to use a local AAR file.
+   * This is useful for testing unreleased versions or when working with custom builds.
+   * Place your AAR file in the 'libs' folder.
+   */
+  // implementation(name: 'adgeistkit-beta-release', ext: 'aar')
+  // implementation "androidx.work:work-runtime-ktx:2.11.1"
+  // implementation 'com.google.code.gson:gson:2.10.1'
+  // implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+  // implementation("com.google.android.gms:play-services-ads-identifier:18.0.1")
 }
 
 if (isNewArchitectureEnabled()) {

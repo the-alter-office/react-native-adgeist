@@ -19,3 +19,17 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+/*
+ * Alternative: Use local AAR file instead of remote package
+ * Uncomment the lines below and comment out the remote dependency above to use a local AAR file.
+ * This is useful for testing unreleased versions or when working with custom builds.
+ * Place your AAR file in the 'libs' folder.
+ */
+// allprojects {
+//     repositories {
+//         flatDir {
+//             dirs "${rootDir}/../../android/libs"
+//         }
+//     }
+// }

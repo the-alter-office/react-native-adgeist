@@ -1,8 +1,14 @@
 export interface CPMADRESPONSE {
+  success: boolean;
+  message: string;
+  data?: BidResponseData;
+}
+
+interface BidResponseData {
   id: string;
+  seatBid: SeatBid[];
   bidId: string;
   cur: string;
-  seatBid: SeatBid[];
 }
 
 interface SeatBid {
@@ -22,5 +28,4 @@ interface BidExtension {
   ctaUrl: string;
   creativeTitle: string;
   creativeDescription: string;
-  creativeBrandName?: string;
 }

@@ -14,17 +14,16 @@ import com.adgeistkit.data.network.FetchCreative
 
 import com.facebook.react.bridge.ReadableMap
 import com.adgeist.utils.toWritableMap
-import com.adgeistkit.ads.network.AnalyticsRequest
-import com.adgeistkit.ads.network.AnalyticsRequestDEPRECATED
+import com.adgeistkit.request.AnalyticsRequestDEPRECATED
 
 class AdgeistImpl internal constructor(private val context: ReactApplicationContext) {
-
   private var adgeistInstance: AdgeistCore? = null
   private var getAd: FetchCreative? = null
   private var postCreativeAnalytic: CreativeAnalytics? = null
 
   fun initializeSdk(customBidRequestBackendDomain: String?, customPackageOrBundleID: String?, customAdgeistAppID: String?, customVersioning: String?, promise: Promise) {
     try {
+      Log.d("AdgeistImpl", "SDK initialized with domain: ${customBidRequestBackendDomain ?: "default"}, package/bundle ID: ${customPackageOrBundleID ?: "default"}, app ID: ${customAdgeistAppID ?: "default"}, versioning: ${customVersioning ?: "default"}")
       adgeistInstance = AdgeistCore.initialize(context.applicationContext, customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID, customVersioning)
       getAd = adgeistInstance?.getCreative()
       postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()

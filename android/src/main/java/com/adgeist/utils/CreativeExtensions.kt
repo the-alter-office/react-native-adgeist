@@ -53,13 +53,16 @@ fun CPMAdResponse.toWritableMap(): WritableMap {
 fun FixedAdResponse.toWritableMap(): WritableMap {
   val map = Arguments.createMap()
 
+  isTest?.let { map.putBoolean("isTest", it) }
+  expiresAt?.let { map.putString("expiresAt", it) }
   map.putString("metaData", metaData)
   map.putString("id", id)
-  map.putString("generatedAt", generatedAt)
-  map.putString("campaignId", campaignId)
-  map.putString("type", type)
-  map.putString("loadType", loadType)
-  map.putInt("frontendCacheDurationSeconds", frontendCacheDurationSeconds ?: 0)
+  generatedAt?.let { map.putString("generatedAt", it) }
+  signature?.let { map.putString("signature", it) }
+  campaignId?.let { map.putString("campaignId", it) }
+  type?.let { map.putString("type", it) }
+  loadType?.let { map.putString("loadType", it) }
+  frontendCacheDurationSeconds?.let { map.putInt("frontendCacheDurationSeconds", it) }
 
   advertiser?.let {
     val advMap = Arguments.createMap()
@@ -76,41 +79,74 @@ fun FixedAdResponse.toWritableMap(): WritableMap {
     map.putMap("campaignValidity", cvMap)
   }
 
-  creatives?.let { list ->
-    val arr = Arguments.createArray()
-    list.forEach { creative ->
-      val cMap = Arguments.createMap()
-      cMap.putString("ctaUrl", creative.ctaUrl)
-      cMap.putString("description", creative.description)
-      cMap.putString("fileName", creative.fileName)
-      cMap.putInt("fileSize", creative.fileSize ?: 0)
-      cMap.putString("fileUrl", creative.fileUrl)
-      cMap.putString("thumbnailUrl", creative.thumbnailUrl)
-      cMap.putString("title", creative.title)
-      cMap.putString("type", creative.type)
+  val creativesArr = Arguments.createArray()
+  creatives.forEach { creative ->
+    val cMap = Arguments.createMap()
+    cMap.putString("ctaUrl", creative.ctaUrl)
+    cMap.putString("description", creative.description)
+    cMap.putString("fileName", creative.fileName)
+    cMap.putInt("fileSize", creative.fileSize ?: 0)
+    cMap.putString("fileUrl", creative.fileUrl)
+    cMap.putString("thumbnailUrl", creative.thumbnailUrl)
+    cMap.putString("title", creative.title)
+    cMap.putString("type", creative.type)
 
-      creative.contentModerationResult?.let {
-        val cm = Arguments.createMap()
-        cm.putString("\$oid", it.`$oid`)
-        cMap.putMap("contentModerationResult", cm)
-      }
-
-      creative.createdAt?.let {
-        val cm = Arguments.createMap()
-        cm.putDouble("\$date", it.`$date`?.toDouble() ?: 0.0)
-        cMap.putMap("createdAt", cm)
-      }
-
-      creative.updatedAt?.let {
-        val cm = Arguments.createMap()
-        cm.putDouble("\$date", it.`$date`?.toDouble() ?: 0.0)
-        cMap.putMap("updatedAt", cm)
-      }
-
-      arr.pushMap(cMap)
+    creative.contentModerationResult?.let {
+      val cm = Arguments.createMap()
+      cm.putString("\$oid", it.`$oid`)
+      cMap.putMap("contentModerationResult", cm)
     }
-    map.putArray("creatives", arr)
+
+    creative.createdAt?.let {
+      val cm = Arguments.createMap()
+      cm.putDouble("\$date", it.`$date`?.toDouble() ?: 0.0)
+      cMap.putMap("createdAt", cm)
+    }
+
+    creative.updatedAt?.let {
+      val cm = Arguments.createMap()
+      cm.putDouble("\$date", it.`$date`?.toDouble() ?: 0.0)
+      cMap.putMap("updatedAt", cm)
+    }
+
+    creativesArr.pushMap(cMap)
   }
+  map.putArray("creatives", creativesArr)
+
+  val creativesV1Arr = Arguments.createArray()
+  creativesV1.forEach { creativeV1 ->
+    val cv1Map = Arguments.createMap()
+    cv1Map.putString("title", creativeV1.title)
+    cv1Map.putString("description", creativeV1.description)
+    cv1Map.putString("ctaUrl", creativeV1.ctaUrl)
+
+    creativeV1.primary?.let {
+      val primMap = Arguments.createMap()
+      primMap.putString("type", it.type)
+      primMap.putString("fileName", it.fileName)
+      primMap.putInt("fileSize", it.fileSize ?: 0)
+      primMap.putString("fileUrl", it.fileUrl)
+      primMap.putString("thumbnailUrl", it.thumbnailUrl)
+      cv1Map.putMap("primary", primMap)
+    }
+
+    creativeV1.companions?.let { companions ->
+      val companionsArr = Arguments.createArray()
+      companions.forEach { companion ->
+        val compMap = Arguments.createMap()
+        compMap.putString("type", companion.type)
+        compMap.putString("fileName", companion.fileName)
+        compMap.putInt("fileSize", companion.fileSize ?: 0)
+        compMap.putString("fileUrl", companion.fileUrl)
+        compMap.putString("thumbnailUrl", companion.thumbnailUrl)
+        companionsArr.pushMap(compMap)
+      }
+      cv1Map.putArray("companions", companionsArr)
+    }
+
+    creativesV1Arr.pushMap(cv1Map)
+  }
+  map.putArray("creativesV1", creativesV1Arr)
 
   displayOptions?.let { opt ->
     val opMap = Arguments.createMap()
@@ -142,7 +178,11 @@ fun FixedAdResponse.toWritableMap(): WritableMap {
 
   impressionRequirements?.let {
     val ir = Arguments.createMap()
-    ir.putString("impressionType", it.impressionType)
+    it.impressionType?.let { types ->
+      val typesArr = Arguments.createArray()
+      types.forEach { type -> typesArr.pushString(type) }
+      ir.putArray("impressionType", typesArr)
+    }
     ir.putInt("minViewDurationSeconds", it.minViewDurationSeconds ?: 0)
     map.putMap("impressionRequirements", ir)
   }

@@ -5,8 +5,9 @@ import android.view.View
 import androidx.annotation.RequiresPermission
 import com.adgeistkit.ads.AdListener
 import com.adgeistkit.ads.AdSize
+import com.adgeistkit.ads.AdType
 import com.adgeistkit.ads.AdView
-import com.adgeistkit.ads.network.AdRequest
+import com.adgeistkit.request.AdRequest
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
@@ -23,9 +24,13 @@ object HTML5AdViewManagerImpl {
     const val EVENT_AD_CLOSED = "onAdClosed"
     const val EVENT_AD_CLICKED = "onAdClicked"
 
+    private val viewContextMap = mutableMapOf<Int, ThemedReactContext>()
+
     fun createViewInstance(reactContext: ThemedReactContext): AdView {
-        val adView = AdView(reactContext.applicationContext)
-        adView.setTag(com.facebook.react.R.id.view_tag_native_id, reactContext)
+        Log.d(TAG, "Creating AdView with ThemedReactContext: ${reactContext.hashCode()}")
+        val adView = AdView(reactContext)
+        viewContextMap[System.identityHashCode(adView)] = reactContext
+        Log.d(TAG, "AdView created with hash: ${System.identityHashCode(adView)} and context hash: ${reactContext.hashCode()}")
         return adView
     }
 
@@ -55,8 +60,12 @@ object HTML5AdViewManagerImpl {
     }
 
     fun setAdType(view: AdView, adType: String?) {
-        if (adType != null) {
-            view.adType = adType
+        val typeToSet = adType ?: "BANNER"
+        try {
+            view.adType = AdType.valueOf(typeToSet)
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Invalid ad type: $typeToSet. Must be BANNER, DISPLAY, or COMPANION", e)
+            view.adType = AdType.BANNER
         }
     }
 
@@ -107,7 +116,14 @@ object HTML5AdViewManagerImpl {
     }
 
     fun destroyAd(view: AdView) {
-        view.destroy()
+        try {
+            view.destroy()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error destroying ad view", e)
+        } finally {
+            // Clean up the context reference
+            viewContextMap.remove(System.identityHashCode(view))
+        }
     }
 
     private fun measureAndLayout(view: AdView) {
@@ -119,13 +135,17 @@ object HTML5AdViewManagerImpl {
     }
 
     private fun sendEvent(view: AdView, eventName: String, params: WritableMap) {
-        val reactContext = view.getTag(com.facebook.react.R.id.view_tag_native_id) as? ThemedReactContext
+        val reactContext = viewContextMap[System.identityHashCode(view)]
         if (reactContext != null) {
-            reactContext
-                .getJSModule(RCTEventEmitter::class.java)
-                .receiveEvent(view.id, eventName, params)
+            try {
+                reactContext
+                    .getJSModule(RCTEventEmitter::class.java)
+                    .receiveEvent(view.id, eventName, params)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error sending event $eventName", e)
+            }
         } else {
-            Log.e(TAG, "Unable to send event $eventName: ThemedReactContext not found")
+            Log.w(TAG, "Unable to send event $eventName: ThemedReactContext not found or view already destroyed")
         }
     }
 }

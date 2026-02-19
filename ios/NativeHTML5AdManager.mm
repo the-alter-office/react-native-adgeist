@@ -103,9 +103,12 @@ using namespace facebook::react;
     }
 
     if (oldPropsStruct.adType != newProps.adType) {
-        _swiftView.adType = newProps.adType.empty()
+        // Pass the string value ("BANNER", "DISPLAY", or "COMPANION"), or nil to use default "BANNER" in Swift
+        // The Swift layer converts the string to AdType enum
+        std::string adTypeStr = toString(newProps.adType);
+        _swiftView.adType = adTypeStr.empty()
             ? nil
-            : [NSString stringWithUTF8String:newProps.adType.c_str()];
+            : [NSString stringWithUTF8String:adTypeStr.c_str()];
     }
 
     [super updateProps:props oldProps:oldProps];

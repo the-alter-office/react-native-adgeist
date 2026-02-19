@@ -83,16 +83,17 @@ export const BannerAd: React.FC<AdBannerProps> = ({
     bidId = (adData as FIXEDADRESPONSE)?.id;
     campaignId = (adData as FIXEDADRESPONSE)?.campaignId;
   } else {
-    let creativeData = (adData as CPMADRESPONSE)?.seatBid?.[0]?.bid?.[0]?.ext;
+    let cpmData = (adData as CPMADRESPONSE)?.data;
+    let creativeData = cpmData?.seatBid?.[0]?.bid?.[0]?.ext;
 
     creativeTitle = creativeData?.creativeTitle;
     creativeDescription = creativeData?.creativeDescription;
-    creativeBrandName = creativeData?.creativeBrandName;
+    creativeBrandName = undefined; // Not available in CPM response
     creativeUrl = creativeData?.creativeUrl;
     ctaUrl = creativeData?.ctaUrl;
 
-    bidId = adData?.id;
-    campaignId = (adData as CPMADRESPONSE)?.seatBid?.[0]?.bid?.[0]?.id;
+    bidId = cpmData?.id;
+    campaignId = cpmData?.seatBid?.[0]?.bid?.[0]?.id;
   }
 
   const fetchAd = useCallback(async () => {
@@ -273,7 +274,8 @@ export const BannerAd: React.FC<AdBannerProps> = ({
   const handleClick = useCallback(async () => {
     if (
       !adData ||
-      (dataBuyType == 'CPM' && !(adData as CPMADRESPONSE).seatBid.length) ||
+      (dataBuyType == 'CPM' &&
+        !(adData as CPMADRESPONSE).data?.seatBid?.length) ||
       !bidId ||
       !campaignId
     )

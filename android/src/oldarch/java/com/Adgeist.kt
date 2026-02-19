@@ -5,7 +5,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.adgeist.modules.AdgeistImpl
-import com.adgeistkit.ads.network.AnalyticsRequestDEPRECATED
+import com.adgeistkit.request.AnalyticsRequestDEPRECATED
 import com.facebook.react.bridge.ReadableMap
 
 class Adgeist internal constructor(reactContext: ReactApplicationContext) :

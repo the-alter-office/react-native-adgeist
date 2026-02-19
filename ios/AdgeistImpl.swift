@@ -53,21 +53,17 @@ import React
             buyType: buyType,
             isTestEnvironment: isTestEnvironment
         ) { creativeData in
-            if let creativeData = creativeData {
-                var result: [String: Any] = [:]
-                
-                // Use Mirror to reflect the object's properties
-                let mirror = Mirror(reflecting: creativeData)
-                for child in mirror.children {
-                    if let label = child.label {
-                        result[label] = child.value
-                    }
+            var result: [String: Any] = [:]
+            
+            // Use Mirror to reflect the object's properties
+            let mirror = Mirror(reflecting: creativeData)
+            for child in mirror.children {
+                if let label = child.label {
+                    result[label] = child.value
                 }
-                
-                resolver(result)
-            } else {
-                rejecter("NO_AD", "Ad data not available", nil)
             }
+            
+            resolver(result)
         }
     }
 

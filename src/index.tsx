@@ -7,3 +7,5 @@ export * from './components/deprecated/BannerAdView';
 export * from './cdpclient/index';
 
 export * from './utmtracker/index';
+
+export * from './types/AdType';

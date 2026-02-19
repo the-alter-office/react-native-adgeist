@@ -17,7 +17,7 @@ import {
 
 export default function App() {
   const [appId, setAppId] = useState('695e797d6fcfb14c38cfd1d6');
-  const [bundleId, setBundleId] = useState('com.leaguex.crm.beta');
+  const [bundleId, setBundleId] = useState('com.leaguex.crm');
   const [backendDomain, setbackendDomain] = useState(
     'https://qa.v2.bg-services.adgeist.ai'
   );
@@ -27,7 +27,7 @@ export default function App() {
 
   const [config, setConfig] = useState({
     appId: '695e797d6fcfb14c38cfd1d6',
-    bundleId: 'com.leaguex.crm.beta',
+    bundleId: 'com.leaguex.crm',
     isTest: true,
     backendDomain: 'https://qa.v2.bg-services.adgeist.ai',
   });

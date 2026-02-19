@@ -88,7 +88,7 @@ public class NativeHTML5AdView: UIView {
         let adView = AdView()
         adView.frame = bounds
         adView.adUnitId = adUnitID
-        adView.adIsResposive = adIsResponsive
+        adView.adIsResponsive = adIsResponsive
 
         if let dict = adSize as? [String: Any] {
             if let w = dict["width"] as? Int, let h = dict["height"] as? Int {
@@ -96,7 +96,20 @@ public class NativeHTML5AdView: UIView {
             }
         }
 
-        if let adType = adType { adView.adType = adType }
+        // Handle adType with default value of BANNER
+        let adTypeStr = (adType ?? "BANNER").uppercased()
+        
+        switch adTypeStr {
+        case "BANNER":
+            adView.adType = .BANNER
+        case "DISPLAY":
+            adView.adType = .DISPLAY
+        case "COMPANION":
+            adView.adType = .COMPANION
+        default:
+            delegate?.onAdFailedToLoad(self, error: "Invalid ad type: \(adTypeStr)")
+            return
+        }
 
         let listener = NativeHTML5AdListener(view: self)
         self.adListener = listener

@@ -3,7 +3,7 @@ package com.adgeist
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.adgeist.modules.AdgeistImpl
-import com.adgeistkit.ads.network.AnalyticsRequestDEPRECATED
+import com.adgeistkit.request.AnalyticsRequestDEPRECATED
 import com.facebook.react.bridge.ReadableMap
 
 class Adgeist internal constructor(reactContext: ReactApplicationContext) :

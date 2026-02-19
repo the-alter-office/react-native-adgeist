@@ -45,6 +45,15 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
     try {
       await Adgeist.destroySdk();
 
+      if (__DEV__) {
+        console.log('[AdgeistProvider] Calling initializeSdk with:', {
+          domain: customBidRequestBackendDomain,
+          bundleId: customPackageOrBundleID,
+          appId: customAdgeistAppID,
+          version: `${PACKAGE_VERSION_TAG}-${PACKAGE_VERSION}`,
+        });
+      }
+
       await Adgeist.initializeSdk(
         customBidRequestBackendDomain,
         customPackageOrBundleID,
