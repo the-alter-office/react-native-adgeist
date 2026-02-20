@@ -5,6 +5,7 @@ import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.adgeistkit.AdgeistCore
+import com.adgeistkit.data.models.AdData
 import com.adgeistkit.data.models.CPMAdResponse
 import com.adgeistkit.data.models.Event
 import com.adgeistkit.data.models.FixedAdResponse
@@ -41,16 +42,20 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
   fun fetchCreative(adSpaceId: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
     getAd?.fetchCreative(adSpaceId, buyType, isTestEnvironment) { adData ->
       if (adData != null) {
-        when (adData) {
-          is CPMAdResponse -> {
-            promise.resolve(adData.toWritableMap())
+        if (adData.isSuccess && adData.data != null) {
+          when (val response = adData.data) {
+            is CPMAdResponse -> {
+              promise.resolve(response.toWritableMap())
+            }
+            is FixedAdResponse -> {
+              promise.resolve(response.toWritableMap())
+            }
+            else -> {
+              promise.reject("UNKNOWN_RESPONSE", "Unknown ad response type")
+            }
           }
-          is FixedAdResponse -> {
-            promise.resolve(adData.toWritableMap())
-          }
-          else -> {
-            promise.resolve(null)
-          }
+        } else {
+          promise.reject("AD_ERROR", adData.errorMessage)
         }
       } else {
         promise.reject("NO_AD", "Ad data not available")

@@ -52,18 +52,24 @@ import React
             adUnitID: adSpaceId,
             buyType: buyType,
             isTestEnvironment: isTestEnvironment
-        ) { creativeData in
-            var result: [String: Any] = [:]
-            
-            // Use Mirror to reflect the object's properties
-            let mirror = Mirror(reflecting: creativeData)
-            for child in mirror.children {
-                if let label = child.label {
-                    result[label] = child.value
+        ) { adData in
+            // Check if the request was successful
+            if adData.isSuccess, let creativeData = adData.data {
+                var result: [String: Any] = [:]
+                
+                // Use Mirror to reflect the object's properties
+                let mirror = Mirror(reflecting: creativeData)
+                for child in mirror.children {
+                    if let label = child.label {
+                        result[label] = child.value
+                    }
                 }
+                
+                resolver(result)
+            } else {
+                // Return error from AdData
+                rejecter("AD_ERROR", adData.errorMessage, nil)
             }
-            
-            resolver(result)
         }
     }
 
