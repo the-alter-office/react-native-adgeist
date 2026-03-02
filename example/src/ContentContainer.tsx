@@ -18,7 +18,6 @@ import {
   type AdType,
 } from '@thealteroffice/react-native-adgeist';
 import { useEffect, useState } from 'react';
-import { AdSizes } from '../../src/constants';
 
 export default function ContentContainer() {
   const { setAdgeistConsentModal } = useAdgeistContext();
@@ -60,49 +59,103 @@ export default function ContentContainer() {
   const [isResponsive, setIsResponsive] = useState(false);
   const [showAd, setShowAd] = useState(false);
   const [snippet, setSnippet] = useState(``);
-  const [adMode, setAdMode] = useState<'display' | 'companion'>('display');
-  const [containerWidth, setContainerWidth] = useState('320');
-  const [containerHeight, setContainerHeight] = useState('300');
+  const [responsiveMode, setResponsiveMode] = useState<Boolean>(false);
+  const [containerWidth, setContainerWidth] = useState('250');
+  const [containerHeight, setContainerHeight] = useState('250');
 
-  const handleParseSnippet = () => {
-    const adSlotMatch = snippet.match(/dataAdSlot="([^"]*)"/);
-    const widthMatch = snippet.match(/width="([^"]*)"/);
-    const heightMatch = snippet.match(/height="([^"]*)"/);
-
-    // Match both patterns: dataSlotType="companion" or dataSlotType={AdTypes.COMPANION}
-    const slotTypeMatch =
-      snippet.match(/dataSlotType="([^"]*)"/) ||
-      snippet.match(/dataSlotType=\{AdTypes\.(\w+)\}/);
-
-    const isResponsive = snippet.includes('isResponsive=true');
-
-    if (
-      !isResponsive &&
-      widthMatch?.[1] &&
-      heightMatch?.[1] &&
-      parseInt(widthMatch[1]) < 240 &&
-      parseInt(heightMatch[1]) < 50
-    ) {
-      Alert.alert('Please provide valid ad dimensions.');
-      setSnippet(``);
+  const handleParseSnippet = (): boolean => {
+    // 1. Required: adUnitID
+    const adUnitIDMatch = snippet.match(/adUnitID="([^"]+)"/);
+    if (!adUnitIDMatch?.[1]) {
+      Alert.alert('Error', 'Could not find adUnitID in the snippet.');
+      setSnippet('');
       return false;
     }
 
-    if (adSlotMatch && adSlotMatch[1]) setAdSpaceId(adSlotMatch[1]);
-    if (!isResponsive && widthMatch && widthMatch[1]) setWidth(widthMatch[1]);
-    if (!isResponsive && heightMatch && heightMatch[1])
-      setHeight(heightMatch[1]);
-    if (slotTypeMatch && slotTypeMatch[1]) {
-      const parsedType = slotTypeMatch[1].toUpperCase() as AdType;
-      if (
-        parsedType === 'BANNER' ||
-        parsedType === 'DISPLAY' ||
-        parsedType === 'COMPANION'
-      ) {
-        setAdType(parsedType);
+    // 2. Required: adType
+    const adTypeMatch =
+      snippet.match(/adType="([^"]+)"/) ||
+      snippet.match(/adType=\{AdTypes\.(\w+)\}/);
+
+    if (!adTypeMatch?.[1]) {
+      Alert.alert('Error', 'Could not find adType in the snippet.');
+      setSnippet('');
+      return false;
+    }
+
+    // Parse ad type early (we already know it exists)
+    const rawType = adTypeMatch[1].toUpperCase();
+    const validTypes = ['BANNER', 'DISPLAY', 'COMPANION'] as const;
+    type ValidAdType = (typeof validTypes)[number];
+
+    if (!validTypes.includes(rawType as any)) {
+      Alert.alert(
+        'Error',
+        `Unsupported adType: ${rawType}. Supported: BANNER, DISPLAY, COMPANION`
+      );
+      setSnippet('');
+      return false;
+    }
+
+    const parsedAdType = rawType as ValidAdType;
+
+    // 3. Detect responsive vs fixed-size
+    const adSizeMatch = snippet.match(
+      /adSize\s*=\s*\{\{\s*width\s*:\s*(\d+)\s*,\s*height\s*:\s*(\d+)\s*\}\}/is
+    );
+
+    const adIsResponsive = !adSizeMatch;
+
+    // 4. Width/Height extraction & validation (only for fixed-size ads)
+    let widthStr: string | undefined;
+    let heightStr: string | undefined;
+
+    if (!adIsResponsive) {
+      if (adSizeMatch) {
+        widthStr = adSizeMatch[1];
+        heightStr = adSizeMatch[2];
+      } else {
+        // fallback legacy attributes
+        const wMatch = snippet.match(/width="([^"]+)"/);
+        const hMatch = snippet.match(/height="([^"]+)"/);
+
+        if (wMatch?.[1] && hMatch?.[1]) {
+          widthStr = wMatch[1];
+          heightStr = hMatch[1];
+        }
+      }
+
+      // Validate dimensions if we have them
+      if (widthStr && heightStr) {
+        const w = parseInt(widthStr, 10);
+        const h = parseInt(heightStr, 10);
+
+        if (isNaN(w) || isNaN(h) || w < 1 || h < 1) {
+          Alert.alert('Error', 'Invalid ad dimensions (not valid numbers).');
+          setSnippet('');
+          return false;
+        }
+
+        // Very small banner check
+        if (w < 240 && h < 50) {
+          Alert.alert(
+            'Error',
+            'Ad dimensions are too small. Please use valid size.'
+          );
+          setSnippet('');
+          return false;
+        }
+
+        // Set dimensions only for non-responsive
+        setWidth(widthStr);
+        setHeight(heightStr);
       }
     }
-    if (isResponsive) setIsResponsive(true);
+
+    // 5. All required fields found → set state
+    setAdSpaceId(adUnitIDMatch[1]);
+    setAdType(parsedAdType);
+    setIsResponsive(adIsResponsive);
 
     return true;
   };
@@ -125,43 +178,52 @@ export default function ContentContainer() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Ad Type</Text>
+        <Text style={styles.label}>Responsive Type</Text>
+        <Text style={styles.note}>
+          Note: Enable responsive only for companion and display ads.
+        </Text>
         <View style={styles.toggleContainer}>
           <Pressable
             style={[
               styles.toggleButton,
-              adMode === 'display' && styles.toggleButtonActive,
+              !responsiveMode && styles.toggleButtonActive,
             ]}
-            onPress={() => setAdMode('display')}
+            onPress={() => {
+              setResponsiveMode(false);
+              handleCancel();
+            }}
           >
             <Text
               style={[
                 styles.toggleButtonText,
-                adMode === 'display' && styles.toggleButtonTextActive,
+                !responsiveMode && styles.toggleButtonTextActive,
               ]}
             >
-              Display & Banner
+              With Dimensions
             </Text>
           </Pressable>
           <Pressable
             style={[
               styles.toggleButton,
-              adMode === 'companion' && styles.toggleButtonActive,
+              responsiveMode && styles.toggleButtonActive,
             ]}
-            onPress={() => setAdMode('companion')}
+            onPress={() => {
+              setResponsiveMode(true);
+              handleCancel();
+            }}
           >
             <Text
               style={[
                 styles.toggleButtonText,
-                adMode === 'companion' && styles.toggleButtonTextActive,
+                responsiveMode && styles.toggleButtonTextActive,
               ]}
             >
-              Companion Ad
+              Responsive
             </Text>
           </Pressable>
         </View>
 
-        {adMode === 'companion' && (
+        {responsiveMode && (
           <View style={styles.dimensionsContainer}>
             <View style={styles.dimensionInput}>
               <Text style={styles.dimensionLabel}>Container Width</Text>
@@ -254,7 +316,7 @@ export default function ContentContainer() {
             <HTML5AdView
               key={width + height}
               adUnitID={adSpaceId}
-              adSize={AdSizes.custom(parseInt(width), parseInt(height))}
+              adSize={{ width: parseInt(width), height: parseInt(height) }}
               adType={adType}
               onAdLoaded={() => {}}
               onAdFailedToLoad={(event) => {
@@ -298,6 +360,11 @@ const styles = StyleSheet.create({
   label: {
     color: '#ccc',
     fontSize: 14,
+    marginBottom: 15,
+  },
+  note: {
+    color: '#ccc',
+    fontSize: 12,
     marginBottom: 15,
   },
   input: {
