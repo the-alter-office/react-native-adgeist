@@ -79,40 +79,6 @@ fun FixedAdResponse.toWritableMap(): WritableMap {
     map.putMap("campaignValidity", cvMap)
   }
 
-  val creativesArr = Arguments.createArray()
-  creatives.forEach { creative ->
-    val cMap = Arguments.createMap()
-    cMap.putString("ctaUrl", creative.ctaUrl)
-    cMap.putString("description", creative.description)
-    cMap.putString("fileName", creative.fileName)
-    cMap.putInt("fileSize", creative.fileSize ?: 0)
-    cMap.putString("fileUrl", creative.fileUrl)
-    cMap.putString("thumbnailUrl", creative.thumbnailUrl)
-    cMap.putString("title", creative.title)
-    cMap.putString("type", creative.type)
-
-    creative.contentModerationResult?.let {
-      val cm = Arguments.createMap()
-      cm.putString("\$oid", it.`$oid`)
-      cMap.putMap("contentModerationResult", cm)
-    }
-
-    creative.createdAt?.let {
-      val cm = Arguments.createMap()
-      cm.putDouble("\$date", it.`$date`?.toDouble() ?: 0.0)
-      cMap.putMap("createdAt", cm)
-    }
-
-    creative.updatedAt?.let {
-      val cm = Arguments.createMap()
-      cm.putDouble("\$date", it.`$date`?.toDouble() ?: 0.0)
-      cMap.putMap("updatedAt", cm)
-    }
-
-    creativesArr.pushMap(cMap)
-  }
-  map.putArray("creatives", creativesArr)
-
   val creativesV1Arr = Arguments.createArray()
   creativesV1.forEach { creativeV1 ->
     val cv1Map = Arguments.createMap()

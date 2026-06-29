@@ -16,20 +16,20 @@ import {
 } from 'react-native';
 
 export default function App() {
-  const [appId, setAppId] = useState('695e797d6fcfb14c38cfd1d6');
+  const [appId, setAppId] = useState('69a6777707df2b1527e357f9');
   const [bundleId, setBundleId] = useState('com.leaguex.crm');
   const [backendDomain, setbackendDomain] = useState(
-    'https://qa.v2.bg-services.adgeist.ai'
+    'https://beta.v2.bg-services.adgeist.ai'
   );
   const [isTest, setIsTest] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showProvider, setShowProvider] = useState(true);
 
   const [config, setConfig] = useState({
-    appId: '695e797d6fcfb14c38cfd1d6',
+    appId: '69a6777707df2b1527e357f9',
     bundleId: 'com.leaguex.crm',
     isTest: true,
-    backendDomain: 'https://qa.v2.bg-services.adgeist.ai',
+    backendDomain: 'https://beta.v2.bg-services.adgeist.ai',
   });
 
   const handleSubmit = () => {

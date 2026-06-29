@@ -1,5 +1,5 @@
 export const PACKAGE_VERSION_TAG = 'RN';
-export const PACKAGE_VERSION = '0.0.30-beta';
+export const PACKAGE_VERSION = '0.0.31-beta';
 
 export const AdSizes = {
   Responsive: { width: -1, height: -1 },
