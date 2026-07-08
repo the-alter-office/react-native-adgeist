@@ -1,0 +1,39 @@
+name: ✨ Feature request
+description: Suggest an improvement or new capability for the AdGeist React Native SDK.
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a feature. Please describe the use case and expected behavior clearly.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What workflow, integration, or experience is currently missing?
+      placeholder: e.g. A smoother way to display rewarded ad placements in a React Native screen.
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like to see added or improved?
+      placeholder: e.g. A new helper component or provider option for ad placement lifecycle events.
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: How would this help your app or integration?
+      placeholder: e.g. Better support for Expo apps or custom ad layouts on iOS and Android.
+  - type: textarea
+    id: platform
+    attributes:
+      label: Platform details
+      description: Mention any relevant React Native, Expo, iOS, or Android context.
+      placeholder: React Native version, platform, package version, and any related setup notes.
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Share examples, references, or screenshots if helpful.
+      placeholder: Add any supporting details or links here.

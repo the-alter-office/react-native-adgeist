@@ -1,68 +1,36 @@
 name: 🐛 Bug report
-description: Report a reproducible bug or regression in this library.
-labels: [bug]
+description: Report a reproducible issue with the AdGeist React Native SDK.
+labels:
+  - bug
 body:
   - type: markdown
     attributes:
       value: |
-        # Bug report
-
-        👋 Hi!
-
-        **Please fill the following carefully before opening a new issue ❗**
-        *(Your issue may be closed if it doesn't provide the required pieces of information)*
-  - type: checkboxes
-    attributes:
-      label: Before submitting a new issue
-      description: Please perform simple checks first.
-      options:
-        - label: I tested using the latest version of the library, as the bug might be already fixed.
-          required: true
-        - label: I tested using a [supported version](https://github.com/reactwg/react-native-releases/blob/main/docs/support.md) of react native.
-          required: true
-        - label: I checked for possible duplicate issues, with possible answers.
-          required: true
+        Thanks for helping improve this package. Please share as much context as you can.
   - type: textarea
     id: summary
     attributes:
       label: Bug summary
-      description: |
-        Provide a clear and concise description of what the bug is.
-        If needed, you can also provide other samples: error messages / stack traces, screenshots, gifs, etc.
-    validations:
-      required: true
-  - type: input
-    id: library-version
-    attributes:
-      label: Library version
-      description: What version of the library are you using?
-      placeholder: "x.x.x"
-    validations:
-      required: true
+      description: What happened, and what did you expect instead?
+      placeholder: e.g. The ad container does not render on Android after the provider mounts.
   - type: textarea
-    id: react-native-info
+    id: environment
     attributes:
-      label: Environment info
-      description: Run `react-native info` in your terminal and paste the results here.
-      render: shell
-    validations:
-      required: true
+      label: Environment details
+      description: Share your React Native, Expo, iOS, or Android context.
+      placeholder: React Native version, package version, platform, and any relevant setup notes.
   - type: textarea
-    id: steps-to-reproduce
+    id: reproduction
     attributes:
       label: Steps to reproduce
-      description: |
-        You must provide a clear list of steps and code to reproduce the problem.
-      value: |
-        1. …
-        2. …
-    validations:
-      required: true
-  - type: input
-    id: reproducible-example
+      description: Outline the steps to reproduce the bug.
+      placeholder: |
+        1. Install @thealteroffice/react-native-adgeist
+        2. Add the provider and ad component
+        3. Launch the app and observe the issue
+  - type: textarea
+    id: logs
     attributes:
-      label: Reproducible example repository 
-      description: Please provide a link to a repository on GitHub with a reproducible example.
-      render: js
-    validations:
-      required: true
+      label: Logs or screenshots
+      description: Paste error messages, stack traces, or add screenshots if helpful.
+      placeholder: Paste relevant logs or attach screenshots here.

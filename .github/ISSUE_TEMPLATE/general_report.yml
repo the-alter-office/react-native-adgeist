@@ -1,0 +1,33 @@
+name: 💬 General report
+description: Share feedback, questions, or other general concerns about the AdGeist React Native SDK.
+labels:
+  - general
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for general feedback, questions, or anything that does not fit the other templates.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What would you like to share?
+      placeholder: e.g. A question about ad placement lifecycle events or feedback on the current integration experience.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant background about your project or setup.
+      placeholder: Share your React Native, Expo, iOS, or Android context if helpful.
+  - type: textarea
+    id: question-or-request
+    attributes:
+      label: Question or request
+      description: Describe what you need help with or what you would like to discuss.
+      placeholder: e.g. Ask about supported ad formats or suggest an improvement to the example app.
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional information
+      description: Add any other details that may be useful.
+      placeholder: Paste logs, links, screenshots, or example code here.

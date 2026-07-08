@@ -1,0 +1,33 @@
+name: 📝 Documentation
+description: Suggest improvements or corrections for the package README, examples, or integration docs.
+labels:
+  - documentation
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the documentation for this React Native package.
+  - type: textarea
+    id: area
+    attributes:
+      label: Documentation area
+      description: Which part of the docs or examples needs attention?
+      placeholder: e.g. Installation steps, provider setup, sample usage, or native module notes.
+  - type: textarea
+    id: issue
+    attributes:
+      label: What is unclear or incorrect?
+      description: Describe the problem with the current documentation.
+      placeholder: e.g. The README example does not show the correct import path for the AdGeist provider.
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement
+      description: Share the wording, example, or change you would like to see.
+      placeholder: e.g. Add an Expo-friendly example and a note about required native setup.
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Add links or snippets that might help clarify the update.
+      placeholder: Paste relevant links, code snippets, or screenshots here.
