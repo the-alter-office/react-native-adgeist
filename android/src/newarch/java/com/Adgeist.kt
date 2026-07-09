@@ -26,7 +26,6 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     }
 
     override fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, renderTime: Double, promise: Promise) {
-        // Not supported by AdgeistKit Android anymore; kept for JS API compatibility with iOS
         promise.resolve("trackImpression is not supported on Android")
     }
 
@@ -44,7 +43,6 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     }
 
     override fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalViewTime: Double, promise: Promise) {
-        // Not supported by AdgeistKit Android anymore; kept for JS API compatibility with iOS
         promise.resolve("trackTotalView is not supported on Android")
     }
 
@@ -57,7 +55,6 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
      }
 
      override fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalPlaybackTime: Double, promise: Promise) {
-        // Not supported by AdgeistKit Android anymore; kept for JS API compatibility with iOS
         promise.resolve("trackVideoPlayback is not supported on Android")
      }
 
