@@ -29,6 +29,10 @@ object HTML5AdViewManagerImpl {
     fun createViewInstance(reactContext: ThemedReactContext): AdView {
         Log.d(TAG, "Creating AdView with ThemedReactContext: ${reactContext.hashCode()}")
         val adView = AdView(reactContext)
+        // react-native-screens destroys/recreates the host fragment whenever a
+        // screen is covered, so fragment onDestroy is not a teardown signal
+        // here; RN drives teardown via onDropViewInstance instead
+        adView.watchFragmentLifecycle = false
         viewContextMap[System.identityHashCode(adView)] = reactContext
         Log.d(TAG, "AdView created with hash: ${System.identityHashCode(adView)} and context hash: ${reactContext.hashCode()}")
         return adView

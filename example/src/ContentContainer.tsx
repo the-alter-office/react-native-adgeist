@@ -4,7 +4,6 @@ import {
   Text,
   Pressable,
   ScrollView,
-  Linking,
   TextInput,
   Alert,
 } from 'react-native';
@@ -12,7 +11,6 @@ import {
 import {
   useAdgeistContext,
   getConsentStatus,
-  trackConversionsWithDeepLinks,
   HTML5AdView,
   AdTypes,
   type AdType,
@@ -30,26 +28,6 @@ export default function ContentContainer() {
       }
     })();
   }, [setAdgeistConsentModal]);
-
-  useEffect(() => {
-    const handleUrl = (url: string) => {
-      trackConversionsWithDeepLinks(url);
-    };
-
-    // Handle initial URL if app was opened from link
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleUrl(url);
-      }
-    });
-
-    // Handle URL changes while app is running
-    const subscription = Linking.addEventListener('url', (event) => {
-      handleUrl(event.url);
-    });
-
-    return () => subscription?.remove();
-  }, []);
 
   const [adSpaceId, setAdSpaceId] = useState('');
   const [adType, setAdType] = useState<AdType>(AdTypes.BANNER);

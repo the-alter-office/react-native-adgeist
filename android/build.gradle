@@ -113,7 +113,7 @@ def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
   implementation "com.facebook.react:react-android"
-  implementation "ai.adgeist:adgeistkit:1.1.22-beta"
+  implementation "ai.adgeist:adgeistkit:1.1.27-beta"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
   /*

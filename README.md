@@ -119,45 +119,6 @@ import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
 - `AdTypes.COMPANION` - Companion ads (requires minimum 320x320 dimensions)
 
 
-### Campaign Conversion Analytics
+## Support
 
-#### Prerequisites
-
-Before implementing campaign conversion analytics, ensure your app has deeplink support configured. Refer to these resources for setup guidance:
-
-- [React Navigation - Deep Linking](https://reactnavigation.org/docs/deep-linking/)
-- [React Native - Linking](https://reactnative.dev/docs/linking)
-- [Expo - Linking into your app](https://docs.expo.dev/linking/into-your-app/)
-
-#### Implementation
-
-Tracks deeplink UTM parameters for attribution and analytics. This method should be called whenever your app is opened via a deeplink to capture campaign attribution data.
-
-```tsx
-// Example usage with React Navigation
-import { Linking } from 'react-native';
-import { trackConversionsWithDeepLinks } from '@thealteroffice/react-native-adgeist';
-
-useEffect(() => {
-  const handleUrl = (url: string) => {
-    trackConversionsWithDeepLinks(url);
-    // Continue with your normal deeplink handling
-  };
-
-  // Handle initial URL if app was opened from link
-  Linking.getInitialURL().then((url) => {
-    if (url) {
-      handleUrl(url);
-    }
-  });
-
-  // Handle URL changes while app is running
-  const subscription = Linking.addEventListener('url', (event) => {
-    handleUrl(event.url);
-  });
-
-  return () => subscription?.remove();
-}, []);
-```
-
-**Important**: This method should be called as early as possible when handling deeplinks to ensure accurate attribution tracking.
+If you run into any difficulties while integrating or using the Adgeist Mobile Ads SDK, reach out to beast@thealteroffice.com and we'll help you get it sorted out.

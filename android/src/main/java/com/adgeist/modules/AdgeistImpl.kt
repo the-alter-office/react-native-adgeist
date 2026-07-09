@@ -1,12 +1,10 @@
 package com.adgeist.modules
 
-import android.net.Uri
 import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.adgeistkit.AdgeistCore
 import com.adgeistkit.data.models.AdData
-import com.adgeistkit.data.models.CPMAdResponse
 import com.adgeistkit.data.models.Event
 import com.adgeistkit.data.models.FixedAdResponse
 import com.adgeistkit.data.models.UserDetails
@@ -15,7 +13,7 @@ import com.adgeistkit.data.network.FetchCreative
 
 import com.facebook.react.bridge.ReadableMap
 import com.adgeist.utils.toWritableMap
-import com.adgeistkit.request.AnalyticsRequestDEPRECATED
+import com.adgeistkit.request.AnalyticsRequest
 
 class AdgeistImpl internal constructor(private val context: ReactApplicationContext) {
   private var adgeistInstance: AdgeistCore? = null
@@ -41,30 +39,23 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
 
   fun fetchCreative(adSpaceId: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
     getAd?.fetchCreative(adSpaceId, buyType, isTestEnvironment) { adData ->
-      if (adData != null) {
-        if (adData.isSuccess && adData.data != null) {
-          when (val response = adData.data) {
-            is CPMAdResponse -> {
-              promise.resolve(response.toWritableMap())
-            }
-            is FixedAdResponse -> {
-              promise.resolve(response.toWritableMap())
-            }
-            else -> {
-              promise.reject("UNKNOWN_RESPONSE", "Unknown ad response type")
-            }
+      if (adData.isSuccess && adData.data != null) {
+        when (val response = adData.data) {
+          is FixedAdResponse -> {
+            promise.resolve(response.toWritableMap())
           }
-        } else {
-          promise.reject("AD_ERROR", adData.errorMessage)
+          else -> {
+            promise.reject("UNKNOWN_RESPONSE", "Unknown ad response type")
+          }
         }
       } else {
-        promise.reject("NO_AD", "Ad data not available")
+        promise.reject("AD_ERROR", adData.errorMessage)
       }
     } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
   }
 
-  fun sendCreativeAnalytics(analyticsRequestDEPRECATED : AnalyticsRequestDEPRECATED, promise: Promise) {
-    postCreativeAnalytic?.sendTrackingData(analyticsRequestDEPRECATED)
+  fun sendCreativeAnalytics(analyticsRequest: AnalyticsRequest, promise: Promise) {
+    postCreativeAnalytic?.sendTrackingDataV2(analyticsRequest)
     promise.resolve("Event sent successfully")
   }
 
@@ -108,11 +99,6 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
 
   fun updateConsentStatus(consent: Boolean) {
     adgeistInstance?.updateConsentStatus(consent)
-  }
-
-  fun trackDeeplinkUtm(url: String) {
-    val uri = Uri.parse(url)
-    adgeistInstance?.trackUtmFromDeeplink(uri)
   }
 
   companion object {
