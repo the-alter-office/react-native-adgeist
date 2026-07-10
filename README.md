@@ -123,4 +123,4 @@ import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
 
 ## Support
 
-If you run into any difficulties while integrating or using the Adgeist Mobile Ads SDK, reach out to beast@thealteroffice.com and we'll help you get it sorted out.
+If you run into any difficulties while integrating or using the Adgeist Mobile Ads SDK, reach out to beast@thealteroffice.com or kishore@thealteroffice.com and we'll help you get it sorted out.
