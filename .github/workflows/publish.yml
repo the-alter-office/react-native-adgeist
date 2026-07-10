@@ -46,39 +46,39 @@ jobs:
           fi
 
       - name: Upgrade npm for trusted publishing
-        run: npm install -g npm@latest
+        run: npm install -g npm@11
 
       - name: Publish to npm
         run: npm publish --tag "$DIST_TAG"
 
-      - name: Send Slack Notification
-        if: always()
-        run: |
-          REPO="${{ github.repository }}"
-          BRANCH="${{ github.ref_name }}"
-          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      # - name: Send Slack Notification
+      #   if: always()
+      #   run: |
+      #     REPO="${{ github.repository }}"
+      #     BRANCH="${{ github.ref_name }}"
+      #     WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          if [ "${{ job.status }}" = "success" ]; then
-            STATUS_EMOJI="✅"
-            STATUS_TEXT="Deployment Succeeded"
-          else
-            STATUS_EMOJI="❌"
-            STATUS_TEXT="Deployment Failed"
-          fi
+      #     if [ "${{ job.status }}" = "success" ]; then
+      #       STATUS_EMOJI="✅"
+      #       STATUS_TEXT="Deployment Succeeded"
+      #     else
+      #       STATUS_EMOJI="❌"
+      #       STATUS_TEXT="Deployment Failed"
+      #     fi
 
-          ARTIFACT_URL="https://www.npmjs.com/package/@thealteroffice/react-native-adgeist"
+      #     ARTIFACT_URL="https://www.npmjs.com/package/@thealteroffice/react-native-adgeist"
 
-          MESSAGE="*React Native Package Deployment Status*
-          $STATUS_EMOJI *Status:* $STATUS_TEXT
-          *Repository:* $REPO
-          *Branch:* $BRANCH
-          *Environment:* ${PUBLISH_ENV:-unknown}
-          *Version:* ${PKG_VERSION:-unknown}"
+      #     MESSAGE="*React Native Package Deployment Status*
+      #     $STATUS_EMOJI *Status:* $STATUS_TEXT
+      #     *Repository:* $REPO
+      #     *Branch:* $BRANCH
+      #     *Environment:* ${PUBLISH_ENV:-unknown}
+      #     *Version:* ${PKG_VERSION:-unknown}"
 
-          curl -X POST "${{ secrets.SLACK_NOTIFICATION_WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"text\": \"$MESSAGE\",
-              \"workflowUrl\": \"$WORKFLOW_URL\",
-              \"artifactUrl\": \"$ARTIFACT_URL\"
-            }"
+      #     curl -X POST "${{ secrets.SLACK_NOTIFICATION_WEBHOOK_URL }}" \
+      #       -H "Content-Type: application/json" \
+      #       -d "{
+      #         \"text\": \"$MESSAGE\",
+      #         \"workflowUrl\": \"$WORKFLOW_URL\",
+      #         \"artifactUrl\": \"$ARTIFACT_URL\"
+      #       }"
