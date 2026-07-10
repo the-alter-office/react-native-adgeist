@@ -22,13 +22,13 @@ const USAGE = `Usage:
   yarn set-env <beta|qa|prod>     Set PACKAGE_SUFFIX and BACKEND_DOMAIN for an environment
   yarn set-env --domain <url>     Set only BACKEND_DOMAIN (local development)`;
 
-const constantsPath = path.join(__dirname, '../src/constants.ts');
+const envPath = path.join(__dirname, '../src/env.ts');
 
 function replaceConstant(content, name, value) {
   const regex = new RegExp(`export const ${name} = ['"][^'"]*['"]`);
 
   if (!regex.test(content)) {
-    console.error(`❌ Could not find ${name} in constants.ts`);
+    console.error(`❌ Could not find ${name} in env.ts`);
     process.exit(1);
   }
 
@@ -36,7 +36,7 @@ function replaceConstant(content, name, value) {
 }
 
 const args = process.argv.slice(2);
-let content = fs.readFileSync(constantsPath, 'utf8');
+let content = fs.readFileSync(envPath, 'utf8');
 
 if (args[0] === '--domain') {
   const domain = args[1];
@@ -47,7 +47,7 @@ if (args[0] === '--domain') {
   }
 
   content = replaceConstant(content, 'BACKEND_DOMAIN', domain);
-  fs.writeFileSync(constantsPath, content, 'utf8');
+  fs.writeFileSync(envPath, content, 'utf8');
   console.log(`✅ Set BACKEND_DOMAIN to ${domain}`);
 } else {
   const env = ENVIRONMENTS[args[0]];
@@ -59,7 +59,7 @@ if (args[0] === '--domain') {
 
   content = replaceConstant(content, 'PACKAGE_SUFFIX', env.suffix);
   content = replaceConstant(content, 'BACKEND_DOMAIN', env.domain);
-  fs.writeFileSync(constantsPath, content, 'utf8');
+  fs.writeFileSync(envPath, content, 'utf8');
   console.log(
     `✅ Environment set to ${args[0]} (PACKAGE_SUFFIX='${env.suffix}', BACKEND_DOMAIN='${env.domain}')`
   );

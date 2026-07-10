@@ -11,12 +11,8 @@ import type {
   AdgeistContextType,
   AdgeistProviderProps,
 } from '../types/Provider';
-import {
-  PACKAGE_VERSION_TAG,
-  PACKAGE_VERSION,
-  PACKAGE_SUFFIX,
-  BACKEND_DOMAIN,
-} from '../constants';
+import { PACKAGE_VERSION_TAG, PACKAGE_VERSION } from '../constants';
+import { PACKAGE_SUFFIX, BACKEND_DOMAIN } from '../env';
 
 const AdgeistContext = createContext<AdgeistContextType>({
   isTestEnvironment: false,
