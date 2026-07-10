@@ -7,7 +7,7 @@ const path = require('path');
 const constantsPath = path.join(__dirname, '../src/constants.ts');
 const constantsContent = fs.readFileSync(constantsPath, 'utf8');
 
-// Extract version using regex
+// Extract version and suffix using regex
 const versionMatch = constantsContent.match(
   /export const PACKAGE_VERSION = ['"]([^'"]+)['"]/
 );
@@ -17,7 +17,16 @@ if (!versionMatch) {
   process.exit(1);
 }
 
-const version = versionMatch[1];
+const suffixMatch = constantsContent.match(
+  /export const PACKAGE_SUFFIX = ['"]([^'"]*)['"]/
+);
+
+if (!suffixMatch) {
+  console.error('❌ Could not find PACKAGE_SUFFIX in constants.ts');
+  process.exit(1);
+}
+
+const version = versionMatch[1] + suffixMatch[1];
 console.log(`📦 Version from constants.ts: ${version}`);
 
 // Read and update package.json

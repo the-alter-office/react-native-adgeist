@@ -1,0 +1,84 @@
+name: Publish
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write # required for npm trusted publishing (OIDC)
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Resolve environment from branch
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            main) echo "PUBLISH_ENV=beta" >> $GITHUB_ENV; echo "DIST_TAG=beta" >> $GITHUB_ENV ;;
+            qa)   echo "PUBLISH_ENV=qa"   >> $GITHUB_ENV; echo "DIST_TAG=qa"   >> $GITHUB_ENV ;;
+            prod) echo "PUBLISH_ENV=prod" >> $GITHUB_ENV; echo "DIST_TAG=latest" >> $GITHUB_ENV ;;
+            *)
+              echo "::error::Publishing is only allowed from main, qa, or prod (got '${GITHUB_REF_NAME}')"
+              exit 1
+              ;;
+          esac
+
+      - name: Set environment constants
+        run: yarn set-env "$PUBLISH_ENV"
+
+      - name: Build package
+        run: yarn prepare
+
+      - name: Check version is not already published
+        run: |
+          PKG_NAME=$(node -p "require('./package.json').name")
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "PKG_NAME=${PKG_NAME}" >> $GITHUB_ENV
+          echo "PKG_VERSION=${PKG_VERSION}" >> $GITHUB_ENV
+          if npm view "${PKG_NAME}@${PKG_VERSION}" version > /dev/null 2>&1; then
+            echo "::error::${PKG_NAME}@${PKG_VERSION} is already published. Bump PACKAGE_VERSION in src/constants.ts."
+            exit 1
+          fi
+
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Publish to npm
+        run: npm publish --tag "$DIST_TAG"
+
+      - name: Send Slack Notification
+        if: always()
+        run: |
+          REPO="${{ github.repository }}"
+          BRANCH="${{ github.ref_name }}"
+          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS_EMOJI="✅"
+            STATUS_TEXT="Deployment Succeeded"
+          else
+            STATUS_EMOJI="❌"
+            STATUS_TEXT="Deployment Failed"
+          fi
+
+          ARTIFACT_URL="https://www.npmjs.com/package/@thealteroffice/react-native-adgeist"
+
+          MESSAGE="*React Native Package Deployment Status*
+          $STATUS_EMOJI *Status:* $STATUS_TEXT
+          *Repository:* $REPO
+          *Branch:* $BRANCH
+          *Environment:* ${PUBLISH_ENV:-unknown}
+          *Version:* ${PKG_VERSION:-unknown}"
+
+          curl -X POST "${{ secrets.SLACK_NOTIFICATION_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"text\": \"$MESSAGE\",
+              \"workflowUrl\": \"$WORKFLOW_URL\",
+              \"artifactUrl\": \"$ARTIFACT_URL\"
+            }"

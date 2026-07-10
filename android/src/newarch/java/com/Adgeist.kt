@@ -3,7 +3,7 @@ package com.adgeist
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.adgeist.modules.AdgeistImpl
-import com.adgeistkit.request.AnalyticsRequestDEPRECATED
+import com.adgeistkit.request.AnalyticsRequest
 import com.facebook.react.bridge.ReadableMap
 
 class Adgeist internal constructor(reactContext: ReactApplicationContext) :
@@ -26,78 +26,36 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     }
 
     override fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, renderTime: Double, promise: Promise) {
-        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
-
-        builder = when (buyType.uppercase()) {
-          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
-          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
-          else -> builder
-        }
-
-        implementation.sendCreativeAnalytics(builder.trackImpression(renderTime.toFloat()).build(), promise)
+        promise.resolve("trackImpression is not supported on Android")
     }
 
     override fun trackView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, viewTime: Double, visibilityRatio: Double, scrollDepth: Double, timeToVisible: Double, promise: Promise) {
-        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
-
-        builder = when (buyType.uppercase()) {
-          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
-          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
-          else -> builder
-        }
-
-        implementation.sendCreativeAnalytics(
-          builder.trackViewableImpression(timeToVisible.toFloat(),
+        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta, isTestEnvironment)
+          .trackViewableImpression(
+            timeToVisible.toLong(),
             scrollDepth.toFloat(),
             visibilityRatio.toFloat(),
-            viewTime.toFloat()).build(),
-          promise
-        )
+            viewTime.toLong()
+          )
+          .build()
+
+        implementation.sendCreativeAnalytics(request, promise)
     }
 
     override fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalViewTime: Double, promise: Promise) {
-        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
-
-        builder = when (buyType.uppercase()) {
-          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
-          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
-          else -> builder
-        }
-
-        implementation.sendCreativeAnalytics(
-          builder.trackTotalViewTime(totalViewTime.toFloat()).build(),
-          promise
-        )
+        promise.resolve("trackTotalView is not supported on Android")
     }
 
      override fun trackClick(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
-        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
+        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta, isTestEnvironment)
+          .trackClick()
+          .build()
 
-        builder = when (buyType.uppercase()) {
-          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
-          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
-          else -> builder
-        }
-
-        implementation.sendCreativeAnalytics(
-          builder.trackClick().build(),
-          promise
-        )
+        implementation.sendCreativeAnalytics(request, promise)
      }
 
      override fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalPlaybackTime: Double, promise: Promise) {
-        var builder =  AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adSpaceId, isTestEnvironment)
-
-        builder = when (buyType.uppercase()) {
-          "CPM" -> builder.buildCPMRequest(campaignId, bidId)
-          "FIXED" -> builder.buildFIXEDRequest(bidMeta)
-          else -> builder
-        }
-
-        implementation.sendCreativeAnalytics(
-          builder.trackTotalPlaybackTime(totalPlaybackTime.toFloat()).build(),
-          promise
-        )
+        promise.resolve("trackVideoPlayback is not supported on Android")
      }
 
     override fun setUserDetails(userDetails: ReadableMap) {
@@ -114,9 +72,5 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
 
     override fun updateConsentStatus(consent: Boolean) {
         implementation.updateConsentStatus(consent)
-    }
-
-    override fun trackDeeplinkUtm(url: String) {
-        implementation.trackDeeplinkUtm(url)
     }
 }

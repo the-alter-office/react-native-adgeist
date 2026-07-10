@@ -102,14 +102,6 @@ import React
         adgeistInstance?.updateConsentStatus(consent)
     }
 
-    @objc public func trackDeeplinkUtm(url: String) {
-        guard let urlObj = URL(string: url) else {
-            print("Invalid URL provided for UTM tracking")
-            return
-        }
-        adgeistInstance?.trackDeeplink(url: urlObj)
-    }
-
     @objc public func logEvent(eventDict: [String: Any]) {
         let filtered = eventDict.compactMapValues { value -> Any? in
             (value is NSNull) ? nil : value
@@ -129,11 +121,11 @@ import React
     }
 
     public func sendCreativeAnalytics(
-        analyticsRequest: AnalyticsRequestDEPRECATED,
+        analyticsRequest: AnalyticsRequest,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        postCreativeAnalytic?.sendTrackingData(analyticsRequestDEPRECATED: analyticsRequest)
+        postCreativeAnalytic?.sendTrackingDataV2(analyticsRequest: analyticsRequest)
         resolver("Event sent successfully")
     }
 
@@ -148,17 +140,8 @@ import React
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
-        
-        let upperBuyType = buyType.uppercased()
-        if upperBuyType == "CPM" {
-            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
-        } else if upperBuyType == "FIXED" {
-            builder = builder.buildFIXEDRequest(metaData: bidMeta)
-        }
-        
-        let request = builder.trackImpression(renderTime: renderTime).build()
-        sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
+        // Not supported by AdgeistKit iOS anymore; kept for JS API compatibility
+        resolver("trackImpression is not supported on iOS")
     }
 
     @objc public func trackView(
@@ -175,21 +158,13 @@ import React
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
-        
-        let upperBuyType = buyType.uppercased()
-        if upperBuyType == "CPM" {
-            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
-        } else if upperBuyType == "FIXED" {
-            builder = builder.buildFIXEDRequest(metaData: bidMeta)
-        }
-        
-        let request = builder.trackViewableImpression(
-            timeToVisible: timeToVisible,
-            scrollDepth: scrollDepth,
-            visibilityRatio: visibilityRatio,
-            viewTime: viewTime
-        ).build()
+        let request = AnalyticsRequest.AnalyticsRequestBuilder(metaData: bidMeta, isTestMode: isTestEnvironment)
+            .trackViewableImpression(
+                timeToVisible: Int64(timeToVisible),
+                scrollDepth: scrollDepth,
+                visibilityRatio: visibilityRatio,
+                viewTime: Int64(viewTime)
+            ).build()
         sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
     }
 
@@ -205,17 +180,8 @@ import React
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
-        
-        let upperBuyType = buyType.uppercased()
-        if upperBuyType == "CPM" {
-            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
-        } else if upperBuyType == "FIXED" {
-            builder = builder.buildFIXEDRequest(metaData: bidMeta)
-        }
-        
-        let request = builder.trackTotalViewTime(totalViewTime: totalViewTime).build()
-        sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
+        // Not supported by AdgeistKit iOS anymore; kept for JS API compatibility
+        resolver("trackTotalView is not supported on iOS")
     }
 
     @objc public func trackClick(
@@ -228,16 +194,8 @@ import React
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
-        
-        let upperBuyType = buyType.uppercased()
-        if upperBuyType == "CPM" {
-            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
-        } else if upperBuyType == "FIXED" {
-            builder = builder.buildFIXEDRequest(metaData: bidMeta)
-        }
-        
-        let request = builder.trackClick().build()
+        let request = AnalyticsRequest.AnalyticsRequestBuilder(metaData: bidMeta, isTestMode: isTestEnvironment)
+            .trackClick().build()
         sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
     }
 
@@ -252,17 +210,8 @@ import React
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
-        
-        let upperBuyType = buyType.uppercased()
-        if upperBuyType == "CPM" {
-            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)
-        } else if upperBuyType == "FIXED" {
-            builder = builder.buildFIXEDRequest(metaData: bidMeta)
-        }
-        
-        let request = builder.trackTotalPlaybackTime(totalPlaybackTime: totalPlaybackTime).build()
-        sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
+        // Not supported by AdgeistKit iOS anymore; kept for JS API compatibility
+        resolver("trackVideoPlayback is not supported on iOS")
     }
 
 //    @objc public func trackVideoQuartile(

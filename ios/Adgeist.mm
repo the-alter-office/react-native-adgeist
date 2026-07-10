@@ -70,10 +70,6 @@ RCT_EXPORT_METHOD(updateConsentStatus:(BOOL)consent) {
     [adgeist updateConsentStatus:consent];
 }
 
-RCT_EXPORT_METHOD(trackDeeplinkUtm:(NSString *)url) {
-    [adgeist trackDeeplinkUtmWithUrl:url];
-}
-
 RCT_EXPORT_METHOD(logEvent:(NSDictionary *)eventDict) {
     [adgeist logEventWithEventDict:eventDict];
 }

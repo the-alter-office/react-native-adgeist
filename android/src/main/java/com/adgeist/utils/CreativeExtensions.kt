@@ -4,52 +4,6 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
 import com.adgeistkit.data.models.*
 
-fun CPMAdResponse.toWritableMap(): WritableMap {
-  val map = Arguments.createMap()
-
-  map.putBoolean("success", success)
-  map.putString("message", message)
-
-  val dataMap = Arguments.createMap()
-  val d = data
-
-  if (d != null) {
-    dataMap.putString("id", d.id)
-    dataMap.putString("bidId", d.bidId)
-    dataMap.putString("cur", d.cur)
-
-    val seatBidArray = Arguments.createArray()
-    d.seatBid.forEach { seatBid ->
-      val seatMap = Arguments.createMap()
-      seatMap.putString("bidId", seatBid.bidId)
-
-      val bidArr = Arguments.createArray()
-      seatBid.bid.forEach { bid ->
-        val bidMap = Arguments.createMap()
-        bidMap.putString("id", bid.id)
-        bidMap.putString("impId", bid.impId)
-        bidMap.putDouble("price", bid.price)
-
-        val extMap = Arguments.createMap()
-        extMap.putString("creativeUrl", bid.ext.creativeUrl)
-        extMap.putString("ctaUrl", bid.ext.ctaUrl)
-        extMap.putString("creativeTitle", bid.ext.creativeTitle)
-        extMap.putString("creativeDescription", bid.ext.creativeDescription)
-
-        bidMap.putMap("ext", extMap)
-        bidArr.pushMap(bidMap)
-      }
-      seatMap.putArray("bid", bidArr)
-      seatBidArray.pushMap(seatMap)
-    }
-
-    dataMap.putArray("seatBid", seatBidArray)
-  }
-
-  map.putMap("data", dataMap)
-  return map
-}
-
 fun FixedAdResponse.toWritableMap(): WritableMap {
   val map = Arguments.createMap()
 
