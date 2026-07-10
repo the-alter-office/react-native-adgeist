@@ -11,7 +11,12 @@ import type {
   AdgeistContextType,
   AdgeistProviderProps,
 } from '../types/Provider';
-import { PACKAGE_VERSION_TAG, PACKAGE_VERSION } from '../constants';
+import {
+  PACKAGE_VERSION_TAG,
+  PACKAGE_VERSION,
+  PACKAGE_SUFFIX,
+  BACKEND_DOMAIN,
+} from '../constants';
 
 const AdgeistContext = createContext<AdgeistContextType>({
   isTestEnvironment: false,
@@ -21,7 +26,7 @@ const AdgeistContext = createContext<AdgeistContextType>({
 
 export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
   children,
-  customBidRequestBackendDomain = 'https://beta.v2.bg-services.adgeist.ai',
+  customBidRequestBackendDomain = BACKEND_DOMAIN,
   customPackageOrBundleID = null,
   customAdgeistAppID = null,
   isTestEnvironment = false,
@@ -50,7 +55,7 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
           domain: customBidRequestBackendDomain,
           bundleId: customPackageOrBundleID,
           appId: customAdgeistAppID,
-          version: `${PACKAGE_VERSION_TAG}-${PACKAGE_VERSION}`,
+          version: `${PACKAGE_VERSION_TAG}-${PACKAGE_VERSION}${PACKAGE_SUFFIX}`,
         });
       }
 
