@@ -44,12 +44,12 @@ You can find your app ID in the Adgeist web interface. For `android:value`, inse
 
     <meta-data
         android:name="com.adgeistkit.ads.ADGEIST_APP_ID"
-        android:value="ADGEIST_APP_ID"/>
+        android:value="YOUR_ADGEIST_APP_ID"/>
   </application>
 </manifest>
 ```
 
-Replace `ADGEIST_APP_ID` with your Adgeist Publisher ID.
+Replace `YOUR_ADGEIST_APP_ID` with your Adgeist Publisher ID. The `android:name` attribute must stay as is.
 
 ### iOS Configuration
 
@@ -67,14 +67,16 @@ cd ios && pod install --repo-update
 
 #### Update your Info.plist
 
-Update your app's `Info.plist` file to add three keys:
-
-A `ADGEIST_APP_ID` key with a string value of your Adgeist ID found in the Adgeist UI.
+Add your Adgeist publisher ID, as identified in the Adgeist web interface, to your app's `Info.plist` file. To do so, add an `ADGEIST_APP_ID` key with a string value of your Adgeist publisher ID.
 
 ```xml
+<!-- Sample Adgeist app ID: 69326f9fbb280f9241cabc94 -->
+
 <key>ADGEIST_APP_ID</key>
-<string>69326f9fbb280f9241cabc94</string>
+<string>YOUR_ADGEIST_APP_ID</string>
 ```
+
+Replace `YOUR_ADGEIST_APP_ID` with your Adgeist Publisher ID. The `ADGEIST_APP_ID` key name must stay as is.
 
 ### STEP 3: React Native Configuration and Ad Placement
 
