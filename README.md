@@ -104,10 +104,11 @@ Use the `HTML5AdView` component to display banner ads anywhere in your app. Plac
 import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
 
 // Sample Adgeist ad unit ID: 6932a4c022f6786424ce3b84
+// Sample ad size: { width: 320, height: 480 }
 
 <HTML5AdView
   adUnitID="YOUR_ADUNIT_ID"
-  adSize={{ width: 320, height: 480 }}
+  adSize={{ width: YOUR_AD_WIDTH, height: YOUR_AD_HEIGHT }}
   onAdLoaded={}
   onAdFailedToLoad={}
   onAdOpened={}
@@ -118,6 +119,23 @@ import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
 ```
 
 Replace `YOUR_ADUNIT_ID` with your Adgeist Ad Unit ID, as identified in the Adgeist web interface. Each ad placement in your app requires its own ad unit ID.
+
+Replace `YOUR_AD_WIDTH` and `YOUR_AD_HEIGHT` with the dimensions you mentioned while creating the ad space in the Adgeist web interface. The `adSize` must match those dimensions.
+
+**Responsive ads:** For responsive ads, `adSize` is not needed — passing `adIsResponsive={true}` is enough. The ad will automatically size itself to fit the available space.
+
+```tsx
+<HTML5AdView
+  adUnitID="YOUR_ADUNIT_ID"
+  adIsResponsive={true}
+  onAdLoaded={}
+  onAdFailedToLoad={}
+  onAdOpened={}
+  onAdClosed={}
+  onAdClicked={}
+  adType={AdTypes.DISPLAY}
+/>;
+```
 
 **Ad Types:**
 - `AdTypes.BANNER` - Small rectangular banner ads
