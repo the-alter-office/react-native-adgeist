@@ -21,16 +21,16 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
         implementation.destroySdk(promise)
     }
 
-    override fun fetchCreative(adSpaceId: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
-        implementation.fetchCreative(adSpaceId, buyType, isTestEnvironment, promise)
+    override fun fetchCreative(adSpaceId: String, buyType: String, promise: Promise) {
+        implementation.fetchCreative(adSpaceId, buyType, promise)
     }
 
-    override fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, renderTime: Double, promise: Promise) {
+    override fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, renderTime: Double, promise: Promise) {
         promise.resolve("trackImpression is not supported on Android")
     }
 
-    override fun trackView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, viewTime: Double, visibilityRatio: Double, scrollDepth: Double, timeToVisible: Double, promise: Promise) {
-        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta, isTestEnvironment)
+    override fun trackView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, viewTime: Double, visibilityRatio: Double, scrollDepth: Double, timeToVisible: Double, promise: Promise) {
+        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta)
           .trackViewableImpression(
             timeToVisible.toLong(),
             scrollDepth.toFloat(),
@@ -42,19 +42,19 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
         implementation.sendCreativeAnalytics(request, promise)
     }
 
-    override fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalViewTime: Double, promise: Promise) {
+    override fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, totalViewTime: Double, promise: Promise) {
         promise.resolve("trackTotalView is not supported on Android")
     }
 
-     override fun trackClick(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
-        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta, isTestEnvironment)
+     override fun trackClick(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, promise: Promise) {
+        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta)
           .trackClick()
           .build()
 
         implementation.sendCreativeAnalytics(request, promise)
      }
 
-     override fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalPlaybackTime: Double, promise: Promise) {
+     override fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, totalPlaybackTime: Double, promise: Promise) {
         promise.resolve("trackVideoPlayback is not supported on Android")
      }
 

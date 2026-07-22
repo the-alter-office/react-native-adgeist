@@ -59,8 +59,8 @@ class HTML5AdViewManager : SimpleViewManager<AdView>(), HTML5AdNativeComponentMa
     }
 
     @RequiresPermission("android.permission.INTERNET")
-    override fun loadAd(view: AdView, isTestMode: Boolean) {
-        HTML5AdViewManagerImpl.loadAd(view, isTestMode)
+    override fun loadAd(view: AdView) {
+        HTML5AdViewManagerImpl.loadAd(view)
     }
 
     override fun destroy(view: AdView) {

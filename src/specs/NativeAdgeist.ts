@@ -22,11 +22,7 @@ export interface Spec extends TurboModule {
 
   destroySdk(): Promise<boolean>;
 
-  fetchCreative(
-    adSpaceId: string,
-    buyType: string,
-    isTestEnvironment: boolean
-  ): Promise<Object>;
+  fetchCreative(adSpaceId: string, buyType: string): Promise<Object>;
 
   setUserDetails(user: Object): void;
 
@@ -42,7 +38,6 @@ export interface Spec extends TurboModule {
     bidId: string,
     bidMeta: string,
     buyType: string,
-    isTestEnvironment: boolean,
     renderTime: number
   ): Promise<string>;
 
@@ -52,7 +47,6 @@ export interface Spec extends TurboModule {
     bidId: string,
     bidMeta: string,
     buyType: string,
-    isTestEnvironment: boolean,
     viewTime: number,
     visibilityRatio: number,
     scrollDepth: number,
@@ -65,7 +59,6 @@ export interface Spec extends TurboModule {
     bidId: string,
     bidMeta: string,
     buyType: string,
-    isTestEnvironment: boolean,
     totalViewTime: number
   ): Promise<string>;
 
@@ -74,8 +67,7 @@ export interface Spec extends TurboModule {
     adSpaceId: string,
     bidId: string,
     bidMeta: string,
-    buyType: string,
-    isTestEnvironment: boolean
+    buyType: string
   ): Promise<string>;
 
   trackVideoPlayback(
@@ -84,7 +76,6 @@ export interface Spec extends TurboModule {
     bidId: string,
     bidMeta: string,
     buyType: string,
-    isTestEnvironment: boolean,
     totalPlaybackTime: number
   ): Promise<string>;
 
@@ -92,7 +83,6 @@ export interface Spec extends TurboModule {
   //   campaignId: string,
   //   adSpaceId: string,
   //   bidId: string,
-  //   isTestEnvironment: boolean,
   //   quartile: string
   // ): Promise<string>;
 }

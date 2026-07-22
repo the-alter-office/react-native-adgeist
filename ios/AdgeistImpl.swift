@@ -39,8 +39,7 @@ import React
     @objc public func fetchCreative(
         adSpaceId: String,
         buyType: String,
-        isTestEnvironment: Bool,
-        resolver: @escaping RCTPromiseResolveBlock, 
+        resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
         guard let getAd = getAd else {
@@ -50,8 +49,7 @@ import React
 
         getAd.fetchCreative(
             adUnitID: adSpaceId,
-            buyType: buyType,
-            isTestEnvironment: isTestEnvironment
+            buyType: buyType
         ) { adData in
             // Check if the request was successful
             if adData.isSuccess, let creativeData = adData.data {
@@ -135,7 +133,6 @@ import React
         bidId: String,
         bidMeta: String,
         buyType: String,
-        isTestEnvironment: Bool,
         renderTime: Float,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
@@ -150,7 +147,6 @@ import React
         bidId: String,
         bidMeta: String,
         buyType: String,
-        isTestEnvironment: Bool,
         viewTime: Float,
         visibilityRatio: Float,
         scrollDepth: Float,
@@ -158,7 +154,7 @@ import React
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        let request = AnalyticsRequest.AnalyticsRequestBuilder(metaData: bidMeta, isTestMode: isTestEnvironment)
+        let request = AnalyticsRequest.AnalyticsRequestBuilder(metaData: bidMeta)
             .trackViewableImpression(
                 timeToVisible: Int64(timeToVisible),
                 scrollDepth: scrollDepth,
@@ -174,7 +170,6 @@ import React
         bidId: String,
         bidMeta: String,
         buyType: String,
-        isTestEnvironment: Bool,
         totalViewTime: Float,
         visibilityRatio: Float,
         resolver: @escaping RCTPromiseResolveBlock,
@@ -190,11 +185,10 @@ import React
         bidId: String,
         bidMeta: String,
         buyType: String,
-        isTestEnvironment: Bool,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        let request = AnalyticsRequest.AnalyticsRequestBuilder(metaData: bidMeta, isTestMode: isTestEnvironment)
+        let request = AnalyticsRequest.AnalyticsRequestBuilder(metaData: bidMeta)
             .trackClick().build()
         sendCreativeAnalytics(analyticsRequest: request, resolver: resolver, rejecter: rejecter)
     }
@@ -205,7 +199,6 @@ import React
         bidId: String,
         bidMeta: String,
         buyType: String,
-        isTestEnvironment: Bool,
         totalPlaybackTime: Float,
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
@@ -220,13 +213,12 @@ import React
 //        bidId: String,
 //        bidMeta: String,
 //        buyType: String,
-//        isTestEnvironment: Bool,
 //        quartile: String,
 //        resolver: @escaping RCTPromiseResolveBlock,
 //        rejecter: @escaping RCTPromiseRejectBlock
 //    ) {
-//        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId, isTestMode: isTestEnvironment)
-//        
+//        var builder = AnalyticsRequestDEPRECATED.AnalyticsRequestBuilderDEPRECATED(adUnitID: adSpaceId)
+//
 //        let upperBuyType = buyType.uppercased()
 //        if upperBuyType == "CPM" {
 //            builder = builder.buildCPMRequest(campaignID: campaignId, bidID: bidId)

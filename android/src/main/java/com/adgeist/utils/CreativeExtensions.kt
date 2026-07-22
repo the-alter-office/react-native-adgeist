@@ -7,7 +7,6 @@ import com.adgeistkit.data.models.*
 fun FixedAdResponse.toWritableMap(): WritableMap {
   val map = Arguments.createMap()
 
-  isTest?.let { map.putBoolean("isTest", it) }
   expiresAt?.let { map.putString("expiresAt", it) }
   map.putString("metaData", metaData)
   map.putString("id", id)

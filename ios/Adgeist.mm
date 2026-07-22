@@ -44,13 +44,11 @@ RCT_EXPORT_METHOD(destroySdk:(RCTPromiseResolveBlock)resolve
 
 RCT_EXPORT_METHOD(fetchCreative:(NSString *)adSpaceId
                   buyType:(NSString *)buyType
-                  isTestEnvironment:(BOOL)isTestEnvironment
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
     [adgeist fetchCreativeWithAdSpaceId:adSpaceId
                                        buyType:buyType
-                             isTestEnvironment:isTestEnvironment
                                       resolver:resolve
                                       rejecter:reject];
 }
@@ -79,7 +77,6 @@ RCT_EXPORT_METHOD(trackImpression:(NSString *)campaignId
                   bidId:(NSString *)bidId
                   bidMeta:(NSString *)bidMeta
                   buyType:(NSString *)buyType
-                  isTestEnvironment:(BOOL)isTestEnvironment
                   renderTime:(double)renderTime
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
@@ -89,7 +86,6 @@ RCT_EXPORT_METHOD(trackImpression:(NSString *)campaignId
                                      bidId:bidId
                                    bidMeta:bidMeta
                                    buyType:buyType
-                         isTestEnvironment:isTestEnvironment
                                 renderTime:(float)renderTime
                                   resolver:resolve
                                   rejecter:reject];
@@ -100,7 +96,6 @@ RCT_EXPORT_METHOD(trackView:(NSString *)campaignId
                   bidId:(NSString *)bidId
                   bidMeta:(NSString *)bidMeta
                   buyType:(NSString *)buyType
-                  isTestEnvironment:(BOOL)isTestEnvironment
                   viewTime:(double)viewTime
                   visibilityRatio:(double)visibilityRatio
                   scrollDepth:(double)scrollDepth
@@ -113,7 +108,6 @@ RCT_EXPORT_METHOD(trackView:(NSString *)campaignId
                                bidId:bidId
                              bidMeta:bidMeta
                              buyType:buyType
-                   isTestEnvironment:isTestEnvironment
                             viewTime:(float)viewTime
                      visibilityRatio:(float)visibilityRatio
                          scrollDepth:(float)scrollDepth
@@ -127,7 +121,6 @@ RCT_EXPORT_METHOD(trackTotalView:(NSString *)campaignId
                   bidId:(NSString *)bidId
                   bidMeta:(NSString *)bidMeta
                   buyType:(NSString *)buyType
-                  isTestEnvironment:(BOOL)isTestEnvironment
                   totalViewTime:(double)totalViewTime
                   visibilityRatio:(double)visibilityRatio
                   resolve:(RCTPromiseResolveBlock)resolve
@@ -138,7 +131,6 @@ RCT_EXPORT_METHOD(trackTotalView:(NSString *)campaignId
                                     bidId:bidId
                                   bidMeta:bidMeta
                                   buyType:buyType
-                        isTestEnvironment:isTestEnvironment
                             totalViewTime:(float)totalViewTime
                           visibilityRatio:(float)visibilityRatio
                                  resolver:resolve
@@ -150,7 +142,6 @@ RCT_EXPORT_METHOD(trackClick:(NSString *)campaignId
                   bidId:(NSString *)bidId
                   bidMeta:(NSString *)bidMeta
                   buyType:(NSString *)buyType
-                  isTestEnvironment:(BOOL)isTestEnvironment
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
@@ -159,7 +150,6 @@ RCT_EXPORT_METHOD(trackClick:(NSString *)campaignId
                                 bidId:bidId
                               bidMeta:bidMeta
                               buyType:buyType
-                    isTestEnvironment:isTestEnvironment
                              resolver:resolve
                              rejecter:reject];
 }
@@ -169,7 +159,6 @@ RCT_EXPORT_METHOD(trackVideoPlayback:(NSString *)campaignId
                   bidId:(NSString *)bidId
                   bidMeta:(NSString *)bidMeta
                   buyType:(NSString *)buyType
-                  isTestEnvironment:(BOOL)isTestEnvironment
                   totalPlaybackTime:(double)totalPlaybackTime
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
@@ -179,7 +168,6 @@ RCT_EXPORT_METHOD(trackVideoPlayback:(NSString *)campaignId
                                         bidId:bidId
                                       bidMeta:bidMeta
                                       buyType:buyType
-                            isTestEnvironment:isTestEnvironment
                             totalPlaybackTime:(float)totalPlaybackTime
                                      resolver:resolve
                                      rejecter:reject];
@@ -190,7 +178,6 @@ RCT_EXPORT_METHOD(trackVideoPlayback:(NSString *)campaignId
 //                   bidId:(NSString *)bidId
 //                   bidMeta:(NSString *)bidMeta
 //                   buyType:(NSString *)buyType
-//                   isTestEnvironment:(BOOL)isTestEnvironment
 //                   quartile:(NSString *)quartile
 //                   resolve:(RCTPromiseResolveBlock)resolve
 //                   reject:(RCTPromiseRejectBlock)reject)
@@ -200,7 +187,6 @@ RCT_EXPORT_METHOD(trackVideoPlayback:(NSString *)campaignId
 //                                         bidId:bidId
 //                                       bidMeta:bidMeta
 //                                       buyType:buyType
-//                             isTestEnvironment:isTestEnvironment
 //                                      quartile:quartile
 //                                      resolver:resolve
 //                                      rejecter:reject];

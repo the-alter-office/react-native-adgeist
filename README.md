@@ -89,7 +89,7 @@ import { AdgeistProvider } from '@thealteroffice/react-native-adgeist';
 
 export default function App() {
   return (
-    <AdgeistProvider isTestEnvironment={false}>
+    <AdgeistProvider>
       {/* Your app content */}
     </AdgeistProvider>
   );
