@@ -60,8 +60,7 @@ class HTML5AdViewManager : SimpleViewManager<AdView>() {
         try {
             when (commandId) {
                 COMMAND_LOAD_AD -> {
-                    val isTestMode = args?.getBoolean(0) ?: false
-                    loadAd(root, isTestMode)
+                    loadAd(root)
                 }
                 COMMAND_DESTROY -> {
                     destroy(root)
@@ -76,8 +75,8 @@ class HTML5AdViewManager : SimpleViewManager<AdView>() {
     }
 
     @RequiresPermission("android.permission.INTERNET")
-    fun loadAd(view: AdView, isTestMode: Boolean) {
-        HTML5AdViewManagerImpl.loadAd(view, isTestMode)
+    fun loadAd(view: AdView) {
+        HTML5AdViewManagerImpl.loadAd(view)
     }
 
     fun destroy(view: AdView) {

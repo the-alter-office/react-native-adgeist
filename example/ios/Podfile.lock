@@ -1,6 +1,6 @@
 PODS:
-  - Adgeist (0.0.31-beta):
-    - AdgeistKit (= 1.0.15-beta)
+  - Adgeist (0.0.33):
+    - AdgeistKit (= 1.0.16-beta)
     - DoubleConversion
     - glog
     - hermes-engine
@@ -21,7 +21,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - AdgeistKit (1.0.15-beta)
+  - AdgeistKit (1.0.16-beta)
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
   - fast_float (6.1.4)
@@ -1882,8 +1882,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  Adgeist: ce83df46092846f90b81c601b900309b0e0f06b0
-  AdgeistKit: ef53e628d4afb97f0f19320f43c58ed128ad3720
+  Adgeist: fb98b83bf1d9ff269fca431ac76ab0698ea5e69a
+  AdgeistKit: 430cbc4dffd8b901febf751a14d88e172d4deadd
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6

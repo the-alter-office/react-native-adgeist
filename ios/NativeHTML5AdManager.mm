@@ -162,11 +162,9 @@ using namespace facebook::react;
     RCTHTML5AdNativeComponentHandleCommand(self, commandName, args);
 }
 
-- (void)loadAd:(BOOL)isTestMode
+- (void)loadAd
 {
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    dict[@"isTestMode"] = @(isTestMode);
-    [_swiftView loadAd:dict];
+    [_swiftView loadAd];
 }
 
 - (void)destroy
@@ -235,15 +233,12 @@ RCT_EXPORT_VIEW_PROPERTY(onAdOpened, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAdClosed, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAdClicked, RCTDirectEventBlock)
 
-RCT_EXPORT_METHOD(loadAd:(nonnull NSNumber *)reactTag
-                  isTestMode:(BOOL)isTestMode)
+RCT_EXPORT_METHOD(loadAd:(nonnull NSNumber *)reactTag)
 {
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
         NativeHTML5AdView *view = (NativeHTML5AdView *)viewRegistry[reactTag];
         if ([view isKindOfClass:[NativeHTML5AdView class]]) {
-            NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-            dict[@"isTestMode"] = @(isTestMode);
-            [view loadAd:dict];
+            [view loadAd];
         }
     }];
 }

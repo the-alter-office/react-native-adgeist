@@ -26,18 +26,18 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun fetchCreative(adSpaceId: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
-        implementation.fetchCreative(adSpaceId, buyType, isTestEnvironment, promise)
+    fun fetchCreative(adSpaceId: String, buyType: String, promise: Promise) {
+        implementation.fetchCreative(adSpaceId, buyType, promise)
     }
 
     @ReactMethod
-    fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, renderTime: Double, promise: Promise) {
+    fun trackImpression(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, renderTime: Double, promise: Promise) {
         promise.resolve("trackImpression is not supported on Android")
     }
 
     @ReactMethod
-    fun trackView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, viewTime: Double, visibilityRatio: Double, scrollDepth: Double, timeToVisible: Double, promise: Promise) {
-        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta, isTestEnvironment)
+    fun trackView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, viewTime: Double, visibilityRatio: Double, scrollDepth: Double, timeToVisible: Double, promise: Promise) {
+        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta)
           .trackViewableImpression(
             timeToVisible.toLong(),
             scrollDepth.toFloat(),
@@ -50,13 +50,13 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalViewTime: Double, visibilityRatio: Double, promise: Promise) {
+    fun trackTotalView(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, totalViewTime: Double, visibilityRatio: Double, promise: Promise) {
         promise.resolve("trackTotalView is not supported on Android")
     }
 
     @ReactMethod
-    fun trackClick(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
-        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta, isTestEnvironment)
+    fun trackClick(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, promise: Promise) {
+        val request = AnalyticsRequest.AnalyticsRequestBuilder(bidMeta)
           .trackClick()
           .build()
 
@@ -64,7 +64,7 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, isTestEnvironment: Boolean, totalPlaybackTime: Double, promise: Promise) {
+    fun trackVideoPlayback(campaignId: String, adSpaceId: String, bidId: String, bidMeta: String, buyType: String, totalPlaybackTime: Double, promise: Promise) {
         promise.resolve("trackVideoPlayback is not supported on Android")
     }
 

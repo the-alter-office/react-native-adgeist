@@ -89,7 +89,7 @@ import { AdgeistProvider } from '@thealteroffice/react-native-adgeist';
 
 export default function App() {
   return (
-    <AdgeistProvider isTestEnvironment={false}>
+    <AdgeistProvider>
       {/* Your app content */}
     </AdgeistProvider>
   );
@@ -103,9 +103,31 @@ Use the `HTML5AdView` component to display banner ads anywhere in your app. Plac
 ```tsx
 import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
 
+// Sample Adgeist ad unit ID: 6932a4c022f6786424ce3b84
+// Sample ad size: { width: 320, height: 480 }
+
 <HTML5AdView
-  adUnitID="6932a4c022f6786424ce3b84"
-  adSize={{ width: 320, height: 480 }}
+  adUnitID="YOUR_ADUNIT_ID"
+  adSize={{ width: YOUR_AD_WIDTH, height: YOUR_AD_HEIGHT }}
+  onAdLoaded={}
+  onAdFailedToLoad={}
+  onAdOpened={}
+  onAdClosed={}
+  onAdClicked={}
+  adType={AdTypes.DISPLAY}
+/>;
+```
+
+Replace `YOUR_ADUNIT_ID` with your Adgeist Ad Unit ID, as identified in the Adgeist web interface. Each ad placement in your app requires its own ad unit ID.
+
+Replace `YOUR_AD_WIDTH` and `YOUR_AD_HEIGHT` with the dimensions you mentioned while creating the ad space in the Adgeist web interface. The `adSize` must match those dimensions.
+
+**Responsive ads:** For responsive ads, `adSize` is not needed — passing `adIsResponsive={true}` is enough. The ad will automatically size itself to fit the available space.
+
+```tsx
+<HTML5AdView
+  adUnitID="YOUR_ADUNIT_ID"
+  adIsResponsive={true}
   onAdLoaded={}
   onAdFailedToLoad={}
   onAdOpened={}
@@ -123,4 +145,4 @@ import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
 
 ## Support
 
-If you run into any difficulties while integrating or using the Adgeist Mobile Ads SDK, reach out to beast@thealteroffice.com and we'll help you get it sorted out.
+If you run into any difficulties while integrating or using the Adgeist Mobile Ads SDK, reach out to beast@thealteroffice.com or kishore@thealteroffice.com and we'll help you get it sorted out.

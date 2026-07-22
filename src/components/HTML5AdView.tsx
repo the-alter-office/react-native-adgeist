@@ -9,20 +9,18 @@ import {
 } from 'react';
 import type { ViewStyle, DimensionValue } from 'react-native';
 
-import { useAdgeistContext } from '../providers/AdgeistProvider';
 import HTML5AdNativeComponent, {
   AdCommands,
 } from '../specs/HTML5AdNativeComponent';
 import type {
   HTML5AdNativeComponentProps,
-  HTML5AdRequest,
   HTML5AdViewRef,
 } from '../types/HTML5AdNativeComponentProps';
 import { AdSizes } from '../constants';
 
 export const HTML5AdView = forwardRef<
   HTML5AdViewRef,
-  HTML5AdNativeComponentProps & HTML5AdRequest
+  HTML5AdNativeComponentProps
 >(
   (
     {
@@ -38,11 +36,8 @@ export const HTML5AdView = forwardRef<
     },
     ref
   ) => {
-    const { isTestEnvironment } = useAdgeistContext();
-
     const nativeRef = useRef<any>(null);
     const [isViewReady, setIsViewReady] = useState(false);
-    const pendingLoadRef = useRef<HTML5AdRequest | null>(null);
 
     const dimensions = useMemo<{
       width: DimensionValue;
@@ -61,28 +56,20 @@ export const HTML5AdView = forwardRef<
       [dimensions]
     );
 
-    const loadAdInternal = useCallback(
-      (request: HTML5AdRequest = { isTestMode: isTestEnvironment }) => {
-        if (!nativeRef.current) {
-          console.warn('HTML5AdView: Cannot load ad, native view not ready');
-          return;
-        }
+    const loadAdInternal = useCallback(() => {
+      if (!nativeRef.current) {
+        console.warn('HTML5AdView: Cannot load ad, native view not ready');
+        return;
+      }
 
-        const finalRequest = {
-          ...request,
-          isTestMode: request.isTestMode ?? isTestEnvironment,
-        };
-
-        try {
-          AdCommands.loadAd(nativeRef.current, finalRequest.isTestMode);
-        } catch (error) {
-          if (__DEV__) {
-            console.warn('HTML5AdView: Error loading ad:', error);
-          }
+      try {
+        AdCommands.loadAd(nativeRef.current);
+      } catch (error) {
+        if (__DEV__) {
+          console.warn('HTML5AdView: Error loading ad:', error);
         }
-      },
-      [isTestEnvironment]
-    );
+      }
+    }, []);
 
     const handleNativeRef = useCallback((ref: any) => {
       nativeRef.current = ref;
@@ -99,26 +86,16 @@ export const HTML5AdView = forwardRef<
 
     useEffect(() => {
       if (isViewReady && adUnitID) {
-        const request: HTML5AdRequest = { isTestMode: isTestEnvironment };
-        if (pendingLoadRef.current) {
-          loadAdInternal(pendingLoadRef.current);
-          pendingLoadRef.current = null;
-        } else {
-          loadAdInternal(request);
-        }
+        loadAdInternal();
       }
-    }, [isViewReady, adUnitID, isTestEnvironment, loadAdInternal]);
+    }, [isViewReady, adUnitID, loadAdInternal]);
 
     useImperativeHandle(
       ref,
       () => ({
-        loadAd: (adRequest?: HTML5AdRequest) => {
-          const request = adRequest || { isTestMode: isTestEnvironment };
-
+        loadAd: () => {
           if (isViewReady && nativeRef.current) {
-            loadAdInternal(request);
-          } else {
-            pendingLoadRef.current = request;
+            loadAdInternal();
           }
         },
         destroy: () => {
@@ -131,7 +108,7 @@ export const HTML5AdView = forwardRef<
           }
         },
       }),
-      [isViewReady, isTestEnvironment, loadAdInternal]
+      [isViewReady, loadAdInternal]
     );
 
     if (__DEV__) {

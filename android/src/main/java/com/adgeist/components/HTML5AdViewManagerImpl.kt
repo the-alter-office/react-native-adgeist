@@ -74,13 +74,9 @@ object HTML5AdViewManagerImpl {
     }
 
     @RequiresPermission("android.permission.INTERNET")
-    fun loadAd(view: AdView, isTestMode: Boolean) {
+    fun loadAd(view: AdView) {
         try {
-            val adRequestBuilder = AdRequest.Builder()
-            adRequestBuilder.setTestMode(isTestMode)
-
-
-            val adRequest = adRequestBuilder.build()
+            val adRequest = AdRequest.Builder().build()
 
             view.setAdListener(object : AdListener() {
                 override fun onAdLoaded() {

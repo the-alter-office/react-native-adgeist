@@ -7,7 +7,6 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
-  Switch,
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
@@ -25,14 +24,12 @@ export default function HomeScreen({ navigation }: Props) {
   const [backendDomain, setbackendDomain] = useState(
     'https://beta.v2.bg-services.adgeist.ai'
   );
-  const [isTest, setIsTest] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showProvider, setShowProvider] = useState(true);
 
   const [config, setConfig] = useState({
     appId: '69a6777707df2b1527e357f9',
     bundleId: 'com.leaguex.crm.beta',
-    isTest: true,
     backendDomain: 'https://beta.v2.bg-services.adgeist.ai',
   });
 
@@ -44,7 +41,6 @@ export default function HomeScreen({ navigation }: Props) {
       setConfig({
         appId,
         bundleId,
-        isTest,
         backendDomain,
       });
       setShowProvider(true);
@@ -85,15 +81,6 @@ export default function HomeScreen({ navigation }: Props) {
             placeholderTextColor="#999"
           />
 
-          <View style={styles.switchContainer}>
-            <Text style={styles.label}>Test Environment</Text>
-            <Switch
-              value={isTest}
-              onValueChange={setIsTest}
-              trackColor={{ false: '#767577', true: '#63AA75' }}
-            />
-          </View>
-
           <Pressable
             style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleSubmit}
@@ -119,7 +106,6 @@ export default function HomeScreen({ navigation }: Props) {
             customBidRequestBackendDomain={backendDomain}
             customPackageOrBundleID={config.bundleId}
             customAdgeistAppID={config.appId}
-            isTestEnvironment={config.isTest}
           >
             <ContentContainer />
           </AdgeistProvider>
@@ -164,14 +150,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#3a3a3a',
     fontSize: 14,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 15,
-    marginBottom: 15,
-    display: 'none',
   },
   button: {
     backgroundColor: '#63AA75',

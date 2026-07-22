@@ -19,11 +19,7 @@ export interface AdFailedToLoadEvent {
   error: string;
 }
 
-export interface HTML5AdRequest {
-  isTestMode?: boolean;
-}
-
 export interface HTML5AdViewRef {
-  loadAd: (adRequest?: HTML5AdRequest) => void;
+  loadAd: () => void;
   destroy: () => void;
 }

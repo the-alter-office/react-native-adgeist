@@ -37,8 +37,8 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
     promise.resolve("SDK destroyed")
   }
 
-  fun fetchCreative(adSpaceId: String, buyType: String, isTestEnvironment: Boolean, promise: Promise) {
-    getAd?.fetchCreative(adSpaceId, buyType, isTestEnvironment) { adData ->
+  fun fetchCreative(adSpaceId: String, buyType: String, promise: Promise) {
+    getAd?.fetchCreative(adSpaceId, buyType) { adData ->
       if (adData.isSuccess && adData.data != null) {
         when (val response = adData.data) {
           is FixedAdResponse -> {
