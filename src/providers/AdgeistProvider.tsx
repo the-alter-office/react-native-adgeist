@@ -15,7 +15,6 @@ import { PACKAGE_VERSION_TAG, PACKAGE_VERSION } from '../constants';
 import { PACKAGE_SUFFIX, BACKEND_DOMAIN } from '../env';
 
 const AdgeistContext = createContext<AdgeistContextType>({
-  isTestEnvironment: false,
   isInitialized: false,
   setAdgeistConsentModal: () => {},
 });
@@ -25,7 +24,6 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
   customBidRequestBackendDomain = BACKEND_DOMAIN,
   customPackageOrBundleID = null,
   customAdgeistAppID = null,
-  isTestEnvironment = false,
   onInitializationError,
   onInitializationSuccess,
 }) => {
@@ -86,7 +84,6 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
   return (
     <AdgeistContext.Provider
       value={{
-        isTestEnvironment,
         isInitialized,
         initializationError,
         setAdgeistConsentModal,

@@ -1,5 +1,4 @@
 export interface FIXEDADRESPONSE {
-  isTest?: boolean;
   expiresAt?: string;
   metaData: string;
   id: string;

@@ -35,7 +35,6 @@ public class NativeHTML5AdView: UIView {
     // MARK: Private Ad View & Listener
     private var adView: AdView?
     private var adListener: NativeHTML5AdListener?
-    private var isTestMode: Bool = false
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -61,10 +60,7 @@ public class NativeHTML5AdView: UIView {
         setNeedsLayout()
     }
 
-    @objc public func loadAd(_ options: NSDictionary) {
-        if let testMode = options["isTestMode"] as? Bool {
-            self.isTestMode = testMode
-        }
+    @objc public func loadAd() {
         reloadAd()
     }
 
@@ -118,9 +114,7 @@ public class NativeHTML5AdView: UIView {
         self.adView = adView
         addSubview(adView)
 
-        let request = AdRequest.AdRequestBuilder()
-            .setTestMode(self.isTestMode)
-            .build()
+        let request = AdRequest.AdRequestBuilder().build()
         adView.loadAd(request)
     }
 }

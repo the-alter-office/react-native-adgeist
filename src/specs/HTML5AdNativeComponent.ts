@@ -34,10 +34,7 @@ export interface NativeProps extends ViewProps {
 }
 
 interface NativeCommands {
-  loadAd: (
-    viewRef: React.ElementRef<HostComponent<NativeProps>>,
-    isTestMode: boolean
-  ) => void;
+  loadAd: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
   destroy: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
 }
 
@@ -52,19 +49,16 @@ export default codegenNativeComponent<NativeProps>(
 const isFabric = (global as any)?.nativeFabricUIManager !== undefined;
 
 export const AdCommands = {
-  loadAd: (
-    viewRef: React.ElementRef<HostComponent<NativeProps>>,
-    isTestMode: boolean
-  ) => {
+  loadAd: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => {
     if (isFabric) {
-      Commands.loadAd(viewRef, isTestMode);
+      Commands.loadAd(viewRef);
     } else {
       const reactTag = findNodeHandle(viewRef);
       if (reactTag != null) {
         UIManager.dispatchViewManagerCommand(
           reactTag,
           Platform.OS === 'ios' ? 'loadAd' : 1,
-          [isTestMode]
+          []
         );
       }
     }
