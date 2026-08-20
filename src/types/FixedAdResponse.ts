@@ -69,7 +69,6 @@ interface DisplayOptions {
   allowedFormats?: string[];
   dimensions?: Dimensions;
   isResponsive?: boolean;
-  responsiveType?: string;
   styleOptions?: StyleOptions;
 }
 

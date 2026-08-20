@@ -70,7 +70,6 @@ fun FixedAdResponse.toWritableMap(): WritableMap {
   displayOptions?.let { opt ->
     val opMap = Arguments.createMap()
     opMap.putBoolean("isResponsive", opt.isResponsive ?: false)
-    opMap.putString("responsiveType", opt.responsiveType)
 
     opt.dimensions?.let {
       val dim = Arguments.createMap()
