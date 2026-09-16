@@ -1,4 +1,7 @@
-import { AdgeistProvider } from '@thealteroffice/react-native-adgeist';
+import {
+  AdgeistProvider,
+  HTML5AdView,
+} from '@thealteroffice/react-native-adgeist';
 import ContentContainer from '../ContentContainer';
 import { useState } from 'react';
 import {
@@ -51,6 +54,25 @@ export default function HomeScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
+        <View
+          style={{
+            alignItems: 'center',
+            marginVertical: 20,
+            backgroundColor: 'red',
+          }}
+        >
+          <HTML5AdView
+            adType="BANNER"
+            adUnitID="6aaa40b0135d6b9931d33ce2"
+            adSize={{ width: 360, height: 360 }}
+            onAdLoaded={() => {}}
+            onAdFailedToLoad={() => {}}
+            onAdOpened={() => {}}
+            onAdClosed={() => {}}
+            onAdClicked={() => {}}
+          />
+        </View>
+
         <View style={styles.configContainer}>
           <Text style={styles.header}>SDK Configuration</Text>
 

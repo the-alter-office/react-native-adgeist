@@ -15,13 +15,13 @@ import React
 @objc(NativeHTML5AdView)
 @objcMembers
 public class NativeHTML5AdView: UIView {
-      
+
     // MARK: Public Props (accessible from .mm)
     @objc public var adUnitID: String?
     @objc public var adSize: NSDictionary?
     @objc public var adType: String?
     @objc public var adIsResponsive: Bool = false
-    
+
     // MARK: Events (Old Architecture)
     @objc public var onAdLoaded: ((_ body: [String: Any]) -> Void)?
     @objc public var onAdFailedToLoad: ((_ body: [String: Any]) -> Void)?
@@ -32,9 +32,7 @@ public class NativeHTML5AdView: UIView {
     // MARK: Delegate (used to send events back to manager)
     @objc public weak var delegate: NativeHTML5AdDelegate?
 
-    // MARK: Private Ad View & Listener
     private var adView: AdView?
-    private var adListener: NativeHTML5AdListener?
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -46,14 +44,8 @@ public class NativeHTML5AdView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-    }
+    @objc public func triggerViewWillAppear() {}
 
-    @objc public func triggerViewWillAppear() {
-        // adView?.resume()
-    }
-    
     @objc public func reloadAd() {
         cleanupAdView()
         embedAdView()
@@ -67,126 +59,60 @@ public class NativeHTML5AdView: UIView {
     @objc public func destroy() {
         cleanupAdView()
     }
-    
+
     private func cleanupAdView() {
-        adView?.destroy()
         adView?.removeFromSuperview()
         adView = nil
-        adListener = nil
+    }
+
+    private func resolvedAdSize() -> (width: CGFloat, height: CGFloat)? {
+        if adIsResponsive { return nil }
+        guard let dict = adSize as? [String: Any] else { return nil }
+
+        guard let width = (dict["width"] as? NSNumber)?.doubleValue,
+              let height = (dict["height"] as? NSNumber)?.doubleValue,
+              width > 0, height > 0 else { return nil }
+
+        return (CGFloat(width), CGFloat(height))
     }
 
     private func embedAdView() {
-        guard let adUnitID = adUnitID else {
-            delegate?.onAdFailedToLoad(self, error: "Ad unit ID is required")
+        guard let adUnitID = adUnitID, !adUnitID.isEmpty else {
+            emitFailure("Ad unit ID is required")
             return
         }
 
-        let adView = AdView()
-        adView.frame = bounds
-        adView.adUnitId = adUnitID
-        adView.adIsResponsive = adIsResponsive
+        let size = resolvedAdSize()
 
-        if let dict = adSize as? [String: Any] {
-            if let w = dict["width"] as? Int, let h = dict["height"] as? Int {
-                adView.setAdDimension(AdSize(width: w, height: h))
-            }
-        }
-
-        // Handle adType with default value of BANNER
-        let adTypeStr = (adType ?? "BANNER").uppercased()
-        
-        switch adTypeStr {
-        case "BANNER":
-            adView.adType = .BANNER
-        case "DISPLAY":
-            adView.adType = .DISPLAY
-        case "COMPANION":
-            adView.adType = .COMPANION
-        default:
-            delegate?.onAdFailedToLoad(self, error: "Invalid ad type: \(adTypeStr)")
-            return
-        }
-
-        let listener = NativeHTML5AdListener(view: self)
-        self.adListener = listener
-        adView.setAdListener(listener)
-
-        self.adView = adView
+        let adView = AdView(
+            adUnitId: adUnitID,
+            width: size?.width,
+            height: size?.height,
+            reserveSpace: size != nil
+        )
+        adView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(adView)
 
-        let request = AdRequest.AdRequestBuilder().build()
-        adView.loadAd(request)
-    }
-}
+        NSLayoutConstraint.activate([
+            adView.topAnchor.constraint(equalTo: topAnchor),
+            adView.centerXAnchor.constraint(equalTo: centerXAnchor),
+        ])
 
-// MARK: - Ad Listener (Bridge to delegate)
-private class NativeHTML5AdListener: AdListener {
-    private weak var view: NativeHTML5AdView?
-
-    init(view: NativeHTML5AdView) {
-        self.view = view
-        super.init()
+        self.adView = adView
+        adView.load()
     }
 
-    override func onAdLoaded() {
-        if let view = view {
-            // Old Architecture
-            if let onAdLoaded = view.onAdLoaded {
-                onAdLoaded([:])
-            }
-            // New Architecture (or if delegate is used)
-            view.delegate?.onAdLoaded(view)
-        }
-    }
-
-    override func onAdFailedToLoad(_ errorMessage: String) {
-        if let view = view {
-            // Old Architecture
-            if let onAdFailedToLoad = view.onAdFailedToLoad {
-                let errorDict = ["error": errorMessage]
-                if Thread.isMainThread {
-                    onAdFailedToLoad(errorDict)
-                } else {
-                    DispatchQueue.main.async {
-                        onAdFailedToLoad(errorDict)
-                    }
+    private func emitFailure(_ message: String) {
+        if let onAdFailedToLoad = onAdFailedToLoad {
+            let body = ["error": message]
+            if Thread.isMainThread {
+                onAdFailedToLoad(body)
+            } else {
+                DispatchQueue.main.async {
+                    onAdFailedToLoad(body)
                 }
             }
-            // New Architecture (or if delegate is used)
-            view.delegate?.onAdFailedToLoad(view, error: errorMessage)
         }
-    }
-
-    override func onAdClicked() {
-        if let view = view {
-            // Old Architecture
-            if let onAdClicked = view.onAdClicked {
-                onAdClicked([:])
-            }
-            // New Architecture (or if delegate is used)
-            view.delegate?.onAdClicked(view)
-        }
-    }
-
-    override func onAdImpression() {
-        if let view = view {
-            // Old Architecture (mapped to onAdOpened)
-            if let onAdOpened = view.onAdOpened {
-                onAdOpened([:])
-            }
-            // New Architecture (or if delegate is used)
-            view.delegate?.onAdOpened(view)
-        }
-    }
-
-    override func onAdClosed() {
-        if let view = view {
-            // Old Architecture
-            if let onAdClosed = view.onAdClosed {
-                onAdClosed([:])
-            }
-            // New Architecture (or if delegate is used)
-            view.delegate?.onAdClosed(view)
-        }
+        delegate?.onAdFailedToLoad(self, error: message)
     }
 }

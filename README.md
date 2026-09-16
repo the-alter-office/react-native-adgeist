@@ -12,10 +12,17 @@ To prepare your app, complete the steps in the following sections.
 
 ### App prerequisites
 
-Make sure that your app's build file uses the following values:
+Make sure that your app's build files use the following values:
+
+**Android**
 
 - Minimum SDK version of 23 or higher
 - Compile SDK version of 35 or higher
+
+**iOS**
+
+- Xcode 16.0 or higher
+- Deployment target of iOS 15.6 or higher
 
 ## Configure your app
 
@@ -57,13 +64,19 @@ Replace `YOUR_ADGEIST_APP_ID` with your Adgeist Publisher ID. The `android:name`
 
 Before you continue, review Using CocoaPods for information on creating and using Podfiles.
 
-To use CocoaPods, follow these steps:
+Set your Podfile deployment target to iOS 15.6 or higher. The default `min_ios_version_supported` from React Native is lower than this and will fail to install:
 
-In a terminal, run:
+```ruby
+platform :ios, '15.6'
+```
+
+Then, in a terminal, run:
 
 ```bash
 cd ios && pod install --repo-update
 ```
+
+`pod install` downloads the AdgeistKit binary framework from GitHub Releases and verifies its checksum, so the first install for a given SDK version requires network access. Later installs reuse the downloaded copy.
 
 #### Update your Info.plist
 
@@ -77,6 +90,25 @@ Add your Adgeist publisher ID, as identified in the Adgeist web interface, to yo
 ```
 
 Replace `YOUR_ADGEIST_APP_ID` with your Adgeist Publisher ID. The `ADGEIST_APP_ID` key name must stay as is.
+
+On iOS the publisher ID is read from `Info.plist` only. Passing it to `AdgeistProvider` has no effect.
+
+#### Expo
+
+If you use Expo, add the config plugin to your app config and pass your publisher ID as `adgeistAppId`. Prebuild will write the `ADGEIST_APP_ID` key into `Info.plist` for you.
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "@thealteroffice/react-native-adgeist",
+        { "adgeistAppId": "YOUR_ADGEIST_APP_ID" }
+      ]
+    ]
+  }
+}
+```
 
 ### STEP 3: React Native Configuration and Ad Placement
 
