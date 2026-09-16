@@ -25,8 +25,6 @@ object HTML5AdViewManagerImpl {
     const val EVENT_AD_CLICKED = "onAdClicked"
 
     private val viewContextMap = mutableMapOf<Int, ThemedReactContext>()
-    private val viewAdSizeMap = mutableMapOf<Int, AdSize>()
-    private val viewReserveSpaceMap = mutableMapOf<Int, Boolean>()
 
     fun createViewInstance(reactContext: ThemedReactContext): AdView {
         Log.d(TAG, "Creating AdView with ThemedReactContext: ${reactContext.hashCode()}")
@@ -58,34 +56,11 @@ object HTML5AdViewManagerImpl {
 
                 val adSize = AdSize(width, height)
 
-                viewAdSizeMap[System.identityHashCode(view)] = adSize
                 view.setAdDimension(adSize)
-                applyReservedSpace(view)
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting ad size", e)
             }
         }
-    }
-
-    fun setReserveSpace(view: AdView, reserveSpace: Boolean) {
-        viewReserveSpaceMap[System.identityHashCode(view)] = reserveSpace
-        applyReservedSpace(view)
-    }
-
-    private fun applyReservedSpace(view: AdView) {
-        val key = System.identityHashCode(view)
-        val adSize = viewAdSizeMap[key]
-        val reserveSpace = viewReserveSpaceMap[key] == true
-
-        if (!reserveSpace || adSize == null || adSize.width <= 0 || adSize.height <= 0) {
-            view.minimumWidth = 0
-            view.minimumHeight = 0
-            return
-        }
-
-        val density = view.resources.displayMetrics.density
-        view.minimumWidth = (adSize.width * density).toInt()
-        view.minimumHeight = (adSize.height * density).toInt()
     }
 
     fun setAdType(view: AdView, adType: String?) {
@@ -147,10 +122,7 @@ object HTML5AdViewManagerImpl {
             Log.e(TAG, "Error destroying ad view", e)
         } finally {
             // Clean up the context reference
-            val key = System.identityHashCode(view)
-            viewContextMap.remove(key)
-            viewAdSizeMap.remove(key)
-            viewReserveSpaceMap.remove(key)
+            viewContextMap.remove(System.identityHashCode(view))
         }
     }
 
