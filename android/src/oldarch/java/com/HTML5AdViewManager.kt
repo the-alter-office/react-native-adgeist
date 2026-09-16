@@ -34,6 +34,11 @@ class HTML5AdViewManager : SimpleViewManager<AdView>() {
         HTML5AdViewManagerImpl.setAdSize(view, adSizeMap)
     }
 
+    @ReactProp(name = "reserveSpace", defaultBoolean = false)
+    fun setReserveSpace(view: AdView, reserveSpace: Boolean) {
+        HTML5AdViewManagerImpl.setReserveSpace(view, reserveSpace)
+    }
+
     @ReactProp(name = "adType")
     fun setAdType(view: AdView, adType: String?) {
         HTML5AdViewManagerImpl.setAdType(view, adType)

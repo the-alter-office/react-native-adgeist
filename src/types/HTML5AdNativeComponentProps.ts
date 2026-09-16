@@ -6,6 +6,7 @@ export interface HTML5AdNativeComponentProps {
   adUnitID: string;
   adIsResponsive?: boolean;
   adSize?: AdSize;
+  reserveSpace?: boolean;
   adType: AdType;
 
   onAdLoaded?: () => void;

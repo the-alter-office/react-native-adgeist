@@ -21,6 +21,7 @@ public class NativeHTML5AdView: UIView {
     @objc public var adSize: NSDictionary?
     @objc public var adType: String?
     @objc public var adIsResponsive: Bool = false
+    @objc public var reserveSpace: Bool = false
 
     // MARK: Events (Old Architecture)
     @objc public var onAdLoaded: ((_ body: [String: Any]) -> Void)?
@@ -88,7 +89,7 @@ public class NativeHTML5AdView: UIView {
             adUnitId: adUnitID,
             width: size?.width,
             height: size?.height,
-            reserveSpace: size != nil
+            reserveSpace: reserveSpace && size != nil
         )
         adView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(adView)

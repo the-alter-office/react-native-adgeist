@@ -65,6 +65,7 @@ export default function HomeScreen({ navigation }: Props) {
             adType="BANNER"
             adUnitID="6aaa40b0135d6b9931d33ce2"
             adSize={{ width: 360, height: 360 }}
+            reserveSpace={false}
             onAdLoaded={() => {}}
             onAdFailedToLoad={() => {}}
             onAdOpened={() => {}}

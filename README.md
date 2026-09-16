@@ -141,6 +141,7 @@ import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
 <HTML5AdView
   adUnitID="YOUR_ADUNIT_ID"
   adSize={{ width: YOUR_AD_WIDTH, height: YOUR_AD_HEIGHT }}
+  reserveSpace={true}
   onAdLoaded={}
   onAdFailedToLoad={}
   onAdOpened={}
@@ -152,7 +153,19 @@ import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
 
 Replace `YOUR_ADUNIT_ID` with your Adgeist Ad Unit ID, as identified in the Adgeist web interface. Each ad placement in your app requires its own ad unit ID.
 
-Replace `YOUR_AD_WIDTH` and `YOUR_AD_HEIGHT` with the dimensions you mentioned while creating the ad space in the Adgeist web interface. The `adSize` must match those dimensions.
+Replace `YOUR_AD_WIDTH` and `YOUR_AD_HEIGHT` with the dimensions you mentioned while creating the ad space in the Adgeist web interface.
+
+### Sizing
+
+| Prop            | Purpose                                                                 |
+| --------------- | ----------------------------------------------------------------------- |
+| `adSize.width`  | Fallback width, used only if the server returns no dimensions            |
+| `adSize.height` | Fallback height, used only if the server returns no dimensions           |
+| `reserveSpace`  | Holds `adSize.width` × `adSize.height` until the ad resolves             |
+
+Dimensions returned by the server always win. The `adSize` you pass is a fallback for the case where the response carries none — if the server returns no dimensions and you passed no `adSize`, the ad has no size and will not be visible.
+
+`reserveSpace` defaults to `false`, which lets the ad take its size only once the creative resolves. Pass `reserveSpace={true}` to claim `adSize.width` × `adSize.height` from the first render instead, so surrounding content does not shift when the ad arrives. It requires both a width and a height, and is ignored when `adIsResponsive` is set.
 
 **Responsive ads:** For responsive ads, `adSize` is not needed — passing `adIsResponsive={true}` is enough. The ad will automatically size itself to fit the available space.
 
