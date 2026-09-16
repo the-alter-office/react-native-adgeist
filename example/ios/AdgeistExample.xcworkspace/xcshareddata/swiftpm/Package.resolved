@@ -1,0 +1,15 @@
+{
+  "originHash" : "3c3a21288e155c06630d9894c057a82fd81aa285e06206947ad4fbd3dfaa7517",
+  "pins" : [
+    {
+      "identity" : "adgeist-publisher-ios-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/the-alter-office/adgeist-publisher-ios-sdk.git",
+      "state" : {
+        "revision" : "8481e009f3ea2731259407671db8f1a596a77a17",
+        "version" : "1.0.19"
+      }
+    }
+  ],
+  "version" : 3
+}

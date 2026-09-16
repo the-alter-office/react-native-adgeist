@@ -85,9 +85,11 @@ using namespace facebook::react;
         _swiftView.adIsResponsive = newProps.adIsResponsive;
     }
 
-    if (oldPropsStruct.adSize.width != newProps.adSize.width ||
-        oldPropsStruct.adSize.height != newProps.adSize.height) {
+    BOOL adSizeChanged = oldPropsStruct.adSize.width != newProps.adSize.width ||
+                         oldPropsStruct.adSize.height != newProps.adSize.height;
+    BOOL reserveSpaceChanged = oldPropsStruct.reserveSpace != newProps.reserveSpace;
 
+    if (adSizeChanged) {
         NSMutableDictionary *dict = [NSMutableDictionary dictionary];
         if (newProps.adSize.width != 0.0) {
             dict[@"width"] = @(newProps.adSize.width);
@@ -96,10 +98,14 @@ using namespace facebook::react;
             dict[@"height"] = @(newProps.adSize.height);
         }
         _swiftView.adSize = dict.count > 0 ? dict : nil;
-        
-        if (_swiftView.adUnitID != nil) {
-            [_swiftView reloadAd];
-        }
+    }
+
+    if (reserveSpaceChanged) {
+        _swiftView.reserveSpace = newProps.reserveSpace;
+    }
+
+    if ((adSizeChanged || reserveSpaceChanged) && _swiftView.adUnitID != nil) {
+        [_swiftView reloadAd];
     }
 
     if (oldPropsStruct.adType != newProps.adType) {
@@ -225,6 +231,7 @@ RCT_EXPORT_MODULE(HTML5AdNativeComponent)
 RCT_EXPORT_VIEW_PROPERTY(adUnitID, NSString)
 RCT_EXPORT_VIEW_PROPERTY(adIsResponsive, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(adSize, NSDictionary)
+RCT_EXPORT_VIEW_PROPERTY(reserveSpace, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(adType, NSString)
 
 RCT_EXPORT_VIEW_PROPERTY(onAdLoaded, RCTDirectEventBlock)

@@ -16,6 +16,7 @@ import type {
   HTML5AdNativeComponentProps,
   HTML5AdViewRef,
 } from '../types/HTML5AdNativeComponentProps';
+import type { AdSize } from '../types/AdSize';
 import { AdSizes } from '../constants';
 
 export const HTML5AdView = forwardRef<
@@ -27,6 +28,7 @@ export const HTML5AdView = forwardRef<
       adUnitID,
       adIsResponsive,
       adSize,
+      reserveSpace,
       adType,
       onAdLoaded,
       onAdFailedToLoad,
@@ -39,22 +41,24 @@ export const HTML5AdView = forwardRef<
     const nativeRef = useRef<any>(null);
     const [isViewReady, setIsViewReady] = useState(false);
 
-    const dimensions = useMemo<{
-      width: DimensionValue;
-      height: DimensionValue;
-    }>(() => {
-      const width: DimensionValue = adSize?.width ?? '100%';
-      const height: DimensionValue = adSize?.height ?? '100%';
-      return { width, height };
-    }, [adSize?.width, adSize?.height]);
+    const resolvedAdSize = useMemo<AdSize>(
+      () => ({ ...(adIsResponsive ? AdSizes.Responsive : adSize) }),
+      [adIsResponsive, adSize]
+    );
 
     const containerStyle = useMemo<ViewStyle>(
       () => ({
-        width: dimensions.width,
-        height: dimensions.height,
+        width: (adSize?.width ?? '100%') as DimensionValue,
+        height: (adSize?.height ?? '100%') as DimensionValue,
       }),
-      [dimensions]
+      [adSize?.width, adSize?.height]
     );
+
+    const shouldReserveSpace =
+      reserveSpace === true &&
+      !adIsResponsive &&
+      (resolvedAdSize.width ?? 0) > 0 &&
+      (resolvedAdSize.height ?? 0) > 0;
 
     const loadAdInternal = useCallback(() => {
       if (!nativeRef.current) {
@@ -112,7 +116,13 @@ export const HTML5AdView = forwardRef<
     );
 
     if (__DEV__) {
-      console.log('[HTML5AdView]', { adUnitID, adSize, adType, isViewReady });
+      console.log('[HTML5AdView]', {
+        adUnitID,
+        adSize: resolvedAdSize,
+        reserveSpace: shouldReserveSpace,
+        adType,
+        isViewReady,
+      });
     }
 
     return (
@@ -121,7 +131,8 @@ export const HTML5AdView = forwardRef<
         style={containerStyle}
         // Required Props, it will take values from React Component props
         adUnitID={adUnitID}
-        adSize={adIsResponsive ? AdSizes.Responsive : adSize}
+        adSize={resolvedAdSize}
+        reserveSpace={shouldReserveSpace}
         adIsResponsive={adIsResponsive}
         adType={adType}
         // Required Event Callbacks

@@ -43,6 +43,12 @@ class HTML5AdViewManager : SimpleViewManager<AdView>(), HTML5AdNativeComponentMa
         HTML5AdViewManagerImpl.setAdSize(view, adSizeMap)
     }
 
+    @ReactProp(name = "reserveSpace", defaultBoolean = false)
+    override fun setReserveSpace(view: AdView, reserveSpace: Boolean) {
+        // Not Implemented in Native SDK yet.
+        return null
+    }
+
     @ReactProp(name = "adType")
     override fun setAdType(view: AdView, adType: String?) {
         HTML5AdViewManagerImpl.setAdType(view, adType)

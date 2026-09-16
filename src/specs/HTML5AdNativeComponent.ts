@@ -24,6 +24,7 @@ export interface NativeProps extends ViewProps {
   adUnitID: string;
   adIsResponsive?: boolean;
   adSize?: AdSize;
+  reserveSpace?: WithDefault<boolean, false>;
   adType?: WithDefault<AdType, 'BANNER'>;
 
   onAdLoaded?: DirectEventHandler<null>;
