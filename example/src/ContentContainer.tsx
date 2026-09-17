@@ -12,7 +12,6 @@ import {
   useAdgeistContext,
   getConsentStatus,
   HTML5AdView,
-  AdTypes,
 } from '@thealteroffice/react-native-adgeist';
 import { useEffect, useState } from 'react';
 
@@ -244,7 +243,6 @@ export default function ContentContainer() {
                 key={'isReponsive'}
                 adUnitID={adSpaceId}
                 adIsResponsive={isResponsive}
-                adType={AdTypes.BANNER}
                 onAdLoaded={() => {}}
                 onAdFailedToLoad={(event) => {
                   const errorMessage = event.nativeEvent.error;
@@ -265,7 +263,6 @@ export default function ContentContainer() {
               key={width + height}
               adUnitID={adSpaceId}
               adSize={{ width: parseInt(width), height: parseInt(height) }}
-              adType={AdTypes.BANNER}
               onAdLoaded={() => {}}
               onAdFailedToLoad={(event) => {
                 const errorMessage = event.nativeEvent.error;

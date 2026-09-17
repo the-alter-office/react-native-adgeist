@@ -11,7 +11,7 @@ import {
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { AdgeistProvider } from '@thealteroffice/react-native-adgeist';
-import { HTML5AdView, AdTypes } from '@thealteroffice/react-native-adgeist';
+import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
 
@@ -47,7 +47,6 @@ export default function ProfileScreen({ navigation }: Props) {
         <HTML5AdView
           adUnitID="69ca2675576a0a20dd6c6cfb"
           adSize={{ width: 360, height: 360 }}
-          adType={AdTypes.BANNER}
           onAdLoaded={() => {}}
           onAdFailedToLoad={(event) => {
             const errorMessage = event.nativeEvent.error;

@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.adgeistkit.ads.AdListener
 import com.adgeistkit.ads.AdSize
-import com.adgeistkit.ads.AdType
 import com.adgeistkit.ads.AdView
 import com.adgeistkit.request.AdRequest
 import com.facebook.react.bridge.Arguments
@@ -59,16 +58,6 @@ object HTML5AdViewManagerImpl {
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting ad size", e)
             }
-        }
-    }
-
-    fun setAdType(view: AdView, adType: String?) {
-        val typeToSet = adType ?: "BANNER"
-        try {
-            view.adType = AdType.valueOf(typeToSet)
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Invalid ad type: $typeToSet. Must be BANNER, DISPLAY, or COMPANION", e)
-            view.adType = AdType.BANNER
         }
     }
 

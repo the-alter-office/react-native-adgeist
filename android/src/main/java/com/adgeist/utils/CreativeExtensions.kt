@@ -11,9 +11,9 @@ fun FixedAdResponse.toWritableMap(): WritableMap {
   map.putString("metaData", metaData)
   map.putString("id", id)
   generatedAt?.let { map.putString("generatedAt", it) }
-  signature?.let { map.putString("signature", it) }
   campaignId?.let { map.putString("campaignId", it) }
   type?.let { map.putString("type", it) }
+  map.putString("adSpaceType", adSpaceType.name.lowercase())
   loadType?.let { map.putString("loadType", it) }
   frontendCacheDurationSeconds?.let { map.putInt("frontendCacheDurationSeconds", it) }
 
@@ -40,25 +40,13 @@ fun FixedAdResponse.toWritableMap(): WritableMap {
     cv1Map.putString("ctaUrl", creativeV1.ctaUrl)
 
     creativeV1.primary?.let {
-      val primMap = Arguments.createMap()
-      primMap.putString("type", it.type)
-      primMap.putString("fileName", it.fileName)
-      primMap.putInt("fileSize", it.fileSize ?: 0)
-      primMap.putString("fileUrl", it.fileUrl)
-      primMap.putString("thumbnailUrl", it.thumbnailUrl)
-      cv1Map.putMap("primary", primMap)
+      cv1Map.putMap("primary", it.toWritableMap())
     }
 
     creativeV1.companions?.let { companions ->
       val companionsArr = Arguments.createArray()
       companions.forEach { companion ->
-        val compMap = Arguments.createMap()
-        compMap.putString("type", companion.type)
-        compMap.putString("fileName", companion.fileName)
-        compMap.putInt("fileSize", companion.fileSize ?: 0)
-        compMap.putString("fileUrl", companion.fileUrl)
-        compMap.putString("thumbnailUrl", companion.thumbnailUrl)
-        companionsArr.pushMap(compMap)
+        companionsArr.pushMap(companion.toWritableMap())
       }
       cv1Map.putArray("companions", companionsArr)
     }
@@ -70,6 +58,7 @@ fun FixedAdResponse.toWritableMap(): WritableMap {
   displayOptions?.let { opt ->
     val opMap = Arguments.createMap()
     opMap.putBoolean("isResponsive", opt.isResponsive ?: false)
+    opt.responsiveType?.let { opMap.putString("responsiveType", it) }
 
     opt.dimensions?.let {
       val dim = Arguments.createMap()
@@ -85,25 +74,30 @@ fun FixedAdResponse.toWritableMap(): WritableMap {
       opMap.putMap("styleOptions", st)
     }
 
-    opt.allowedFormats?.let { list ->
+    opt.primaryFormats?.let { list ->
       val arr = Arguments.createArray()
       list.forEach { arr.pushString(it) }
-      opMap.putArray("allowedFormats", arr)
+      opMap.putArray("primaryFormats", arr)
+    }
+
+    opt.companionFormats?.let { list ->
+      val arr = Arguments.createArray()
+      list.forEach { arr.pushString(it) }
+      opMap.putArray("companionFormats", arr)
     }
 
     map.putMap("displayOptions", opMap)
   }
 
-  impressionRequirements?.let {
-    val ir = Arguments.createMap()
-    it.impressionType?.let { types ->
-      val typesArr = Arguments.createArray()
-      types.forEach { type -> typesArr.pushString(type) }
-      ir.putArray("impressionType", typesArr)
-    }
-    ir.putInt("minViewDurationSeconds", it.minViewDurationSeconds ?: 0)
-    map.putMap("impressionRequirements", ir)
-  }
+  return map
+}
 
+private fun MediaItem.toWritableMap(): WritableMap {
+  val map = Arguments.createMap()
+  map.putString("type", type)
+  map.putString("fileName", fileName)
+  map.putInt("fileSize", fileSize ?: 0)
+  map.putString("fileUrl", fileUrl)
+  map.putString("thumbnailUrl", thumbnailUrl)
   return map
 }

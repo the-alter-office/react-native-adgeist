@@ -43,11 +43,6 @@ class HTML5AdViewManager : SimpleViewManager<AdView>(), HTML5AdNativeComponentMa
         HTML5AdViewManagerImpl.setAdSize(view, adSizeMap)
     }
 
-    @ReactProp(name = "adType")
-    override fun setAdType(view: AdView, adType: String?) {
-        HTML5AdViewManagerImpl.setAdType(view, adType)
-    }
-
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
         return MapBuilder.of(
             HTML5AdViewManagerImpl.EVENT_AD_LOADED, MapBuilder.of("registrationName", HTML5AdViewManagerImpl.EVENT_AD_LOADED),

@@ -27,7 +27,6 @@ export const HTML5AdView = forwardRef<
       adUnitID,
       adIsResponsive,
       adSize,
-      adType,
       onAdLoaded,
       onAdFailedToLoad,
       onAdOpened,
@@ -112,7 +111,7 @@ export const HTML5AdView = forwardRef<
     );
 
     if (__DEV__) {
-      console.log('[HTML5AdView]', { adUnitID, adSize, adType, isViewReady });
+      console.log('[HTML5AdView]', { adUnitID, adSize, isViewReady });
     }
 
     return (
@@ -123,7 +122,6 @@ export const HTML5AdView = forwardRef<
         adUnitID={adUnitID}
         adSize={adIsResponsive ? AdSizes.Responsive : adSize}
         adIsResponsive={adIsResponsive}
-        adType={adType}
         // Required Event Callbacks
         onAdLoaded={onAdLoaded}
         onAdFailedToLoad={onAdFailedToLoad}
