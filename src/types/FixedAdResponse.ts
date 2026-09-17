@@ -3,18 +3,18 @@ export interface FIXEDADRESPONSE {
   metaData: string;
   id: string;
   generatedAt?: string;
-  signature?: string;
   campaignId?: string;
   advertiser?: Advertiser;
   type?: string;
+  adSpaceType: AdSpaceType;
   loadType?: string;
   campaignValidity?: CampaignValidity;
-  creatives: Creative[];
   creativesV1: CreativeV1[];
   displayOptions?: DisplayOptions;
   frontendCacheDurationSeconds?: number;
-  impressionRequirements?: ImpressionRequirements;
 }
+
+type AdSpaceType = 'banner' | 'display' | 'companion';
 
 interface Advertiser {
   id?: string;
@@ -25,20 +25,6 @@ interface Advertiser {
 interface CampaignValidity {
   startTime?: string;
   endTime?: string;
-}
-
-interface Creative {
-  contentModerationResult?: MongoIdWrapper;
-  createdAt?: MongoDateWrapper;
-  ctaUrl?: string;
-  description?: string;
-  fileName?: string;
-  fileSize?: number;
-  fileUrl?: string;
-  thumbnailUrl?: string;
-  title?: string;
-  type?: string;
-  updatedAt?: MongoDateWrapper;
 }
 
 interface CreativeV1 {
@@ -57,16 +43,9 @@ interface MediaItem {
   thumbnailUrl?: string;
 }
 
-interface MongoIdWrapper {
-  $oid?: string;
-}
-
-interface MongoDateWrapper {
-  $date?: number;
-}
-
 interface DisplayOptions {
-  allowedFormats?: string[];
+  primaryFormats?: string[];
+  companionFormats?: string[];
   dimensions?: Dimensions;
   isResponsive?: boolean;
   responsiveType?: string;
@@ -81,9 +60,4 @@ interface Dimensions {
 interface StyleOptions {
   fontColor?: string;
   fontFamily?: string;
-}
-
-interface ImpressionRequirements {
-  impressionType?: string[];
-  minViewDurationSeconds?: number;
 }

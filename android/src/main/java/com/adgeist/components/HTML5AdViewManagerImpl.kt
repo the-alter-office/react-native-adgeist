@@ -1,11 +1,9 @@
 package com.adgeist.components
 
 import android.util.Log
-import android.view.View
 import androidx.annotation.RequiresPermission
 import com.adgeistkit.ads.AdListener
 import com.adgeistkit.ads.AdSize
-import com.adgeistkit.ads.AdType
 import com.adgeistkit.ads.AdView
 import com.adgeistkit.request.AdRequest
 import com.facebook.react.bridge.Arguments
@@ -28,7 +26,7 @@ object HTML5AdViewManagerImpl {
 
     fun createViewInstance(reactContext: ThemedReactContext): AdView {
         Log.d(TAG, "Creating AdView with ThemedReactContext: ${reactContext.hashCode()}")
-        val adView = AdView(reactContext)
+        val adView = ReactAdView(reactContext)
         // react-native-screens destroys/recreates the host fragment whenever a
         // screen is covered, so fragment onDestroy is not a teardown signal
         // here; RN drives teardown via onDropViewInstance instead
@@ -63,16 +61,6 @@ object HTML5AdViewManagerImpl {
         }
     }
 
-    fun setAdType(view: AdView, adType: String?) {
-        val typeToSet = adType ?: "BANNER"
-        try {
-            view.adType = AdType.valueOf(typeToSet)
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Invalid ad type: $typeToSet. Must be BANNER, DISPLAY, or COMPANION", e)
-            view.adType = AdType.BANNER
-        }
-    }
-
     @RequiresPermission("android.permission.INTERNET")
     fun loadAd(view: AdView) {
         try {
@@ -82,7 +70,6 @@ object HTML5AdViewManagerImpl {
                 override fun onAdLoaded() {
                   view.post {
                     sendEvent(view, EVENT_AD_LOADED, Arguments.createMap())
-                    measureAndLayout(view)
                   }
                 }
 
@@ -117,21 +104,13 @@ object HTML5AdViewManagerImpl {
 
     fun destroyAd(view: AdView) {
         try {
-            view.destroy()
+            view.destroyAd()
         } catch (e: Exception) {
             Log.e(TAG, "Error destroying ad view", e)
         } finally {
             // Clean up the context reference
             viewContextMap.remove(System.identityHashCode(view))
         }
-    }
-
-    private fun measureAndLayout(view: AdView) {
-        view.measure(
-            View.MeasureSpec.makeMeasureSpec(view.width, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(view.height, View.MeasureSpec.EXACTLY)
-        )
-        view.layout(view.left, view.top, view.right, view.bottom)
     }
 
     private fun sendEvent(view: AdView, eventName: String, params: WritableMap) {

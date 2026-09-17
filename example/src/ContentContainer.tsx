@@ -12,8 +12,6 @@ import {
   useAdgeistContext,
   getConsentStatus,
   HTML5AdView,
-  AdTypes,
-  type AdType,
 } from '@thealteroffice/react-native-adgeist';
 import { useEffect, useState } from 'react';
 
@@ -30,7 +28,6 @@ export default function ContentContainer() {
   }, [setAdgeistConsentModal]);
 
   const [adSpaceId, setAdSpaceId] = useState('');
-  const [adType, setAdType] = useState<AdType>(AdTypes.BANNER);
 
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
@@ -43,39 +40,13 @@ export default function ContentContainer() {
 
   const handleParseSnippet = (): boolean => {
     // 1. Required: adUnitID
-    const adUnitIDMatch = snippet.match(/adUnitID="([^"]+)"/);
+    const adUnitIDMatch = snippet.match(/adUnitId="([^"]+)"/);
+
     if (!adUnitIDMatch?.[1]) {
-      Alert.alert('Error', 'Could not find adUnitID in the snippet.');
+      Alert.alert('Error', 'Could not find adUnitId in the snippet.');
       setSnippet('');
       return false;
     }
-
-    // 2. Required: adType
-    const adTypeMatch =
-      snippet.match(/adType="([^"]+)"/) ||
-      snippet.match(/adType=\{AdTypes\.(\w+)\}/);
-
-    if (!adTypeMatch?.[1]) {
-      Alert.alert('Error', 'Could not find adType in the snippet.');
-      setSnippet('');
-      return false;
-    }
-
-    // Parse ad type early (we already know it exists)
-    const rawType = adTypeMatch[1].toUpperCase();
-    const validTypes = ['BANNER', 'DISPLAY', 'COMPANION'] as const;
-    type ValidAdType = (typeof validTypes)[number];
-
-    if (!validTypes.includes(rawType as any)) {
-      Alert.alert(
-        'Error',
-        `Unsupported adType: ${rawType}. Supported: BANNER, DISPLAY, COMPANION`
-      );
-      setSnippet('');
-      return false;
-    }
-
-    const parsedAdType = rawType as ValidAdType;
 
     // 3. Detect responsive vs fixed-size
     const adSizeMatch = snippet.match(
@@ -132,7 +103,6 @@ export default function ContentContainer() {
 
     // 5. All required fields found → set state
     setAdSpaceId(adUnitIDMatch[1]);
-    setAdType(parsedAdType);
     setIsResponsive(adIsResponsive);
 
     return true;
@@ -147,7 +117,6 @@ export default function ContentContainer() {
   const handleCancel = () => {
     setShowAd(false);
     setAdSpaceId('');
-    setAdType(AdTypes.BANNER);
     setWidth('');
     setHeight('');
     setSnippet(``);
@@ -274,7 +243,6 @@ export default function ContentContainer() {
                 key={'isReponsive'}
                 adUnitID={adSpaceId}
                 adIsResponsive={isResponsive}
-                adType={adType}
                 onAdLoaded={() => {}}
                 onAdFailedToLoad={(event) => {
                   const errorMessage = event.nativeEvent.error;
@@ -295,7 +263,6 @@ export default function ContentContainer() {
               key={width + height}
               adUnitID={adSpaceId}
               adSize={{ width: parseInt(width), height: parseInt(height) }}
-              adType={adType}
               onAdLoaded={() => {}}
               onAdFailedToLoad={(event) => {
                 const errorMessage = event.nativeEvent.error;

@@ -2,7 +2,6 @@ import type { HostComponent, ViewProps } from 'react-native';
 import type {
   DirectEventHandler,
   Double,
-  WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
@@ -14,8 +13,6 @@ export interface AdSize {
   height?: Double;
 }
 
-export type AdType = 'BANNER' | 'DISPLAY' | 'COMPANION';
-
 export interface AdFailedToLoadEvent {
   error: string;
 }
@@ -24,7 +21,6 @@ export interface NativeProps extends ViewProps {
   adUnitID: string;
   adIsResponsive?: boolean;
   adSize?: AdSize;
-  adType?: WithDefault<AdType, 'BANNER'>;
 
   onAdLoaded?: DirectEventHandler<null>;
   onAdFailedToLoad?: DirectEventHandler<AdFailedToLoadEvent>;

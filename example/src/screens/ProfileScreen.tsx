@@ -6,9 +6,12 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  Alert,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
+import { AdgeistProvider } from '@thealteroffice/react-native-adgeist';
+import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
 
@@ -35,6 +38,28 @@ export default function ProfileScreen({ navigation }: Props) {
           <Text style={styles.buttonText}>Go Back</Text>
         </Pressable>
       </View>
+
+      <AdgeistProvider
+        customBidRequestBackendDomain="https://beta.v2.bg-services.adgeist.ai"
+        customPackageOrBundleID="com.leaguex.crm.beta"
+        customAdgeistAppID="69a6777707df2b1527e357f9"
+      >
+        <HTML5AdView
+          adUnitID="69ca2675576a0a20dd6c6cfb"
+          adSize={{ width: 360, height: 360 }}
+          onAdLoaded={() => {}}
+          onAdFailedToLoad={(event) => {
+            const errorMessage = event.nativeEvent.error;
+            Alert.alert(
+              'Ad Failed to Load',
+              errorMessage || 'Please check the ad snippet.'
+            );
+          }}
+          onAdOpened={() => {}}
+          onAdClosed={() => {}}
+          onAdClicked={() => {}}
+        />
+      </AdgeistProvider>
     </SafeAreaView>
   );
 }
