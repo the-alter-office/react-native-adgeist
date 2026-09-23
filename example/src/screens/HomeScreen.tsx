@@ -95,9 +95,9 @@ export default function HomeScreen({ navigation }: Props) {
 
           <Pressable
             style={[styles.button, styles.profileButton]}
-            onPress={() => navigation.push('Profile')}
+            onPress={() => navigation.push('FixedAdspace')}
           >
-            <Text style={styles.buttonText}>Go to Profile</Text>
+            <Text style={styles.buttonText}>Fixed Adspace</Text>
           </Pressable>
         </View>
 

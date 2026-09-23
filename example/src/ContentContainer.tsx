@@ -14,9 +14,14 @@ import {
   HTML5AdView,
 } from '@thealteroffice/react-native-adgeist';
 import { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from './App';
 
 export default function ContentContainer() {
   const { setAdgeistConsentModal } = useAdgeistContext();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     (async () => {
@@ -124,8 +129,15 @@ export default function ContentContainer() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Pressable
+        style={styles.scenariosButton}
+        onPress={() => navigation.push('Scenarios')}
+      >
+        <Text style={styles.submitButtonText}>Responsive Layout Screens</Text>
+      </Pressable>
+
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Responsive Type</Text>
+        <Text style={styles.label}>Manual Configuration</Text>
         <Text style={styles.note}>
           Note: Enable responsive only for companion and display ads.
         </Text>
@@ -332,6 +344,16 @@ const styles = StyleSheet.create({
   disabledButton: {
     backgroundColor: '#555',
     opacity: 0.5,
+  },
+  scenariosButton: {
+    backgroundColor: '#2a2a2a',
+    borderWidth: 1,
+    borderColor: '#3a3a3a',
+    padding: 15,
+    borderRadius: 5,
+    marginBottom: 20,
+    alignItems: 'center',
+    width: '100%',
   },
   submitButtonText: {
     color: 'white',
