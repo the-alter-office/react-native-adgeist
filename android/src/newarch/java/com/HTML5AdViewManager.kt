@@ -43,14 +43,21 @@ class HTML5AdViewManager : SimpleViewManager<AdView>(), HTML5AdNativeComponentMa
         HTML5AdViewManagerImpl.setAdSize(view, adSizeMap)
     }
 
+    @ReactProp(name = "reserveSpace", defaultBoolean = true)
+    override fun setReserveSpace(view: AdView, reserveSpace: Boolean) {
+        HTML5AdViewManagerImpl.setReserveSpace(view, reserveSpace)
+    }
+
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
-        return MapBuilder.of(
-            HTML5AdViewManagerImpl.EVENT_AD_LOADED, MapBuilder.of("registrationName", HTML5AdViewManagerImpl.EVENT_AD_LOADED),
-            HTML5AdViewManagerImpl.EVENT_AD_FAILED_TO_LOAD, MapBuilder.of("registrationName", HTML5AdViewManagerImpl.EVENT_AD_FAILED_TO_LOAD),
-            HTML5AdViewManagerImpl.EVENT_AD_OPENED, MapBuilder.of("registrationName", HTML5AdViewManagerImpl.EVENT_AD_OPENED),
-            HTML5AdViewManagerImpl.EVENT_AD_CLOSED, MapBuilder.of("registrationName", HTML5AdViewManagerImpl.EVENT_AD_CLOSED),
-            HTML5AdViewManagerImpl.EVENT_AD_CLICKED, MapBuilder.of("registrationName", HTML5AdViewManagerImpl.EVENT_AD_CLICKED)
-        )
+        return listOf(
+            HTML5AdViewManagerImpl.EVENT_AD_LOADED,
+            HTML5AdViewManagerImpl.EVENT_AD_FAILED_TO_LOAD,
+            HTML5AdViewManagerImpl.EVENT_AD_OPENED,
+            HTML5AdViewManagerImpl.EVENT_AD_CLOSED,
+            HTML5AdViewManagerImpl.EVENT_AD_CLICKED,
+            HTML5AdViewManagerImpl.EVENT_AD_WARNING,
+            HTML5AdViewManagerImpl.EVENT_AD_SIZE_CHANGED,
+        ).associateWith { MapBuilder.of("registrationName", it) }
     }
 
     @RequiresPermission("android.permission.INTERNET")

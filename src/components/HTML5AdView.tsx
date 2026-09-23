@@ -7,16 +7,19 @@ import {
   useState,
   useMemo,
 } from 'react';
-import type { ViewStyle, DimensionValue } from 'react-native';
+import type { NativeSyntheticEvent, ViewStyle } from 'react-native';
 
 import HTML5AdNativeComponent, {
   AdCommands,
+  type AdSize,
+  type AdSizeChangedEvent,
 } from '../specs/HTML5AdNativeComponent';
 import type {
+  AdFailedToLoadEvent,
   HTML5AdNativeComponentProps,
   HTML5AdViewRef,
 } from '../types/HTML5AdNativeComponentProps';
-import { AdSizes } from '../constants';
+import { toAdSizeAxis } from '../utilities';
 
 export const HTML5AdView = forwardRef<
   HTML5AdViewRef,
@@ -27,33 +30,80 @@ export const HTML5AdView = forwardRef<
       adUnitID,
       adIsResponsive,
       adSize,
+      reserveSpace,
       onAdLoaded,
       onAdFailedToLoad,
       onAdOpened,
       onAdClosed,
       onAdClicked,
+      onAdWarning,
     },
     ref
   ) => {
     const nativeRef = useRef<any>(null);
     const [isViewReady, setIsViewReady] = useState(false);
+    const [resolvedSize, setResolvedSize] = useState<AdSize | null>(null);
+    const [hasFailed, setHasFailed] = useState(false);
 
-    const dimensions = useMemo<{
-      width: DimensionValue;
-      height: DimensionValue;
-    }>(() => {
-      const width: DimensionValue = adSize?.width ?? '100%';
-      const height: DimensionValue = adSize?.height ?? '100%';
-      return { width, height };
-    }, [adSize?.width, adSize?.height]);
+    const collapsesOnFailure = reserveSpace === false;
+
+    const width = toAdSizeAxis(adSize?.width);
+    const height = toAdSizeAxis(adSize?.height);
+
+    const resolvedAdSize = useMemo<AdSize>(() => {
+      const dimensions: AdSize = {};
+
+      if (width !== undefined) {
+        dimensions.width = width;
+      }
+
+      if (height !== undefined) {
+        dimensions.height = height;
+      }
+
+      return dimensions;
+    }, [width, height]);
+
+    const nativeSize = adIsResponsive ? null : resolvedSize;
 
     const containerStyle = useMemo<ViewStyle>(
       () => ({
-        width: dimensions.width,
-        height: dimensions.height,
+        width: nativeSize?.width ?? width ?? '100%',
+        height: nativeSize?.height ?? height ?? '100%',
       }),
-      [dimensions]
+      [width, height, nativeSize]
     );
+
+    const handleAdSizeChanged = useCallback(
+      (event: NativeSyntheticEvent<AdSizeChangedEvent>) => {
+        const { width: nativeWidth, height: nativeHeight } = event.nativeEvent;
+
+        if (nativeWidth <= 0 || nativeHeight <= 0) return;
+
+        setResolvedSize((current) =>
+          current?.width === nativeWidth && current?.height === nativeHeight
+            ? current
+            : { width: nativeWidth, height: nativeHeight }
+        );
+      },
+      []
+    );
+
+    const handleAdFailedToLoad = useCallback(
+      (event: NativeSyntheticEvent<AdFailedToLoadEvent>) => {
+        onAdFailedToLoad?.(event);
+
+        if (collapsesOnFailure) {
+          setHasFailed(true);
+        }
+      },
+      [onAdFailedToLoad, collapsesOnFailure]
+    );
+
+    useEffect(() => {
+      setResolvedSize(null);
+      setHasFailed(false);
+    }, [adUnitID]);
 
     const loadAdInternal = useCallback(() => {
       if (!nativeRef.current) {
@@ -93,6 +143,11 @@ export const HTML5AdView = forwardRef<
       ref,
       () => ({
         loadAd: () => {
+          if (hasFailed) {
+            setHasFailed(false);
+            return;
+          }
+
           if (isViewReady && nativeRef.current) {
             loadAdInternal();
           }
@@ -107,11 +162,11 @@ export const HTML5AdView = forwardRef<
           }
         },
       }),
-      [isViewReady, loadAdInternal]
+      [isViewReady, loadAdInternal, hasFailed]
     );
 
-    if (__DEV__) {
-      console.log('[HTML5AdView]', { adUnitID, adSize, isViewReady });
+    if (hasFailed && collapsesOnFailure) {
+      return null;
     }
 
     return (
@@ -120,14 +175,17 @@ export const HTML5AdView = forwardRef<
         style={containerStyle}
         // Required Props, it will take values from React Component props
         adUnitID={adUnitID}
-        adSize={adIsResponsive ? AdSizes.Responsive : adSize}
         adIsResponsive={adIsResponsive}
+        adSize={resolvedAdSize}
+        reserveSpace={reserveSpace}
         // Required Event Callbacks
         onAdLoaded={onAdLoaded}
-        onAdFailedToLoad={onAdFailedToLoad}
+        onAdFailedToLoad={handleAdFailedToLoad}
         onAdOpened={onAdOpened}
         onAdClosed={onAdClosed}
         onAdClicked={onAdClicked}
+        onAdWarning={onAdWarning}
+        onAdSizeChanged={handleAdSizeChanged}
       />
     );
   }
