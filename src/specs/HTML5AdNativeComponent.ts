@@ -2,6 +2,7 @@ import type { HostComponent, ViewProps } from 'react-native';
 import type {
   DirectEventHandler,
   Double,
+  WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
@@ -30,7 +31,7 @@ export interface NativeProps extends ViewProps {
   adUnitID: string;
   adIsResponsive?: boolean;
   adSize?: AdSize;
-  reserveSpace?: boolean;
+  reserveSpace?: WithDefault<boolean, true>;
 
   onAdLoaded?: DirectEventHandler<null>;
   onAdFailedToLoad?: DirectEventHandler<AdFailedToLoadEvent>;
