@@ -14,23 +14,32 @@ export interface AdSize {
   height?: Double;
 }
 
-export type AdType = 'BANNER' | 'DISPLAY' | 'COMPANION';
-
 export interface AdFailedToLoadEvent {
   error: string;
+}
+
+export interface AdWarningEvent {
+  warning: string;
+}
+
+export interface AdSizeChangedEvent {
+  width: Double;
+  height: Double;
 }
 
 export interface NativeProps extends ViewProps {
   adUnitID: string;
   adIsResponsive?: boolean;
   adSize?: AdSize;
-  adType?: WithDefault<AdType, 'BANNER'>;
+  reserveSpace?: WithDefault<boolean, true>;
 
   onAdLoaded?: DirectEventHandler<null>;
   onAdFailedToLoad?: DirectEventHandler<AdFailedToLoadEvent>;
   onAdOpened?: DirectEventHandler<null>;
   onAdClosed?: DirectEventHandler<null>;
   onAdClicked?: DirectEventHandler<null>;
+  onAdWarning?: DirectEventHandler<AdWarningEvent>;
+  onAdSizeChanged?: DirectEventHandler<AdSizeChangedEvent>;
 }
 
 interface NativeCommands {

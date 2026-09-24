@@ -14,16 +14,29 @@ import com.adgeistkit.data.network.FetchCreative
 import com.facebook.react.bridge.ReadableMap
 import com.adgeist.utils.toWritableMap
 import com.adgeistkit.request.AnalyticsRequest
+import com.adgeistkit.utilities.AdgeistInternalApi
+import com.adgeistkit.utilities.CustomConfig
 
 class AdgeistImpl internal constructor(private val context: ReactApplicationContext) {
   private var adgeistInstance: AdgeistCore? = null
   private var getAd: FetchCreative? = null
   private var postCreativeAnalytic: CreativeAnalytics? = null
 
+  @OptIn(AdgeistInternalApi::class)
   fun initializeSdk(customBidRequestBackendDomain: String?, customPackageOrBundleID: String?, customAdgeistAppID: String?, customVersioning: String?, promise: Promise) {
     try {
       Log.d("AdgeistImpl", "SDK initialized with domain: ${customBidRequestBackendDomain ?: "default"}, package/bundle ID: ${customPackageOrBundleID ?: "default"}, app ID: ${customAdgeistAppID ?: "default"}, versioning: ${customVersioning ?: "default"}")
-      adgeistInstance = AdgeistCore.initialize(context.applicationContext, customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID, customVersioning)
+
+      adgeistInstance = AdgeistCore.initialize(
+        context.applicationContext,
+        CustomConfig(
+          backendDomain = customBidRequestBackendDomain,
+          packageOrBundleId = customPackageOrBundleID,
+          adgeistAppId = customAdgeistAppID,
+          versioning =  customVersioning
+        )
+      )
+
       getAd = adgeistInstance?.getCreative()
       postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()
       promise.resolve("SDK initialized with domain: ${customBidRequestBackendDomain ?: "default"}")
@@ -38,7 +51,7 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
   }
 
   fun fetchCreative(adSpaceId: String, buyType: String, promise: Promise) {
-    getAd?.fetchCreative(adSpaceId, buyType) { adData ->
+    getAd?.fetchCreative(adSpaceId) { adData ->
       if (adData.isSuccess && adData.data != null) {
         when (val response = adData.data) {
           is FixedAdResponse -> {
