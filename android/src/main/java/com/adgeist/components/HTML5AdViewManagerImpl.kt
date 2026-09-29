@@ -36,6 +36,7 @@ object HTML5AdViewManagerImpl {
         // here; RN drives teardown via onDropViewInstance instead
         adView.watchFragmentLifecycle = false
         adView.isFrameworkHosted = true
+        adView.setAdListener(createAdListener(adView))
         viewContextMap[System.identityHashCode(adView)] = reactContext
         Log.d(TAG, "AdView created with hash: ${System.identityHashCode(adView)} and context hash: ${reactContext.hashCode()}")
         return adView
@@ -76,52 +77,52 @@ object HTML5AdViewManagerImpl {
     }
 
     @OptIn(AdgeistEmbedderApi::class)
+    private fun createAdListener(view: AdView): AdListener = object : AdListener() {
+        override fun onAdLoaded() {
+            view.post {
+                sendEvent(view, EVENT_AD_LOADED, Arguments.createMap())
+            }
+        }
+
+        override fun onAdFailedToLoad(error: String) {
+            val event = Arguments.createMap().apply {
+                putString("error", error)
+            }
+            sendEvent(view, EVENT_AD_FAILED_TO_LOAD, event)
+        }
+
+        override fun onAdOpened() {
+            sendEvent(view, EVENT_AD_OPENED, Arguments.createMap())
+        }
+
+        override fun onAdClosed() {
+            sendEvent(view, EVENT_AD_CLOSED, Arguments.createMap())
+        }
+
+        override fun onAdClicked() {
+            sendEvent(view, EVENT_AD_CLICKED, Arguments.createMap())
+        }
+
+        override fun onAdWarning(warning: String) {
+            val event = Arguments.createMap().apply {
+                putString("warning", warning)
+            }
+            sendEvent(view, EVENT_AD_WARNING, event)
+        }
+
+        override fun onAdSizeResolved(adSize: AdSize) {
+            val event = Arguments.createMap().apply {
+                putDouble("width", adSize.width.toDouble())
+                putDouble("height", adSize.height.toDouble())
+            }
+            sendEvent(view, EVENT_AD_SIZE_CHANGED, event)
+        }
+    }
+
     @RequiresPermission("android.permission.INTERNET")
     fun loadAd(view: AdView) {
         try {
             val adRequest = AdRequest.Builder().build()
-
-            view.setAdListener(object : AdListener() {
-                override fun onAdLoaded() {
-                  view.post {
-                    sendEvent(view, EVENT_AD_LOADED, Arguments.createMap())
-                  }
-                }
-
-                override fun onAdFailedToLoad(error: String) {
-                    val event = Arguments.createMap().apply {
-                        putString("error", error)
-                    }
-                    sendEvent(view, EVENT_AD_FAILED_TO_LOAD, event)
-                }
-
-                override fun onAdOpened() {
-                    sendEvent(view, EVENT_AD_OPENED, Arguments.createMap())
-                }
-
-                override fun onAdClosed() {
-                    sendEvent(view, EVENT_AD_CLOSED, Arguments.createMap())
-                }
-
-                override fun onAdClicked() {
-                    sendEvent(view, EVENT_AD_CLICKED, Arguments.createMap())
-                }
-
-                override fun onAdWarning(warning: String) {
-                    val event = Arguments.createMap().apply {
-                        putString("warning", warning)
-                    }
-                    sendEvent(view, EVENT_AD_WARNING, event)
-                }
-
-                override fun onAdSizeResolved(adSize: AdSize) {
-                    val event = Arguments.createMap().apply {
-                        putDouble("width", adSize.width.toDouble())
-                        putDouble("height", adSize.height.toDouble())
-                    }
-                    sendEvent(view, EVENT_AD_SIZE_CHANGED, event)
-                }
-            })
 
             view.loadAd(adRequest)
         } catch (e: Exception) {

@@ -133,8 +133,6 @@ const styles = StyleSheet.create({
   },
   slot: {
     backgroundColor: '#141414',
-    // borderWidth: 1,
-    borderStyle: 'dashed',
   },
   slotGood: {
     borderColor: '#63AA75',

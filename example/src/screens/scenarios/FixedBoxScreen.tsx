@@ -73,8 +73,5 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 12,
     backgroundColor: '#141414',
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
-    borderStyle: 'dashed',
   },
 });
