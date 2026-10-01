@@ -39,8 +39,14 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "set-env": "node scripts/set-env.js",
     "sync-version": "node scripts/sync-version.js",
-    "prepare": "yarn sync-version && bob build",
+    "fetch-adgeistkit": "node scripts/fetch-ios-native-adgeistkit.js",
+    "prepare": "yarn sync-version && yarn fetch-adgeistkit && bob build",
     "release": "release-it"
+  },
+  "adgeistKit": {
+    "version": "1.0.24-beta.1",
+    "url": "https://github.com/the-alter-office/adgeist-publisher-ios-sdk/releases/download/1.0.24-beta.1/AdgeistKit.xcframework.zip",
+    "checksum": "4e3cbd18fc4146eda7759a5ab35b8c2475e744df2681aae4831c7f6c421ce4e1"
   },
   "keywords": [
     "react-native",
