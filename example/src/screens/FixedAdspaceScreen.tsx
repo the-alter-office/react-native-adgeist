@@ -175,8 +175,6 @@ const styles = StyleSheet.create({
   slot: {
     alignSelf: 'center',
     backgroundColor: '#141414',
-    borderWidth: 1,
-    borderStyle: 'dashed',
   },
   slotNeutral: {
     borderColor: '#3a3a3a',
