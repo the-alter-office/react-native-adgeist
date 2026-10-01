@@ -1,5 +1,10 @@
 name: Publish
 on:
+  push:
+    branches:
+      - main
+      - qa
+      - prod
   workflow_dispatch:
 
 permissions:
@@ -31,6 +36,14 @@ jobs:
       - name: Set environment constants
         run: yarn set-env "$PUBLISH_ENV"
 
+      - name: Use stable AdgeistKit release
+        if: github.ref_name == 'prod' || github.ref_name == 'qa'
+        run: |
+          VERSION=$(node -p "require('./package.json').adgeistKit.version")
+          STABLE="${VERSION%%-*}"
+          echo "Switching AdgeistKit ${VERSION} -> ${STABLE}"
+          yarn update-adgeistkit "$STABLE"
+
       - name: Build package
         run: yarn prepare
 
@@ -41,18 +54,25 @@ jobs:
           echo "PKG_NAME=${PKG_NAME}" >> $GITHUB_ENV
           echo "PKG_VERSION=${PKG_VERSION}" >> $GITHUB_ENV
           if npm view "${PKG_NAME}@${PKG_VERSION}" version > /dev/null 2>&1; then
+            if [ "${{ github.event_name }}" = "push" ]; then
+              echo "::notice::${PKG_NAME}@${PKG_VERSION} is already published. Skipping publish."
+              echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
+              exit 0
+            fi
             echo "::error::${PKG_NAME}@${PKG_VERSION} is already published. Bump PACKAGE_VERSION in src/constants.ts."
             exit 1
           fi
 
       - name: Upgrade npm for trusted publishing
+        if: env.SKIP_PUBLISH != 'true'
         run: npm install -g npm@11
 
       - name: Publish to npm
+        if: env.SKIP_PUBLISH != 'true'
         run: npm publish --tag "$DIST_TAG"
 
       - name: Send Slack Notification
-        if: always()
+        if: always() && env.SKIP_PUBLISH != 'true'
         run: |
           REPO="${{ github.repository }}"
           BRANCH="${{ github.ref_name }}"
