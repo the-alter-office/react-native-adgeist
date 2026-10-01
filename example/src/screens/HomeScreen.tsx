@@ -13,14 +13,19 @@ import {
   Platform,
   StatusBar,
 } from 'react-native';
+import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../App';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { RootStackParamList, RootTabParamList } from '../App';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<RootTabParamList, 'Home'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
 export default function HomeScreen({ navigation }: Props) {
-  const [appId, setAppId] = useState('69a6777707df2b1527e357f9');
-  const [bundleId, setBundleId] = useState('com.leaguex.crm.beta');
+  const [appId, setAppId] = useState('6abbacbc1979b59913a3c0b5');
+  const [bundleId, setBundleId] = useState('adgeist.example');
   const [backendDomain, setbackendDomain] = useState(
     'https://beta.v2.bg-services.adgeist.ai'
   );
@@ -28,8 +33,8 @@ export default function HomeScreen({ navigation }: Props) {
   const [showProvider, setShowProvider] = useState(true);
 
   const [config, setConfig] = useState({
-    appId: '69a6777707df2b1527e357f9',
-    bundleId: 'com.leaguex.crm.beta',
+    appId: '6abbacbc1979b59913a3c0b5',
+    bundleId: 'adgeist.example',
     backendDomain: 'https://beta.v2.bg-services.adgeist.ai',
   });
 

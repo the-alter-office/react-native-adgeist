@@ -102,13 +102,8 @@ using namespace facebook::react;
         }
     }
 
-    if (oldPropsStruct.adType != newProps.adType) {
-        // Pass the string value ("BANNER", "DISPLAY", or "COMPANION"), or nil to use default "BANNER" in Swift
-        // The Swift layer converts the string to AdType enum
-        std::string adTypeStr = toString(newProps.adType);
-        _swiftView.adType = adTypeStr.empty()
-            ? nil
-            : [NSString stringWithUTF8String:adTypeStr.c_str()];
+    if (oldPropsStruct.reserveSpace != newProps.reserveSpace) {
+        _swiftView.reserveSpace = newProps.reserveSpace;
     }
 
     [super updateProps:props oldProps:oldProps];
@@ -156,6 +151,26 @@ using namespace facebook::react;
     }
 }
 
+- (void)onAdWarning:(NativeHTML5AdView *)view warning:(NSString *)warning
+{
+    if (_eventEmitter) {
+        HTML5AdNativeComponentEventEmitter::OnAdWarning event{};
+        event.warning = warning ? std::string([warning UTF8String]) : "";
+        std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
+            ->onAdWarning(event);
+    }
+}
+
+- (void)onAdSizeChanged:(NativeHTML5AdView *)view width:(double)width height:(double)height
+{
+    if (_eventEmitter) {
+        HTML5AdNativeComponentEventEmitter::OnAdSizeChanged event{};
+        event.width = width;
+        event.height = height;
+        std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
+            ->onAdSizeChanged(event);
+    }
+}
 
 - (void)handleCommand:(NSString const *)commandName args:(NSArray const *)args
 {
@@ -225,13 +240,15 @@ RCT_EXPORT_MODULE(HTML5AdNativeComponent)
 RCT_EXPORT_VIEW_PROPERTY(adUnitID, NSString)
 RCT_EXPORT_VIEW_PROPERTY(adIsResponsive, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(adSize, NSDictionary)
-RCT_EXPORT_VIEW_PROPERTY(adType, NSString)
+RCT_EXPORT_VIEW_PROPERTY(reserveSpace, BOOL)
 
 RCT_EXPORT_VIEW_PROPERTY(onAdLoaded, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAdFailedToLoad, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAdOpened, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAdClosed, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAdClicked, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onAdWarning, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onAdSizeChanged, RCTDirectEventBlock)
 
 RCT_EXPORT_METHOD(loadAd:(nonnull NSNumber *)reactTag)
 {
@@ -255,7 +272,7 @@ RCT_EXPORT_METHOD(destroy:(nonnull NSNumber *)reactTag)
 
 - (NSArray<NSString *> *)customDirectEventTypes
 {
-    return @[@"onAdLoaded", @"onAdFailedToLoad", @"onAdOpened", @"onAdClosed", @"onAdClicked"];
+    return @[@"onAdLoaded", @"onAdFailedToLoad", @"onAdOpened", @"onAdClosed", @"onAdClicked", @"onAdWarning", @"onAdSizeChanged"];
 }
 
 // NativeHTML5AdDelegate methods
@@ -284,6 +301,14 @@ RCT_EXPORT_METHOD(destroy:(nonnull NSNumber *)reactTag)
 - (void)onAdClicked:(NativeHTML5AdView *)view
 {
     // Handled by view property
+}
+
+- (void)onAdWarning:(NativeHTML5AdView *)view warning:(NSString *)warning
+{
+}
+
+- (void)onAdSizeChanged:(NativeHTML5AdView *)view width:(double)width height:(double)height
+{
 }
 
 @end
