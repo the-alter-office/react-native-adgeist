@@ -41,7 +41,7 @@
     "sync-version": "node scripts/sync-version.js",
     "fetch-adgeistkit": "node scripts/fetch-ios-native-adgeistkit.js",
     "update-adgeistkit": "node scripts/update-adgeistkit.js",
-    "prepare": "yarn sync-version && yarn fetch-adgeistkit && bob build",
+    "prepare": "yarn sync-version && yarn fetch-adgeistkit && bob build && tsc -p plugin",
     "release": "release-it"
   },
   "adgeistKit": {
