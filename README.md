@@ -113,12 +113,7 @@ import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
 <HTML5AdView
   adUnitID="YOUR_ADUNIT_ID"
   adSize={{ width: YOUR_AD_WIDTH, height: YOUR_AD_HEIGHT }}
-  onAdLoaded={}
-  onAdFailedToLoad={}
-  onAdOpened={}
-  onAdClosed={}
-  onAdClicked={}
-  onAdWarning={}
+  onAdEvent={(event) => console.log(event.nativeEvent)}
 />;
 ```
 
@@ -130,16 +125,11 @@ import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
 <HTML5AdView
   adUnitID="YOUR_ADUNIT_ID"
   adIsResponsive={true}
-  onAdLoaded={}
-  onAdFailedToLoad={}
-  onAdOpened={}
-  onAdClosed={}
-  onAdClicked={}
-  onAdWarning={}
+  onAdEvent={(event) => console.log(event.nativeEvent)}
 />;
 ```
 
-Replace `YOUR_ADUNIT_ID` with your Adgeist Ad Unit ID, as identified in the Adgeist web interface. Each ad placement in your app requires its own ad unit ID.
+Replace `YOUR_ADUNIT_ID` with your Adgeist Ad Unit ID, as identified in the Adgeist web interface. Each ad placement in your app requires its own ad unit ID. Everything the ad reports arrives through `onAdEvent` — see [Ad events](#ad-events).
 
 #### What `adSize` actually does
 
@@ -150,11 +140,11 @@ It is **not** what decides the creative's size. That comes from the adspace you 
 | | What happens |
 |---|---|
 | Your `adSize` matches the adspace | The creative fills the box you reserved. Nothing moves. |
-| They differ | [`onAdWarning`](#ad-events) fires, naming the real size. Change `adSize` to that size. |
+| They differ | The ad resizes to the adspace's size, shifting your layout, and [`AW7`](#event-reference) fires with the real size in `data.reason`. Change `adSize` to that size. |
 
 So replace `YOUR_AD_WIDTH` and `YOUR_AD_HEIGHT` with the exact dimensions you entered on adgeist.ai when you created the adspace, and the two can never disagree.
 
-> On React Native your styles own the layout, so the SDK cannot resize the slot on your behalf — it reports the mismatch instead of silently correcting it. Read `onAdWarning` as "your `adSize` is wrong, here is the right one", and treat it as a bug to fix rather than a runtime condition to handle.
+> Read `AW7` as "your `adSize` is wrong, here is the right one", and treat it as a bug to fix rather than a runtime condition to handle.
 
 ---
 
@@ -181,7 +171,7 @@ import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
 
 Pass `false` if you would rather the ad give up its place when there is nothing to show:
 
-| `reserveSpace` | After `onAdFailedToLoad` |
+| `reserveSpace` | After a [failed load](#ad-events) |
 |---|---|
 | `true` (default) | The ad keeps its full box in your layout, empty. No layout shift. |
 | `false` | The ad view detaches itself from your layout. |
@@ -237,20 +227,79 @@ import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
 />;
 ```
 
-An axis you leave out becomes `100%`, so it needs an ancestor with a real size on that axis. The case that catches people out is a `ScrollView`: it gives its children no definite height, so a responsive ad inside one should declare `adSize={{ height: ... }}`. Without it the height resolves against a parent that has none, and the ad will not be the size you expected.
+An axis you leave out becomes `100%`, so it needs an ancestor with a real size on that axis. The case that catches people out is a `ScrollView`: it gives its children no definite height, so a responsive ad inside one should declare `adSize={{ height: ... }}`. Without it the height resolves against a parent that has none, measures `0`, and [`AW4`](#event-reference) fires naming the axis.
 
 ---
 
 ## Ad events
 
-| Callback | Fires when |
-|---|---|
-| `onAdLoaded` | The ad finished loading. |
-| `onAdFailedToLoad` | The request failed. `event.nativeEvent.error` carries the reason. |
-| `onAdOpened` | The ad opened an overlay covering the screen. |
-| `onAdClosed` | The ad was removed from the screen. |
-| `onAdClicked` | The user clicked the ad. |
-| `onAdWarning` | The SDK found a problem that did not stop the ad from loading, but that you should fix. `event.nativeEvent.warning` carries the message, describing the problem and what to change. |
+Every event arrives in one callback, `onAdEvent`:
+
+```tsx
+import type { NativeSyntheticEvent } from 'react-native';
+import {
+  HTML5AdView,
+  type AdViewEvent,
+} from '@thealteroffice/react-native-adgeist';
+
+const handleAdEvent = (event: NativeSyntheticEvent<AdViewEvent>) => {
+  const { type, code, message, data } = event.nativeEvent;
+
+  switch (type) {
+    case 'AD_LOADED':
+    case 'AD_CLICKED':
+    case 'AD_CLOSED':
+    case 'AD_NO_FILL':
+    case 'AD_NETWORK_ERROR':
+    case 'AD_INTERNAL_ERROR':
+      break;
+    case 'AD_WARNING':
+      console.warn(`${code}: ${message}`, data?.reason);
+      break;
+  }
+};
+
+<HTML5AdView adUnitID="YOUR_ADUNIT_ID" onAdEvent={handleAdEvent} />;
+```
+
+### Event payload
+
+`event.nativeEvent` is an `AdViewEvent`:
+
+| Field | Type | Description |
+|---|---|---|
+| `code` | `AdViewEventCode` | SDK reference code, e.g. `'AE1'` |
+| `type` | `AdViewEventType` | Event kind, e.g. `'AD_NO_FILL'` |
+| `message` | `string` | Human-readable description |
+| `data` | `{ reason: string } \| undefined` | Extra details; `data.reason` on the events marked below, `undefined` otherwise |
+
+`data.reason` is a detailed description of what went wrong. Use it for diagnostics only; match on `code` or `type`, never on the text.
+
+Code prefixes: `AL` lifecycle, `AI` interaction, `AE` error, `AW` warning.
+
+### Event reference
+
+| Code | type | Meaning | When it occurs | Possible cause | Recommended action |
+|---|---|---|---|---|---|
+| AL1 | `AD_LOADED` | Ad loaded successfully | Creative rendered | — | — |
+| AL2 | `AD_CLOSED` | Ad closed | `destroy()` is called on the ref | — | — |
+| AI1 | `AD_CLICKED` | Ad clicked | User taps the ad | — | — |
+| AE1 | `AD_NO_FILL` | No ad available | Server returns no ad | No active campaign for the ad unit | Hide the placement |
+| AE2 | `AD_NETWORK_ERROR` | Ad request failed | Ad request does not complete | Device offline, timeout, server error, or connection dropped mid-response | Retry later |
+| AE3 | `AD_INTERNAL_ERROR` | Ad failed to render | While rendering the creative | Web view error | Contact support with `code` and `data.reason` |
+| AE4 | `AD_INTERNAL_ERROR` | Ad response could not be parsed | After the ad response | Response format not supported by this SDK version | Retry later; if it keeps happening, contact support with `code` |
+| AW1 | `AD_WARNING` | SDK not initialized | When the ad loads | The ad is not inside an `AdgeistProvider` | Wrap your app in [`AdgeistProvider`](#configure-adgeistprovider) |
+| AW2 | `AD_WARNING` | Ad unit ID is empty | When the ad loads | `adUnitID` is empty | Pass your ad unit ID as `adUnitID` |
+| AW3 | `AD_WARNING` | Ad has no size | After the ad response | Fixed-size ad with no `adSize` | Pass `adSize`, or set `adIsResponsive={true}` |
+| AW4 | `AD_WARNING` | Responsive ad has no width or height | During layout | Neither the parent nor `adSize` gives an axis a size, so it measures `0` | Follow `data.reason`, which names the axis and the fix |
+| AW5 | `AD_WARNING` | Ad is already loading | On `loadAd()` from the ref | `loadAd()` called again before the previous load finished | Wait for the previous load's event |
+| AW6 | `AD_WARNING` | Ad request rejected | During the ad request | Request rejected by the server (HTTP 4xx) | Check `adUnitID` and `ADGEIST_APP_ID` in `AndroidManifest.xml` |
+| AW7 | `AD_WARNING` | Ad size mismatch | After the ad response | Your `adSize` differs from the adspace's size; the ad was resized | Set `adSize` to the size in `data.reason` |
+| AW8 | `AD_WARNING` | Not enough space for a companion ad | While rendering the creative | Less than 320x320 available; the ad is collapsed and not tracked | Give the ad at least 320x320 |
+
+`data.reason` is set on AE3, AW4, AW7 and AW8.
+
+A load **fails** with AE1, AE2, AE3, AE4, AW1, AW2, AW3 or AW6. After a failed load the ad keeps or gives up its space according to [`reserveSpace`](#reservespace--keep-the-slot-when-an-ad-fails). The other warnings do not stop the ad.
 
 
 ## Support

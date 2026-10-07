@@ -20,7 +20,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
   const [appId, setAppId] = useState('69a6777707df2b1527e357f9');
-  const [bundleId, setBundleId] = useState('com.leaguex.crm.beta');
+  const [bundleId, setBundleId] = useState('adgeist.example');
   const [backendDomain, setbackendDomain] = useState(
     'https://beta.v2.bg-services.adgeist.ai'
   );
@@ -29,7 +29,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   const [config, setConfig] = useState({
     appId: '69a6777707df2b1527e357f9',
-    bundleId: 'com.leaguex.crm.beta',
+    bundleId: 'adgeist.example',
     backendDomain: 'https://beta.v2.bg-services.adgeist.ai',
   });
 
