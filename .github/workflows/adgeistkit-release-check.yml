@@ -1,0 +1,33 @@
+name: AdgeistKit release check
+on:
+  pull_request:
+    branches:
+      - prod
+      - qa
+
+permissions:
+  contents: read
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check stable AdgeistKit release exists
+        run: |
+          VERSION=$(node -p "require('./package.json').adgeistKit.version")
+          STABLE="${VERSION%%-*}"
+          URL="https://github.com/the-alter-office/adgeist-publisher-ios-sdk/releases/download/${STABLE}/AdgeistKit.xcframework.zip"
+
+          echo "package.json adgeistKit.version: ${VERSION}"
+          echo "Checking stable release ${STABLE}: ${URL}"
+
+          STATUS=$(curl -sIL -o /dev/null -w "%{http_code}" "$URL")
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::AdgeistKit ${STABLE} is not released yet (HTTP ${STATUS}). Publish it in adgeist-publisher-ios-sdk, then run 'yarn update-adgeistkit ${STABLE}'."
+            exit 1
+          fi
+
+          echo "✅ AdgeistKit ${STABLE} release exists"
