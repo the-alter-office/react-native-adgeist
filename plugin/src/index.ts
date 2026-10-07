@@ -4,7 +4,6 @@ import {
   withPlugins,
 } from '@expo/config-plugins';
 
-import { withRNAdgeistMainApplication } from './android/withRNAdgeistMainApplication';
 import { withRNAdgeistAppDelegate } from './ios/withRNAdgeistAppDelegate';
 
 /**
@@ -19,9 +18,6 @@ import { withRNAdgeistAppDelegate } from './ios/withRNAdgeistAppDelegate';
  */
 const withRNAdgeist: ConfigPlugin = (config) => {
   return withPlugins(config, [
-    //Android
-    withRNAdgeistMainApplication,
-
     //iOS
     withRNAdgeistAppDelegate,
   ]);
