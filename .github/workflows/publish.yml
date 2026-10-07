@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - dev
       - qa
       - prod
   workflow_dispatch:
@@ -24,17 +25,20 @@ jobs:
       - name: Resolve environment from branch
         run: |
           case "${GITHUB_REF_NAME}" in
-            main) echo "PUBLISH_ENV=beta" >> $GITHUB_ENV; echo "DIST_TAG=beta" >> $GITHUB_ENV ;;
-            qa)   echo "PUBLISH_ENV=qa"   >> $GITHUB_ENV; echo "DIST_TAG=qa"   >> $GITHUB_ENV ;;
-            prod) echo "PUBLISH_ENV=prod" >> $GITHUB_ENV; echo "DIST_TAG=latest" >> $GITHUB_ENV ;;
+            main|dev) echo "PUBLISH_ENV=beta" >> $GITHUB_ENV; echo "DIST_TAG=beta" >> $GITHUB_ENV ;;
+            qa)       echo "PUBLISH_ENV=qa"   >> $GITHUB_ENV; echo "DIST_TAG=qa"   >> $GITHUB_ENV ;;
+            prod)     echo "PUBLISH_ENV=prod" >> $GITHUB_ENV; echo "DIST_TAG=latest" >> $GITHUB_ENV ;;
             *)
-              echo "::error::Publishing is only allowed from main, qa, or prod (got '${GITHUB_REF_NAME}')"
+              echo "::error::Publishing is only allowed from main, dev, qa, or prod (got '${GITHUB_REF_NAME}')"
               exit 1
               ;;
           esac
 
       - name: Set environment constants
         run: yarn set-env "$PUBLISH_ENV"
+
+      - name: Resolve publish version
+        run: node scripts/set-publish-version.js "$PUBLISH_ENV"
 
       - name: Use stable AdgeistKit release
         if: github.ref_name == 'prod' || github.ref_name == 'qa'
