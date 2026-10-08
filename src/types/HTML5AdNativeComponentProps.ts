@@ -35,7 +35,7 @@ export interface AdViewEvent {
   code: AdViewEventCode;
   type: AdViewEventType;
   message: string;
-  data?: AdViewEventData;
+  data: AdViewEventData;
 }
 
 export interface HTML5AdNativeComponentProps {

@@ -254,7 +254,7 @@ const handleAdEvent = (event: NativeSyntheticEvent<AdViewEvent>) => {
     case 'AD_INTERNAL_ERROR':
       break;
     case 'AD_WARNING':
-      console.warn(`${code}: ${message}`, data?.reason);
+      console.warn(`${code}: ${message}`, data.reason);
       break;
   }
 };
@@ -271,7 +271,7 @@ const handleAdEvent = (event: NativeSyntheticEvent<AdViewEvent>) => {
 | `code` | `AdViewEventCode` | SDK reference code, e.g. `'AE1'` |
 | `type` | `AdViewEventType` | Event kind, e.g. `'AD_NO_FILL'` |
 | `message` | `string` | Human-readable description |
-| `data` | `{ reason: string } \| undefined` | Extra details; `data.reason` on the events marked below, `undefined` otherwise |
+| `data` | `{ reason: string }` | Extra details; always present. `data.reason` is filled on the events marked below and an empty string otherwise |
 
 `data.reason` is a detailed description of what went wrong. Use it for diagnostics only; match on `code` or `type`, never on the text.
 
@@ -297,7 +297,7 @@ Code prefixes: `AL` lifecycle, `AI` interaction, `AE` error, `AW` warning.
 | AW7 | `AD_WARNING` | Ad size mismatch | After the ad response | Your `adSize` differs from the adspace's size; the ad was resized | Set `adSize` to the size in `data.reason` |
 | AW8 | `AD_WARNING` | Not enough space for a companion ad | While rendering the creative | Less than 320x320 available; the ad is collapsed and not tracked | Give the ad at least 320x320 |
 
-`data.reason` is set on AE3, AW4, AW7 and AW8.
+`data.reason` is non-empty on AE3, AW4, AW7 and AW8.
 
 A load **fails** with AE1, AE2, AE3, AE4, AW1, AW2, AW3 or AW6. After a failed load the ad keeps or gives up its space according to [`reserveSpace`](#reservespace--keep-the-slot-when-an-ad-fails). The other warnings do not stop the ad.
 

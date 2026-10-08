@@ -24,7 +24,7 @@ export function useAdCallbacks(append: (line: string) => void, tag?: string) {
       onAdEvent: (event: NativeSyntheticEvent<AdViewEvent>) => {
         const { code, type, message, data } = event.nativeEvent;
         const reason = data?.reason ? ` - ${data.reason}` : '';
-        append(`${prefix}${code} (${type}): ${message}${reason}`);
+        append(`${prefix}${code} (${type}): ${message} reason:${reason}`);
       },
     };
   }, [append, tag]);

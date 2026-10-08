@@ -18,7 +18,7 @@ export interface NativeAdViewEvent {
   code: string;
   type: string;
   message: string;
-  data?: Readonly<{
+  data: Readonly<{
     reason: string;
   }>;
 }

@@ -79,11 +79,9 @@ object HTML5AdViewManagerImpl {
                 putString("code", event.code.name)
                 putString("type", event.type.name)
                 putString("message", event.message)
-                event.data?.let { data ->
-                    putMap("data", Arguments.createMap().apply {
-                        putString("reason", data.reason)
-                    })
-                }
+                putMap("data", Arguments.createMap().apply {
+                    putString("reason", event.data?.reason ?: "")
+                })
             }
 
             view.post {

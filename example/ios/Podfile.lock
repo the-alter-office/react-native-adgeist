@@ -1,5 +1,5 @@
 PODS:
-  - Adgeist (0.0.35):
+  - Adgeist (0.0.39):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1879,7 +1879,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  Adgeist: cf2c0cda486942ca2d0b3b4dada42ec54dafccff
+  Adgeist: 0e42787a85ba47ffd91bde874cfef6f865b4e715
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
@@ -1952,4 +1952,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: ba0744ea218bd344e2a867ca9bc93ae9dc3e4203
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
