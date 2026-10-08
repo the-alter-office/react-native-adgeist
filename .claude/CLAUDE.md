@@ -42,7 +42,7 @@ exposes them to JS as one TurboModule and one native view component, and is publ
   `NativeHTML5AdManager.mm` (view)
 - `plugin/` — Expo config plugin (patches MainApplication and AppDelegate)
 - `example/` — RN example app, react-navigation native-stack, screens under `src/screens/`
-- `scripts/` — `set-env.js`, `sync-version.js`
+- `scripts/` — `configure-build.js`, `sync-version.js`
 
 ## Commands
 - Start example metro: `yarn example:beta` (also `:qa`, `:prod`)
@@ -67,8 +67,8 @@ exposes them to JS as one TurboModule and one native view component, and is publ
   `ReactAdView` to force the measure/layout pass RN otherwise skips.
 
 ## Environment and versioning
-`src/env.ts` (`PACKAGE_SUFFIX`, `BACKEND_DOMAIN`) is generated — edit it with
-`yarn set-env <beta|qa|prod>` or `yarn set-env --domain <url>`, not by hand. The npm version
+`src/config.ts` (`PACKAGE_SUFFIX`, `BACKEND_DOMAIN`) is generated — edit it with
+`yarn configure-build <beta|qa|prod>`, not by hand. The npm version
 is derived from `PACKAGE_VERSION` in `src/constants.ts` plus that suffix, and written into
 `package.json` by `yarn sync-version`, so bump `src/constants.ts`.
 

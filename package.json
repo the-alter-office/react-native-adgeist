@@ -29,15 +29,15 @@
   ],
   "scripts": {
     "example": "yarn workspace react-native-adgeist-example",
-    "example:beta": "yarn set-env beta && yarn example start",
-    "example:qa": "yarn set-env qa && yarn example start",
-    "example:prod": "yarn set-env prod && yarn example start",
+    "example:beta": "yarn configure-build beta && yarn example start",
+    "example:qa": "yarn configure-build qa && yarn example start",
+    "example:prod": "yarn configure-build prod && yarn example start",
     "expo-plugin": "yarn workspace react-native-adgeist-expo-plugin",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"src/**/*.{js,ts,tsx}\" \"example/**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
-    "set-env": "node scripts/set-env.js",
+    "configure-build": "node scripts/configure-build.js",
     "sync-version": "node scripts/sync-version.js",
     "fetch-adgeistkit": "node scripts/fetch-ios-native-adgeistkit.js",
     "update-adgeistkit": "node scripts/update-adgeistkit.js",
@@ -45,9 +45,14 @@
     "release": "release-it"
   },
   "adgeistKit": {
-    "version": "1.0.24-beta.2",
-    "url": "https://github.com/the-alter-office/adgeist-publisher-ios-sdk/releases/download/1.0.24-beta.2/AdgeistKit.xcframework.zip",
-    "checksum": "ff1850115ce44df9a80a27d14422d2e5c97727d7cf576272739ad00cb20bea15"
+    "android": {
+      "version" : "1.1.37-beta-SNAPSHOT"
+    },
+    "ios": {
+      "version": "1.0.24-beta.2",
+      "url": "https://github.com/the-alter-office/adgeist-publisher-ios-sdk/releases/download/1.0.24-beta.2/AdgeistKit.xcframework.zip",
+      "checksum": "ff1850115ce44df9a80a27d14422d2e5c97727d7cf576272739ad00cb20bea15"
+    }
   },
   "keywords": [
     "react-native",

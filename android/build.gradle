@@ -102,9 +102,17 @@ repositories {
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
+def adgeistKitVersion = new groovy.json.JsonSlurper()
+  .parse(file("$projectDir/../package.json"))
+  .adgeistKit?.android?.version
+
+if (!adgeistKitVersion) {
+  throw new GradleException("adgeistKit.android.version is missing in package.json")
+}
+
 dependencies {
   implementation "com.facebook.react:react-android"
-  implementation "ai.adgeist:adgeistkit:1.1.37-debug"
+  implementation "ai.adgeist:adgeistkit:$adgeistKitVersion"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 

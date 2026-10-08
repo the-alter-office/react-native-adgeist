@@ -11,7 +11,7 @@ import type {
   AdgeistProviderProps,
 } from '../types/Provider';
 import { PACKAGE_VERSION_TAG, PACKAGE_VERSION } from '../constants';
-import { PACKAGE_SUFFIX, BACKEND_DOMAIN } from '../env';
+import { PACKAGE_SUFFIX, BACKEND_DOMAIN } from '../config';
 
 const AdgeistContext = createContext<AdgeistContextType>({
   isInitialized: false,
