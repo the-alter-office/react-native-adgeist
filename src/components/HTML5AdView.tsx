@@ -22,6 +22,30 @@ import type {
 } from '../types/HTML5AdNativeComponentProps';
 import { LOAD_FAILURE_CODES, toAdSizeAxis } from '../utilities';
 
+/**
+ * Displays an Adgeist ad. It loads the ad on mount, and reports everything
+ * that happens through `onAdEvent`. Must be rendered inside `AdgeistProvider`.
+ *
+ * @example Fixed-size adspace
+ * ```tsx
+ * <HTML5AdView
+ *   adUnitID="YOUR_ADUNIT_ID"
+ *   adSize={{ width: 320, height: 480 }}
+ *   onAdEvent={(event) => console.log(event.nativeEvent)}
+ * />
+ * ```
+ *
+ * @example Responsive adspace
+ * ```tsx
+ * <HTML5AdView
+ *   adUnitID="YOUR_ADUNIT_ID"
+ *   adIsResponsive={true}
+ *   onAdEvent={(event) => console.log(event.nativeEvent)}
+ * />
+ * ```
+ *
+ * @see https://github.com/the-alter-office/react-native-adgeist#implement-ad-placement
+ */
 export const HTML5AdView = forwardRef<
   HTML5AdViewRef,
   HTML5AdNativeComponentProps
