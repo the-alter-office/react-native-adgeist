@@ -78,6 +78,31 @@ Add your Adgeist publisher ID, as identified in the Adgeist web interface, to yo
 
 Replace `YOUR_ADGEIST_APP_ID` with your Adgeist Publisher ID. The `ADGEIST_APP_ID` key name must stay as is.
 
+### Expo
+
+For Expo apps (managed workflow / CNG), skip the native edits above and add the config plugin to your `app.json` or `app.config.js` instead. The plugin writes the `Info.plist` key and the `AndroidManifest.xml` `<meta-data>` entry for you during prebuild.
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "@thealteroffice/react-native-adgeist",
+        { "adgeistAppId": "YOUR_ADGEIST_APP_ID" }
+      ]
+    ]
+  }
+}
+```
+
+Then regenerate the native projects:
+
+```bash
+npx expo prebuild
+```
+
+`adgeistAppId` is required — prebuild fails if it is missing. The SDK's native modules are autolinked, so no further native setup is needed. This requires a development build.
+
 ### STEP 3: React Native Configuration and Ad Placement
 
 ### Configure AdgeistProvider
