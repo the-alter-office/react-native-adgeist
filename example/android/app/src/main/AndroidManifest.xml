@@ -13,7 +13,7 @@
 
       <meta-data
             android:name="com.adgeistkit.ads.ADGEIST_APP_ID"
-            android:value="6954e6859ab54390db01e3d7"/>
+            android:value="69a6777707df2b1527e357f9"/>
 
       <activity
         android:name=".MainActivity"

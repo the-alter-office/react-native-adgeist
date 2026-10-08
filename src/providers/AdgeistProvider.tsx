@@ -84,7 +84,7 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
         initializationError,
       }}
     >
-      {children}
+      {(isInitialized || initializationError) && children}
     </AdgeistContext.Provider>
   );
 };
