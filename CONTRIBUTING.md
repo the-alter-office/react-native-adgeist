@@ -154,8 +154,6 @@ The `package.json` file contains various scripts for common tasks:
 - `yarn lint`: lint files with ESLint (`yarn lint --fix` to auto-fix).
 - `yarn test`: run unit tests with Jest.
 - `yarn example:beta`: configure the build for beta and start the Metro server for the example app (also `:qa`, `:prod`).
-- `yarn example android`: run the example app on Android.
-- `yarn example ios`: run the example app on iOS.
 - `yarn configure-build <beta|qa|prod>`: generate `src/config.ts` for an environment.
 - `yarn fetch-adgeistkit`: install the pinned iOS AdgeistKit into `ios/Frameworks`.
 - `yarn update-adgeistkit <ios|android> <version>`: change a platform's AdgeistKit pin.
