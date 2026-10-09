@@ -3,11 +3,11 @@
 const fs = require('fs');
 const path = require('path');
 
-// Read version from constants.ts and suffix from env.ts
+// Read version from constants.ts and suffix from config.ts
 const constantsPath = path.join(__dirname, '../src/constants.ts');
 const constantsContent = fs.readFileSync(constantsPath, 'utf8');
-const envPath = path.join(__dirname, '../src/env.ts');
-const envContent = fs.readFileSync(envPath, 'utf8');
+const configPath = path.join(__dirname, '../src/config.ts');
+const configContent = fs.readFileSync(configPath, 'utf8');
 
 // Extract version and suffix using regex
 const versionMatch = constantsContent.match(
@@ -19,17 +19,17 @@ if (!versionMatch) {
   process.exit(1);
 }
 
-const suffixMatch = envContent.match(
+const suffixMatch = configContent.match(
   /export const PACKAGE_SUFFIX = ['"]([^'"]*)['"]/
 );
 
 if (!suffixMatch) {
-  console.error('❌ Could not find PACKAGE_SUFFIX in env.ts');
+  console.error('❌ Could not find PACKAGE_SUFFIX in config.ts');
   process.exit(1);
 }
 
 const version = versionMatch[1] + suffixMatch[1];
-console.log(`📦 Version from constants.ts + env.ts: ${version}`);
+console.log(`📦 Version from constants.ts + config.ts: ${version}`);
 
 // Read and update package.json
 const packageJsonPath = path.join(__dirname, '../package.json');

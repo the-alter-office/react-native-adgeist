@@ -7,30 +7,32 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import type { NativeSyntheticEvent } from 'react-native';
 
-import {
-  useAdgeistContext,
-  getConsentStatus,
-  HTML5AdView,
+import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
+import type {
+  AdViewEvent,
+  AdViewEventCode,
 } from '@thealteroffice/react-native-adgeist';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './App';
 
+const LOAD_FAILURE_CODES: ReadonlySet<AdViewEventCode> = new Set([
+  'AE1',
+  'AE2',
+  'AE3',
+  'AE4',
+  'AW1',
+  'AW2',
+  'AW3',
+  'AW6',
+]);
+
 export default function ContentContainer() {
-  const { setAdgeistConsentModal } = useAdgeistContext();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  useEffect(() => {
-    (async () => {
-      const consentStatus = await getConsentStatus();
-      if (consentStatus === 'DENIED') {
-        setAdgeistConsentModal(true);
-      }
-    })();
-  }, [setAdgeistConsentModal]);
 
   const [adSpaceId, setAdSpaceId] = useState('');
 
@@ -42,6 +44,16 @@ export default function ContentContainer() {
   const [responsiveMode, setResponsiveMode] = useState<Boolean>(false);
   const [containerWidth, setContainerWidth] = useState('250');
   const [containerHeight, setContainerHeight] = useState('250');
+
+  const handleAdEvent = (event: NativeSyntheticEvent<AdViewEvent>) => {
+    const { code, message, data } = event.nativeEvent;
+
+    if (!LOAD_FAILURE_CODES.has(code)) return;
+
+    setShowAd(false);
+    setSnippet('');
+    Alert.alert('Ad Failed to Load', `${code}: ${data?.reason || message}`);
+  };
 
   const handleParseSnippet = (): boolean => {
     // 1. Required: adUnitID
@@ -255,19 +267,7 @@ export default function ContentContainer() {
                 key={'isReponsive'}
                 adUnitID={adSpaceId}
                 adIsResponsive={isResponsive}
-                onAdLoaded={() => {}}
-                onAdFailedToLoad={(event) => {
-                  const errorMessage = event.nativeEvent.error;
-                  setShowAd(false);
-                  setSnippet(``);
-                  Alert.alert(
-                    'Ad Failed to Load',
-                    errorMessage || 'Please check the ad snippet.'
-                  );
-                }}
-                onAdOpened={() => {}}
-                onAdClosed={() => {}}
-                onAdClicked={() => {}}
+                onAdEvent={handleAdEvent}
               />
             </View>
           ) : (
@@ -275,19 +275,7 @@ export default function ContentContainer() {
               key={width + height}
               adUnitID={adSpaceId}
               adSize={{ width: parseInt(width), height: parseInt(height) }}
-              onAdLoaded={() => {}}
-              onAdFailedToLoad={(event) => {
-                const errorMessage = event.nativeEvent.error;
-                setShowAd(false);
-                setSnippet('');
-                Alert.alert(
-                  'Ad Failed to Load',
-                  errorMessage || 'Please check the ad snippet.'
-                );
-              }}
-              onAdOpened={() => {}}
-              onAdClosed={() => {}}
-              onAdClicked={() => {}}
+              onAdEvent={handleAdEvent}
             />
           )}
         </>

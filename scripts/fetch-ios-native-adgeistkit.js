@@ -8,7 +8,7 @@ const { Buffer } = require('buffer');
 const { execFileSync } = require('child_process');
 
 const root = path.join(__dirname, '..');
-const { adgeistKit } = require(path.join(root, 'package.json'));
+const adgeistKit = require(path.join(root, 'package.json')).adgeistKit?.ios;
 const frameworksDir = path.join(root, 'ios/Frameworks');
 const target = path.join(frameworksDir, 'AdgeistKit.xcframework');
 const stampPath = path.join(frameworksDir, '.adgeistkit-checksum');
@@ -27,7 +27,7 @@ function findXCFramework(dir) {
 async function main() {
   if (!adgeistKit || !adgeistKit.url || !adgeistKit.checksum) {
     throw new Error(
-      'Missing "adgeistKit.url" / "adgeistKit.checksum" in package.json'
+      'Missing "adgeistKit.ios.url" / "adgeistKit.ios.checksum" in package.json'
     );
   }
 

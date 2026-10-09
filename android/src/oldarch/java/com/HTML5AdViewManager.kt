@@ -41,13 +41,8 @@ class HTML5AdViewManager : SimpleViewManager<AdView>() {
 
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
         return listOf(
-            HTML5AdViewManagerImpl.EVENT_AD_LOADED,
-            HTML5AdViewManagerImpl.EVENT_AD_FAILED_TO_LOAD,
-            HTML5AdViewManagerImpl.EVENT_AD_OPENED,
-            HTML5AdViewManagerImpl.EVENT_AD_CLOSED,
-            HTML5AdViewManagerImpl.EVENT_AD_CLICKED,
-            HTML5AdViewManagerImpl.EVENT_AD_WARNING,
-            HTML5AdViewManagerImpl.EVENT_AD_SIZE_CHANGED,
+          HTML5AdViewManagerImpl.AD_EVENT_LISTENER,
+          HTML5AdViewManagerImpl.AD_SIZE_CHANGED_LISTENER,
         ).associateWith { MapBuilder.of("registrationName", it) }
     }
 

@@ -2,9 +2,12 @@ package com.adgeist.components
 
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import com.adgeist.utils.WrapperEventCode
+import com.adgeist.utils.buildAdEvent
 import com.adgeistkit.ads.AdListener
 import com.adgeistkit.ads.AdSize
 import com.adgeistkit.ads.AdView
+import com.adgeistkit.ads.AdgeistEvent
 import com.adgeistkit.request.AdRequest
 import com.adgeistkit.utilities.AdgeistEmbedderApi
 import com.facebook.react.bridge.Arguments
@@ -17,13 +20,8 @@ object HTML5AdViewManagerImpl {
     const val NAME = "HTML5AdNativeComponent"
     private const val TAG = "HTML5AdViewManagerImpl"
 
-    const val EVENT_AD_LOADED = "onAdLoaded"
-    const val EVENT_AD_FAILED_TO_LOAD = "onAdFailedToLoad"
-    const val EVENT_AD_OPENED = "onAdOpened"
-    const val EVENT_AD_CLOSED = "onAdClosed"
-    const val EVENT_AD_CLICKED = "onAdClicked"
-    const val EVENT_AD_WARNING = "onAdWarning"
-    const val EVENT_AD_SIZE_CHANGED = "onAdSizeChanged"
+    const val AD_EVENT_LISTENER = "onAdEvent"
+    const val AD_SIZE_CHANGED_LISTENER = "onAdSizeChanged"
 
     private val viewContextMap = mutableMapOf<Int, ThemedReactContext>()
 
@@ -78,36 +76,17 @@ object HTML5AdViewManagerImpl {
 
     @OptIn(AdgeistEmbedderApi::class)
     private fun createAdListener(view: AdView): AdListener = object : AdListener() {
-        override fun onAdLoaded() {
+        override fun onAdEvent(event: AdgeistEvent) {
+            val payload = buildAdEvent(
+                code = event.code.name,
+                type = event.type.name,
+                message = event.message,
+                reason = event.data?.reason
+            )
+
             view.post {
-                sendEvent(view, EVENT_AD_LOADED, Arguments.createMap())
+                sendEvent(view, AD_EVENT_LISTENER, payload)
             }
-        }
-
-        override fun onAdFailedToLoad(error: String) {
-            val event = Arguments.createMap().apply {
-                putString("error", error)
-            }
-            sendEvent(view, EVENT_AD_FAILED_TO_LOAD, event)
-        }
-
-        override fun onAdOpened() {
-            sendEvent(view, EVENT_AD_OPENED, Arguments.createMap())
-        }
-
-        override fun onAdClosed() {
-            sendEvent(view, EVENT_AD_CLOSED, Arguments.createMap())
-        }
-
-        override fun onAdClicked() {
-            sendEvent(view, EVENT_AD_CLICKED, Arguments.createMap())
-        }
-
-        override fun onAdWarning(warning: String) {
-            val event = Arguments.createMap().apply {
-                putString("warning", warning)
-            }
-            sendEvent(view, EVENT_AD_WARNING, event)
         }
 
         override fun onAdSizeResolved(adSize: AdSize) {
@@ -115,7 +94,7 @@ object HTML5AdViewManagerImpl {
                 putDouble("width", adSize.width.toDouble())
                 putDouble("height", adSize.height.toDouble())
             }
-            sendEvent(view, EVENT_AD_SIZE_CHANGED, event)
+            sendEvent(view, AD_SIZE_CHANGED_LISTENER, event)
         }
     }
 
@@ -126,10 +105,14 @@ object HTML5AdViewManagerImpl {
 
             view.loadAd(adRequest)
         } catch (e: Exception) {
-            val event = Arguments.createMap().apply {
-                putString("error", e.message ?: "Unknown error")
+            val payload = buildAdEvent(
+                WrapperEventCode.RWAE1,
+                reason = listOfNotNull(e::class.java.simpleName, e.message).joinToString(": ")
+            )
+
+            view.post {
+                sendEvent(view, AD_EVENT_LISTENER, payload)
             }
-            sendEvent(view, EVENT_AD_FAILED_TO_LOAD, event)
         }
     }
 

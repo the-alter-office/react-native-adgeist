@@ -1,9 +1,8 @@
 name: AdgeistKit release check
+
 on:
   pull_request:
-    branches:
-      - prod
-      - qa
+    branches: ["main", "qa"]
 
 permissions:
   contents: read
@@ -11,23 +10,48 @@ permissions:
 jobs:
   check-release:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check stable AdgeistKit release exists
+      - name: Check stable AdgeistKit releases exist
+        env:
+          IOS_RELEASE_URL: >-
+            https://github.com/the-alter-office/adgeist-publisher-ios-sdk/releases/download/{VERSION}/AdgeistKit.xcframework.zip
+          ANDROID_RELEASE_URL: >-
+            https://repo1.maven.org/maven2/ai/adgeist/adgeistkit/{VERSION}/
         run: |
-          VERSION=$(node -p "require('./package.json').adgeistKit.version")
-          STABLE="${VERSION%%-*}"
-          URL="https://github.com/the-alter-office/adgeist-publisher-ios-sdk/releases/download/${STABLE}/AdgeistKit.xcframework.zip"
+          FAILED=0
 
-          echo "package.json adgeistKit.version: ${VERSION}"
-          echo "Checking stable release ${STABLE}: ${URL}"
+          check_release() {
+            local PLATFORM="$1"
+            local URL_TEMPLATE="$2"
+            local SOURCE_REPO="$3"
+            local VERSION STABLE URL STATUS
 
-          STATUS=$(curl -sIL -o /dev/null -w "%{http_code}" "$URL")
-          if [ "$STATUS" != "200" ]; then
-            echo "::error::AdgeistKit ${STABLE} is not released yet (HTTP ${STATUS}). Publish it in adgeist-publisher-ios-sdk, then run 'yarn update-adgeistkit ${STABLE}'."
-            exit 1
-          fi
+            VERSION="$(
+              node -p "require('./package.json').adgeistKit.${PLATFORM}.version"
+            )"
+            STABLE="${VERSION%%-*}"
+            URL="${URL_TEMPLATE//\{VERSION\}/$STABLE}"
 
-          echo "✅ AdgeistKit ${STABLE} release exists"
+            echo "package.json adgeistKit.$PLATFORM.version: $VERSION"
+            echo "Checking stable $PLATFORM release $STABLE: $URL"
+
+            STATUS="$(curl -sIL -o /dev/null -w "%{http_code}" "$URL")"
+            if [ "$STATUS" != "200" ]; then
+              echo "::error::AdgeistKit $PLATFORM $STABLE is not released yet (HTTP $STATUS). Publish it in $SOURCE_REPO, then run 'yarn update-adgeistkit $PLATFORM $STABLE'."
+              FAILED=1
+              return
+            fi
+
+            echo "✅ AdgeistKit $PLATFORM $STABLE release exists"
+          }
+
+          check_release ios "$IOS_RELEASE_URL" adgeist-publisher-ios-sdk
+          check_release android "$ANDROID_RELEASE_URL" native-android-adgeist
+
+          exit "$FAILED"
