@@ -25,7 +25,8 @@ export type AdViewEventCode =
   | 'AW5'
   | 'AW6'
   | 'AW7'
-  | 'AW8';
+  | 'AW8'
+  | 'RWAE1';
 
 export interface AdViewEventData {
   reason: string;
@@ -76,7 +77,7 @@ export interface HTML5AdNativeComponentProps {
 
   /**
    * What happens to the ad's space when a load fails (`AE1`–`AE4`, `AW1`,
-   * `AW2`, `AW3`, `AW6`).
+   * `AW2`, `AW3`, `AW6`, `RWAE1`).
    *
    * - `true`: keeps its box in your layout, empty. No layout shift.
    * - `false`: removes itself from your layout.

@@ -300,7 +300,7 @@ const handleAdEvent = (event: NativeSyntheticEvent<AdViewEvent>) => {
 
 `data.reason` is a detailed description of what went wrong. Use it for diagnostics only; match on `code` or `type`, never on the text.
 
-Code prefixes: `AL` lifecycle, `AI` interaction, `AE` error, `AW` warning.
+Code prefixes: `AL` lifecycle, `AI` interaction, `AE` error, `AW` warning. Codes starting with `RW` come from this React Native wrapper rather than the native SDK, e.g. `RWAE1` is a wrapper ad error.
 
 ### Event reference
 
@@ -313,6 +313,7 @@ Code prefixes: `AL` lifecycle, `AI` interaction, `AE` error, `AW` warning.
 | AE2 | `AD_NETWORK_ERROR` | Ad request failed | Ad request does not complete | Device offline, timeout, server error, or connection dropped mid-response | Retry later |
 | AE3 | `AD_INTERNAL_ERROR` | Ad failed to render | While rendering the creative | Web view error | Contact support with `code` and `data.reason` |
 | AE4 | `AD_INTERNAL_ERROR` | Ad response could not be parsed | After the ad response | Response format not supported by this SDK version | Retry later; if it keeps happening, contact support with `code` |
+| RWAE1 | `AD_INTERNAL_ERROR` | Ad failed to load | When the ad starts loading (Android only) | Starting the ad request threw an exception | Contact support with `code` and `data.reason` |
 | AW1 | `AD_WARNING` | SDK not initialized | When the ad loads | The ad is not inside an `AdgeistProvider` | Wrap your app in [`AdgeistProvider`](#configure-adgeistprovider) |
 | AW2 | `AD_WARNING` | Ad unit ID is empty | When the ad loads | `adUnitID` is empty | Pass your ad unit ID as `adUnitID` |
 | AW3 | `AD_WARNING` | Ad has no size | After the ad response | Fixed-size ad with no `adSize` | Pass `adSize`, or set `adIsResponsive={true}` |
@@ -322,9 +323,9 @@ Code prefixes: `AL` lifecycle, `AI` interaction, `AE` error, `AW` warning.
 | AW7 | `AD_WARNING` | Ad size mismatch | After the ad response | Your `adSize` differs from the adspace's size; the ad was resized | Set `adSize` to the size in `data.reason` |
 | AW8 | `AD_WARNING` | Not enough space for a companion ad | While rendering the creative | Less than 320x320 available; the ad is collapsed and not tracked | Give the ad at least 320x320 |
 
-`data.reason` is non-empty on AE3, AW4, AW7 and AW8.
+`data.reason` is non-empty on AE3, AW4, AW7, AW8 and RWAE1.
 
-A load **fails** with AE1, AE2, AE3, AE4, AW1, AW2, AW3 or AW6. After a failed load the ad keeps or gives up its space according to [`reserveSpace`](#reservespace--keep-the-slot-when-an-ad-fails). The other warnings do not stop the ad.
+A load **fails** with AE1, AE2, AE3, AE4, AW1, AW2, AW3, AW6 or RWAE1. After a failed load the ad keeps or gives up its space according to [`reserveSpace`](#reservespace--keep-the-slot-when-an-ad-fails). The other warnings do not stop the ad.
 
 
 ## Support

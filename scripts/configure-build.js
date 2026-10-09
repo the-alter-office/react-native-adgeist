@@ -63,14 +63,24 @@ function baseVersion() {
   return match[1];
 }
 
+function isNotFound(error) {
+  return `${error.stdout ?? ''}${error.stderr ?? ''}`.includes('E404');
+}
+
 function publishedVersions(name) {
   try {
     const output = execFileSync('npm', ['view', name, 'versions', '--json'], {
-      stdio: ['ignore', 'pipe', 'ignore'],
+      stdio: ['ignore', 'pipe', 'pipe'],
     }).toString();
     return [].concat(JSON.parse(output));
-  } catch {
-    return [];
+  } catch (error) {
+    if (isNotFound(error)) {
+      return [];
+    }
+
+    fail(
+      `Could not read published versions of ${name} from npm, re-run the workflow: ${error.message}`
+    );
   }
 }
 

@@ -2,6 +2,8 @@ package com.adgeist.components
 
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import com.adgeist.utils.WrapperEventCode
+import com.adgeist.utils.buildAdEvent
 import com.adgeistkit.ads.AdListener
 import com.adgeistkit.ads.AdSize
 import com.adgeistkit.ads.AdView
@@ -75,14 +77,12 @@ object HTML5AdViewManagerImpl {
     @OptIn(AdgeistEmbedderApi::class)
     private fun createAdListener(view: AdView): AdListener = object : AdListener() {
         override fun onAdEvent(event: AdgeistEvent) {
-            val payload = Arguments.createMap().apply {
-                putString("code", event.code.name)
-                putString("type", event.type.name)
-                putString("message", event.message)
-                putMap("data", Arguments.createMap().apply {
-                    putString("reason", event.data?.reason ?: "")
-                })
-            }
+            val payload = buildAdEvent(
+                code = event.code.name,
+                type = event.type.name,
+                message = event.message,
+                reason = event.data?.reason
+            )
 
             view.post {
                 sendEvent(view, AD_EVENT_LISTENER, payload)
@@ -104,7 +104,15 @@ object HTML5AdViewManagerImpl {
             val adRequest = AdRequest.Builder().build()
 
             view.loadAd(adRequest)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            val payload = buildAdEvent(
+                WrapperEventCode.RWAE1,
+                reason = listOfNotNull(e::class.java.simpleName, e.message).joinToString(": ")
+            )
+
+            view.post {
+                sendEvent(view, AD_EVENT_LISTENER, payload)
+            }
         }
     }
 

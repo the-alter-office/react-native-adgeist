@@ -20,5 +20,5 @@ export const toAdSizeAxis = (value?: number): number | undefined =>
     : undefined;
 
 export const LOAD_FAILURE_CODES: ReadonlySet<string> = new Set<AdViewEventCode>(
-  ['AE1', 'AE2', 'AE3', 'AE4', 'AW1', 'AW2', 'AW3', 'AW6']
+  ['AE1', 'AE2', 'AE3', 'AE4', 'AW1', 'AW2', 'AW3', 'AW6', 'RWAE1']
 );

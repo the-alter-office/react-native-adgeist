@@ -52,7 +52,7 @@ export default function ContentContainer() {
 
     setShowAd(false);
     setSnippet('');
-    Alert.alert('Ad Failed to Load', `${code}: ${data?.reason ?? message}`);
+    Alert.alert('Ad Failed to Load', `${code}: ${data?.reason || message}`);
   };
 
   const handleParseSnippet = (): boolean => {
