@@ -173,6 +173,37 @@ So replace `YOUR_AD_WIDTH` and `YOUR_AD_HEIGHT` with the exact dimensions you en
 
 ---
 
+## Upgrading from a previous version
+
+Each release of `@thealteroffice/react-native-adgeist` can depend on a newer version of the native AdGeist SDKs and ship updated native module code. Gradle and CocoaPods cache native dependencies, so after upgrading the npm package your app may keep building against the old native SDK. That mismatch between the new JS layer and the old native code can cause missing methods, crashes or ads that don't load.
+
+After updating the package, always refresh native dependencies and clean the build.
+
+**Android**
+
+```bash
+cd android
+./gradlew clean
+./gradlew --refresh-dependencies
+cd ..
+```
+
+Then rebuild the app (`npx react-native run-android` or your usual build command).
+
+**iOS**
+
+```bash
+cd ios && pod install --repo-update
+```
+
+**Expo**
+
+```bash
+npx expo prebuild --clean
+```
+
+Then create a new development build.
+
 ## Extra options
 
 The options below are not part of the snippet adgeist.ai gives you. Your ad placement works without them — reach for one only when your layout calls for it.
