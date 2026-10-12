@@ -24,7 +24,7 @@ type Props = CompositeScreenProps<
 >;
 
 export default function HomeScreen({ navigation }: Props) {
-  const [appId, setAppId] = useState('6abbacbc1979b59913a3c0b5');
+  const [appId, setAppId] = useState('69a6777707df2b1527e357f9');
   const [bundleId, setBundleId] = useState('adgeist.example');
   const [backendDomain, setbackendDomain] = useState(
     'https://beta.v2.bg-services.adgeist.ai'
@@ -33,7 +33,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [showProvider, setShowProvider] = useState(true);
 
   const [config, setConfig] = useState({
-    appId: '6abbacbc1979b59913a3c0b5',
+    appId: '69a6777707df2b1527e357f9',
     bundleId: 'adgeist.example',
     backendDomain: 'https://beta.v2.bg-services.adgeist.ai',
   });

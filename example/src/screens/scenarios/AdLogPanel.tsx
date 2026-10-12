@@ -1,9 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import type { NativeSyntheticEvent } from 'react-native';
-
-type FailedToLoadEvent = NativeSyntheticEvent<{ error: string }>;
-type WarningEvent = NativeSyntheticEvent<{ warning: string }>;
+import type { AdViewEvent } from '@thealteroffice/react-native-adgeist';
 
 export function useAdLog() {
   const [lines, setLines] = useState<string[]>([]);
@@ -23,14 +21,11 @@ export function useAdCallbacks(append: (line: string) => void, tag?: string) {
     const prefix = tag ? `[${tag}] ` : '';
 
     return {
-      onAdLoaded: () => append(`${prefix}onAdLoaded`),
-      onAdOpened: () => append(`${prefix}onAdOpened`),
-      onAdClosed: () => append(`${prefix}onAdClosed`),
-      onAdClicked: () => append(`${prefix}onAdClicked`),
-      onAdFailedToLoad: (event: FailedToLoadEvent) =>
-        append(`${prefix}onAdFailedToLoad: ${event.nativeEvent.error}`),
-      onAdWarning: (event: WarningEvent) =>
-        append(`${prefix}onAdWarning: ${event.nativeEvent.warning}`),
+      onAdEvent: (event: NativeSyntheticEvent<AdViewEvent>) => {
+        const { code, type, message, data } = event.nativeEvent;
+        const reason = data?.reason ? ` - ${data.reason}` : '';
+        append(`${prefix}${code} (${type}): ${message} reason:${reason}`);
+      },
     };
   }, [append, tag]);
 }

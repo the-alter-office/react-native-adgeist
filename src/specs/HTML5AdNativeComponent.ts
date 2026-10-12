@@ -14,15 +14,16 @@ export interface AdSize {
   height?: Double;
 }
 
-export interface AdFailedToLoadEvent {
-  error: string;
+export interface NativeAdViewEvent {
+  code: string;
+  type: string;
+  message: string;
+  data: Readonly<{
+    reason: string;
+  }>;
 }
 
-export interface AdWarningEvent {
-  warning: string;
-}
-
-export interface AdSizeChangedEvent {
+export interface NativeAdSizeChangedEvent {
   width: Double;
   height: Double;
 }
@@ -33,13 +34,8 @@ export interface NativeProps extends ViewProps {
   adSize?: AdSize;
   reserveSpace?: WithDefault<boolean, true>;
 
-  onAdLoaded?: DirectEventHandler<null>;
-  onAdFailedToLoad?: DirectEventHandler<AdFailedToLoadEvent>;
-  onAdOpened?: DirectEventHandler<null>;
-  onAdClosed?: DirectEventHandler<null>;
-  onAdClicked?: DirectEventHandler<null>;
-  onAdWarning?: DirectEventHandler<AdWarningEvent>;
-  onAdSizeChanged?: DirectEventHandler<AdSizeChangedEvent>;
+  onAdEvent?: DirectEventHandler<NativeAdViewEvent>;
+  onAdSizeChanged?: DirectEventHandler<NativeAdSizeChangedEvent>;
 }
 
 interface NativeCommands {

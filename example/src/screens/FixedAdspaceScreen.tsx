@@ -33,7 +33,8 @@ export default function FixedAdspaceScreen() {
           <Text style={styles.body}>
             The AdView measures itself from adSize alone. If the server returns
             a creative of a different size, the SDK adopts the creative's size,
-            re-measures the box and reports the mismatch through onAdWarning.
+            re-measures the box and reports the mismatch through onAdEvent as
+            AW7.
           </Text>
           <Text style={styles.code}>{'// adIsResponsive omitted'}</Text>
         </View>
@@ -44,7 +45,7 @@ export default function FixedAdspaceScreen() {
           </Text>
           <Text style={styles.hint}>
             A real ad unit at {FIXED_SIZE.width} x {FIXED_SIZE.height}. Watch
-            for onAdWarning if the creative comes back a different size.
+            for AW7 if the creative comes back a different size.
           </Text>
 
           <View
@@ -68,7 +69,7 @@ export default function FixedAdspaceScreen() {
           </Text>
           <Text style={styles.hint}>
             This ad unit does not exist, so the load fails. With reserveSpace
-            false the native AdView removes itself after onAdFailedToLoad - the
+            false the native AdView removes itself after the failure event - the
             red box should give up its {FAILING_SIZE.width} x{' '}
             {FAILING_SIZE.height} slot and everything below should move up.
           </Text>

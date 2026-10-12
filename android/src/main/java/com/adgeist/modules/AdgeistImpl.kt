@@ -4,7 +4,6 @@ import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.adgeistkit.AdgeistCore
-import com.adgeistkit.data.models.AdData
 import com.adgeistkit.data.models.Event
 import com.adgeistkit.data.models.FixedAdResponse
 import com.adgeistkit.data.models.UserDetails
@@ -12,6 +11,7 @@ import com.adgeistkit.data.network.CreativeAnalytics
 import com.adgeistkit.data.network.FetchCreative
 
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.ReadableType
 import com.adgeist.utils.toWritableMap
 import com.adgeistkit.request.AnalyticsRequest
 import com.adgeistkit.utilities.AdgeistInternalApi
@@ -52,7 +52,7 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
 
   fun fetchCreative(adSpaceId: String, buyType: String, promise: Promise) {
     getAd?.fetchCreative(adSpaceId) { adData ->
-      if (adData.isSuccess && adData.data != null) {
+      if (adData.error == null && adData.data != null) {
         when (val response = adData.data) {
           is FixedAdResponse -> {
             promise.resolve(response.toWritableMap())
@@ -62,7 +62,7 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
           }
         }
       } else {
-        promise.reject("AD_ERROR", adData.errorMessage)
+        promise.reject("AD_ERROR", adData.error?.name ?: "Unknown error")
       }
     } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
   }
@@ -87,11 +87,10 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
     val eventType = eventMap.getStringSafe("eventType")
 
     if (eventType.isNullOrEmpty()) {
-        throw IllegalArgumentException("Event must have a non-empty eventType")
+        return
     }
 
-    val props = if (eventMap.hasKey("eventProperties")) eventMap.getMap("eventProperties") else null
-    val eventProps = props?.toHashMap() ?: emptyMap<String, Any>()
+    val eventProps = eventMap.getMapSafe("eventProperties")?.toHashMap() ?: emptyMap<String, Any>()
 
     val event = Event(
         eventType = eventType,
@@ -120,4 +119,7 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
 }
 
 fun ReadableMap.getStringSafe(key: String): String? =
-    if (this.hasKey(key) && !this.isNull(key)) this.getString(key) else null
+    if (this.hasKey(key) && this.getType(key) == ReadableType.String) this.getString(key) else null
+
+fun ReadableMap.getMapSafe(key: String): ReadableMap? =
+    if (this.hasKey(key) && this.getType(key) == ReadableType.Map) this.getMap(key) else null

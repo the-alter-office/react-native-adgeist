@@ -6,17 +6,15 @@ import React, {
   useCallback,
 } from 'react';
 import Adgeist from '../specs/NativeAdgeist';
-import { ConsentModal } from '../components/deprecated/ConsentModal';
 import type {
   AdgeistContextType,
   AdgeistProviderProps,
 } from '../types/Provider';
 import { PACKAGE_VERSION_TAG, PACKAGE_VERSION } from '../constants';
-import { PACKAGE_SUFFIX, BACKEND_DOMAIN } from '../env';
+import { PACKAGE_SUFFIX, BACKEND_DOMAIN } from '../config';
 
 const AdgeistContext = createContext<AdgeistContextType>({
   isInitialized: false,
-  setAdgeistConsentModal: () => {},
 });
 
 export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
@@ -31,8 +29,6 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
   const [initializationError, setInitializationError] = useState<
     Error | undefined
   >();
-  const [adgeistConsentModal, setAdgeistConsentModal] =
-    useState<boolean>(false);
 
   /**
    * Initializes Adgeist SDK
@@ -86,17 +82,9 @@ export const AdgeistProvider: React.FC<AdgeistProviderProps> = ({
       value={{
         isInitialized,
         initializationError,
-        setAdgeistConsentModal,
       }}
     >
-      {initializationError && <>{children}</>}
-
-      {isInitialized && (
-        <>
-          {adgeistConsentModal && <ConsentModal />}
-          {children}
-        </>
-      )}
+      {(isInitialized || initializationError) && children}
     </AdgeistContext.Provider>
   );
 };
