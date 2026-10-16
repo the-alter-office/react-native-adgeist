@@ -5,9 +5,11 @@
   "description": "Android E2E matrix for @thealteroffice/react-native-adgeist across React Native versions",
   "license": "MIT",
   "engines": {
-    "node": ">=20.19"
+    "node": ">=20.19.4"
   },
   "scripts": {
-    "resolve-versions": "node scripts/resolve-versions.js --from 0.77 --to 0.86"
-  }
+    "resolve-versions": "node scripts/resolve-versions.js --from 0.77 --to 0.86",
+    "generate-app": "node scripts/generate-app.js"
+  },
+  "packageManager": "yarn@1.22.22"
 }

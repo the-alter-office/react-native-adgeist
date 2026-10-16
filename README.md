@@ -79,6 +79,79 @@ Percentages are strings with a `%` suffix, rounded to two decimals. Scripts that
 read them with `parsePercent` from `scripts/lib/npm-downloads.js`. Prereleases (`-rc`, nightlies) are excluded from every
 count, including the totals.
 
+## Generating an app
+
+```
+yarn generate-app 0.77.3
+yarn generate-app --all
+```
+
+Creates `apps/rn-<x.y>` for each version. `--all` uses every version in `config/matrix.json`.
+The same script is used for the initial apps and by the Regenerate workflow, so every app is
+built the same way.
+
+| Option | Purpose |
+|---|---|
+| `--all` | Generate the apps listed in `config/matrix.json`, skipping ones that already exist |
+| `--replace` | Delete and recreate an app folder that already exists |
+| `--skip-install` | Create and patch the app without running `yarn install` |
+| `--cli-version <ver>` | `@react-native-community/cli` version used for `init` (default `latest`) |
+
+### When an app folder already exists
+
+| Command | Folder exists, same version | Folder exists, different version | Folder missing |
+|---|---|---|---|
+| `yarn generate-app 0.77.3` | ❌ error, nothing changed | ❌ error, nothing changed | ✅ generated |
+| `yarn generate-app 0.77.3 --replace` | 🔁 deleted and regenerated | 🔁 deleted and regenerated | ✅ generated |
+| `yarn generate-app --all` | ⏭️ skipped | ⚠️ skipped with a warning | ✅ generated |
+| `yarn generate-app --all --replace` | 🔁 deleted and regenerated | 🔁 deleted and regenerated | ✅ generated |
+
+- The existing version is read from `react-native` in the app's `package.json`. The warning
+  looks like `⚠️ apps/rn-0.83 has 0.83.4, matrix.json lists 0.83.6; use --replace to update`.
+  The app is not rebuilt automatically.
+- With `--all`, any folder in `apps/` that `config/matrix.json` does not list is reported as
+  `⚠️ apps/rn-0.76 is not in config/matrix.json`. It is never deleted; removing an app is a
+  deliberate act.
+- Every run ends with `Generated: N, skipped: N, failed: N`. The exit code is non-zero only when
+  an app fails to generate; skipped apps and warnings do not fail the run.
+- `--replace` deletes the whole app folder first, including manual edits. `react-native` and
+  `@react-native/*` come out at the same exact version, but other dependencies resolve to the
+  newest version their ranges allow, so `yarn.lock` can differ from the previous run.
+
+What it does, per version:
+
+1. Picks the `@react-native-community/template` version with the same number as the requested
+   React Native version (the template is published in lockstep with React Native, e.g.
+   template `0.77.3` creates a React Native `0.77.3` app). If that exact version does not exist,
+   it uses the closest lower stable patch in the same line and prints a warning.
+2. Runs `@react-native-community/cli init AdgeistE2E` into `apps/rn-<x.y>` with package name
+   `ai.adgeist.e2e`, without installing dependencies or CocoaPods.
+3. Pins `react-native` and every `@react-native/*` package in the app's `package.json` to the
+   exact requested version, so the app is correct even when step 1 fell back to a lower template.
+   It also sets `"packageManager": "yarn@1.22.22"`, so Corepack uses Yarn classic in the app.
+   `init` runs with `--pm npm` on purpose: with `--pm yarn` the CLI runs `yarn set version` in the
+   repo root and leaves a `.yarnrc.yml` that forces Yarn 3 everywhere.
+4. Patches `android/app/build.gradle` so `applicationId` and the `ADGEIST_APP_ID` manifest
+   placeholder come from the Gradle properties `e2eApplicationId` and `e2eAdgeistAppId`,
+   falling back to the placeholders in `config/e2e.defaults.json`. In CI they are set through
+   the `ORG_GRADLE_PROJECT_e2eApplicationId` and `ORG_GRADLE_PROJECT_e2eAdgeistAppId`
+   environment variables, so real values are never committed.
+5. Adds the `com.adgeistkit.ads.ADGEIST_APP_ID` `<meta-data>` entry to
+   `android/app/src/main/AndroidManifest.xml`, using that placeholder.
+6. Runs `yarn install` and checks that `node_modules/react-native` is the requested version.
+
+The Java/Kotlin `namespace` stays `ai.adgeist.e2e` in every app; only `applicationId` changes.
+Each app keeps the template's release build type, which signs with the debug keystore.
+
+To build an app's release APK (one ABI is enough for an emulator):
+
+```
+cd apps/rn-0.77/android
+./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+Use `x86_64` instead of `arm64-v8a` on an Intel machine or a CI emulator.
+
 ## Layout
 
 | Path | Contents |
@@ -95,7 +168,7 @@ The GitHub Actions workflows that run this live on the default branch, because
 
 ## Local prerequisites
 
-- Node 20.19 or newer
+- Node 20.19.4 or newer (React Native 0.81+ requires it, and Yarn classic enforces it)
 - Yarn classic 1.x
 - JDK 17
 - Android SDK with an API 35 `google_apis` x86_64 system image

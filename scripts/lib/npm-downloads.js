@@ -196,6 +196,8 @@ function linesInRange(summaries, from, to) {
 }
 
 module.exports = {
+  fetchJson,
+  registryUrl,
   fetchSnapshot,
   loadSnapshot,
   saveSnapshot,
