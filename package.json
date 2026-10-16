@@ -7,5 +7,7 @@
   "engines": {
     "node": ">=20.19"
   },
-  "scripts": {}
+  "scripts": {
+    "resolve-versions": "node scripts/resolve-versions.js --from 0.77 --to 0.86"
+  }
 }

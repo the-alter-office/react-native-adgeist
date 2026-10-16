@@ -28,6 +28,57 @@ most npm downloads in the last week (prereleases excluded; ties go to the higher
 with no downloads uses its latest patch). The range moves forward: new lines are added and
 low-share lines are retired through a reviewed pull request.
 
+### Resolving the versions
+
+```
+yarn resolve-versions
+```
+
+Fetches last week's per-version download counts for `react-native` from
+`api.npmjs.org/versions/react-native/last-week`, merges them with the full version list from the
+npm registry (so versions with zero downloads still count), and writes `config/matrix.json` for
+lines 0.77 to 0.86. It refuses to overwrite an existing `config/matrix.json`; pass `--force` to
+replace it.
+
+Other options:
+
+| Option | Purpose |
+|---|---|
+| `--from <x.y>` / `--to <x.y>` | Line range, inclusive |
+| `--out <file>` | Output file instead of `config/matrix.json` |
+| `--save-snapshot <file>` | Save the fetched download data, to replay it later |
+| `--snapshot <file>` | Use saved download data instead of fetching from npm |
+
+### `config/matrix.json` fields
+
+Top level:
+
+| Field | Meaning |
+|---|---|
+| `package` | npm package the downloads were read for (`react-native`) |
+| `fetchedAt` | When the download data was fetched (ISO 8601, UTC) |
+| `source` | Where the data came from |
+| `range` | The `from` / `to` lines the file was generated for |
+| `lines` | One entry per React Native minor line |
+
+Each entry in `lines`:
+
+| Field | Meaning | Example |
+|---|---|---|
+| `line` | React Native minor line | `0.77` |
+| `version` | Selected patch: the app in `appDir` runs exactly this version | `0.77.3` |
+| `downloads` | Last-week downloads of the selected patch | `65919` |
+| `shareOfLine` | Selected patch's downloads as a **percentage** of its line's downloads. A high value means a clear leader; a low value means the leader can change from week to week | `"59.44%"` |
+| `lineDownloads` | Last-week downloads of all stable patches in the line combined | `110906` |
+| `lineShare` | The line's downloads as a **percentage** of all stable `react-native` downloads. Used to decide when a line is added (≥ 0.5%) or retired (< 1% in two consecutive monthly checks) | `"0.77%"` |
+| `latestPatch` | Newest published stable patch in the line, for comparison with `version` | `0.77.3` |
+| `reason` | Why `version` was selected: `most downloaded patch`, or `latest patch (no downloads in line)` | `most downloaded patch` |
+| `appDir` | Folder of the app for this line | `apps/rn-0.77` |
+
+Percentages are strings with a `%` suffix, rounded to two decimals. Scripts that compare them
+read them with `parsePercent` from `scripts/lib/npm-downloads.js`. Prereleases (`-rc`, nightlies) are excluded from every
+count, including the totals.
+
 ## Layout
 
 | Path | Contents |
