@@ -152,6 +152,37 @@ cd apps/rn-0.77/android
 
 Use `x86_64` instead of `arm64-v8a` on an Intel machine or a CI emulator.
 
+## Installing the SDK
+
+```
+yarn install-sdk qa
+yarn install-sdk 0.0.34-qa
+yarn install-sdk qa --app rn-0.77
+yarn install-sdk 0.0.40-qa --check
+```
+
+Installs `@thealteroffice/react-native-adgeist` at one exact version in the apps listed in
+`config/matrix.json`, or only in the apps given with `--app` (`rn-0.77` or `0.77`, repeatable).
+
+1. Resolves the argument against the npm registry. A dist-tag (`qa`, `latest`, `beta`) becomes
+   its exact version; an exact version must be published. Otherwise it stops with
+   `... is not available on npm` and lists the current dist-tags, before touching any app.
+2. In each app, checks that Yarn classic is active, then runs
+   `yarn add @thealteroffice/react-native-adgeist@<version> --exact`, which updates the app's
+   `package.json` and `yarn.lock`.
+3. Checks that `node_modules/@thealteroffice/react-native-adgeist` has exactly that version.
+
+`--check` stops after step 1 and prints the exact version. CI uses it to test whether a
+newly published version is available yet. Every run ends with `Installed: N, failed: N`;
+the exit code is non-zero if the version is not available or any app fails.
+
+The committed apps carry a baseline SDK version (the `qa` dist-tag when the apps were set up).
+CI installs the requested version on top of it for each run without committing it.
+
+`-beta` versions use a snapshot of the native Android SDK and need the Sonatype snapshot
+repository to build; the script prints a warning for them. `-qa` and release versions use the
+native SDK from Maven Central.
+
 ## Layout
 
 | Path | Contents |

@@ -2,8 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
 const { fetchJson, registryUrl, parseVersion, compareLines } = require('./lib/npm-downloads');
+const { YARN_CLASSIC, run, assertYarnClassic } = require('./lib/yarn');
 
 const root = path.join(__dirname, '..');
 const matrixPath = path.join(root, 'config/matrix.json');
@@ -14,7 +14,6 @@ const NAMESPACE = 'ai.adgeist.e2e';
 const TEMPLATE_PACKAGE = '@react-native-community/template';
 const MIN_LINE = '0.75';
 const APP_ID_META_DATA = 'com.adgeistkit.ads.ADGEIST_APP_ID';
-const YARN_CLASSIC = 'yarn@1.22.22';
 
 const USAGE = `Usage:
   node scripts/generate-app.js <x.y.z> [<x.y.z> ...] [options]
@@ -75,40 +74,6 @@ function readMatrix() {
     return null;
   }
   return JSON.parse(fs.readFileSync(matrixPath, 'utf8'));
-}
-
-function run(command, args, cwd) {
-  console.log(`\n$ ${command} ${args.join(' ')}`);
-  const result = spawnSync(command, args, {
-    cwd,
-    stdio: 'inherit',
-    env: { ...process.env, CI: 'true', COREPACK_ENABLE_AUTO_PIN: '0', COREPACK_ENABLE_DOWNLOAD_PROMPT: '0' },
-  });
-  if (result.error) {
-    throw new Error(`${command} could not start: ${result.error.message}`);
-  }
-  if (result.status !== 0) {
-    throw new Error(`${command} ${args[0] ?? ''} exited with code ${result.status}`);
-  }
-}
-
-function assertYarnClassic(cwd) {
-  const result = spawnSync('yarn', ['--version'], {
-    cwd,
-    encoding: 'utf8',
-    env: { ...process.env, COREPACK_ENABLE_AUTO_PIN: '0', COREPACK_ENABLE_DOWNLOAD_PROMPT: '0' },
-  });
-  if (result.error || result.status !== 0) {
-    throw new Error(
-      `yarn --version failed in ${path.relative(root, cwd) || '.'}: ${(result.stderr || result.error?.message || '').trim()}`
-    );
-  }
-  const version = result.stdout.trim().split('\n').pop();
-  if (!version.startsWith('1.')) {
-    throw new Error(
-      `Yarn classic 1.x is required in ${path.relative(root, cwd) || '.'}, found ${version}. Check the "packageManager" field there and in the repo root.`
-    );
-  }
 }
 
 async function resolveTemplateVersion(target) {

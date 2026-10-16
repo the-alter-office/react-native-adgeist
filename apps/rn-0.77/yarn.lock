@@ -1798,6 +1798,11 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
+"@thealteroffice/react-native-adgeist@0.0.39":
+  version "0.0.39"
+  resolved "https://registry.yarnpkg.com/@thealteroffice/react-native-adgeist/-/react-native-adgeist-0.0.39.tgz#1454f05518a100334e6dc254167938d0e98cab67"
+  integrity sha512-ICZspc8fnonlP6PSjXVbqNj0pbYrKfIl4FkrIK16QePsIguwETelioLS220UI3Y1Lr/G1D1SBgQtl8OTYxFlMw==
+
 "@types/babel__core@^7.1.14":
   version "7.20.5"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.20.5.tgz#3df15f27ba85319caa07ba08d0721889bb39c017"

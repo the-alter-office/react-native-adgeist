@@ -9,7 +9,8 @@
   },
   "scripts": {
     "resolve-versions": "node scripts/resolve-versions.js --from 0.77 --to 0.86",
-    "generate-app": "node scripts/generate-app.js"
+    "generate-app": "node scripts/generate-app.js",
+    "install-sdk": "node scripts/install-sdk.js"
   },
   "packageManager": "yarn@1.22.22"
 }
