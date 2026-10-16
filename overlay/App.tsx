@@ -5,6 +5,10 @@ import { AdgeistProvider, HTML5AdView } from '@thealteroffice/react-native-adgei
 import type { AdViewEvent } from '@thealteroffice/react-native-adgeist';
 import config from './e2e.config.json';
 
+const AD_RENDERED_CODE = 'AL1';
+const CLICK_HANDLED_CODE = 'AI1';
+const ALLOWED_WARNING_CODES: string[] = [];
+
 type InitState = 'initializing' | 'initialized' | 'error';
 
 type ReceivedEvent = {
@@ -13,6 +17,13 @@ type ReceivedEvent = {
   message: string;
   reason: string;
 };
+
+function isUnexpected(code: string) {
+  if (code.startsWith('AE') || code === 'RWAE1') {
+    return true;
+  }
+  return code.startsWith('AW') && !ALLOWED_WARNING_CODES.includes(code);
+}
 
 function AdPlacement({ onEvent }: { onEvent: (event: ReceivedEvent) => void }) {
   const handleAdEvent = useCallback(
@@ -25,14 +36,14 @@ function AdPlacement({ onEvent }: { onEvent: (event: ReceivedEvent) => void }) {
 
   if (config.adIsResponsive) {
     return (
-      <View style={[styles.adBox, { height: config.adSize.height }]}>
+      <View testID="ad-container" style={[styles.adBox, { height: config.adSize.height }]}>
         <HTML5AdView adUnitID={config.adUnitId} adIsResponsive onAdEvent={handleAdEvent} />
       </View>
     );
   }
 
   return (
-    <View style={styles.adBox}>
+    <View testID="ad-container" style={styles.adBox}>
       <HTML5AdView
         adUnitID={config.adUnitId}
         adSize={{ width: config.adSize.width, height: config.adSize.height }}
@@ -57,17 +68,35 @@ export default function App() {
     []
   );
 
+  const codes = events.map((e) => e.code);
+  const adRendered = codes.includes(AD_RENDERED_CODE);
+  const clickHandled = codes.includes(CLICK_HANDLED_CODE);
+  const unexpected = [...new Set(codes.filter(isUnexpected))];
+
   return (
-    <View style={styles.root}>
+    <View testID="e2e-root" style={styles.root}>
       <StatusBar barStyle="dark-content" />
       <Text style={styles.title}>Adgeist E2E</Text>
-      <Text style={styles.line}>
-        init: {initState}
-        {initError ? ` (${initError})` : ''}
-      </Text>
-      <Text style={styles.line}>
-        events: {events.length === 0 ? 'none' : events.map((e) => e.code).join(', ')}
-      </Text>
+      <View style={styles.panel}>
+        <Text testID="status-init" style={styles.line}>
+          {initState === 'error' ? `init: error: ${initError}` : `init: ${initState}`}
+        </Text>
+        <Text testID="status-ad-rendered" style={[styles.line, adRendered && styles.ok]}>
+          {`ad rendered: ${adRendered ? 'yes' : 'no'}`}
+        </Text>
+        <Text testID="status-click-handled" style={[styles.line, clickHandled && styles.ok]}>
+          {`click handled: ${clickHandled ? 'yes' : 'no'}`}
+        </Text>
+        <Text
+          testID="status-unexpected"
+          style={[styles.line, unexpected.length > 0 && styles.bad]}
+        >
+          {`unexpected: ${unexpected.length === 0 ? 'none' : unexpected.join(', ')}`}
+        </Text>
+        <Text testID="event-log" style={styles.line}>
+          {`events: ${codes.length === 0 ? 'none' : codes.join(', ')}`}
+        </Text>
+      </View>
       <AdgeistProvider
         onInitializationSuccess={handleInitSuccess}
         onInitializationError={handleInitError}
@@ -77,8 +106,7 @@ export default function App() {
       <ScrollView style={styles.log}>
         {events.map((e, index) => (
           <Text key={index} style={styles.logLine}>
-            {e.code} {e.type}: {e.message}
-            {e.reason ? ` (${e.reason})` : ''}
+            {`${e.code} ${e.type}: ${e.message}${e.reason ? ` (${e.reason})` : ''}`}
           </Text>
         ))}
       </ScrollView>
@@ -99,10 +127,22 @@ const styles = StyleSheet.create({
     color: '#111111',
     marginBottom: 8,
   },
+  panel: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    backgroundColor: '#f2f2f2',
+  },
   line: {
     fontSize: 14,
     color: '#111111',
-    marginBottom: 4,
+    marginVertical: 2,
+  },
+  ok: {
+    color: '#0a7a2f',
+  },
+  bad: {
+    color: '#b00020',
   },
   adBox: {
     alignSelf: 'center',

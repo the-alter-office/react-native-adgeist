@@ -195,9 +195,27 @@ Every app opens directly on one screen, `overlay/App.tsx`, integrated the way a 
 - One `HTML5AdView` inside it, using the ad unit and size from the app's `e2e.config.json`:
   `adSize` for a fixed ad unit, or `adIsResponsive` inside a box of `adSize.height` for a
   responsive one.
-- `onAdEvent` records every event. The screen shows the provider state
-  (`init: initializing | initialized | error`), the event codes received in order, and a log of
-  each event's code, type, message and reason.
+- `onAdEvent` records every event. A status panel above the ad summarizes them, and a log below
+  the ad lists each event's code, type, message and reason.
+
+### Status panel and test IDs
+
+The panel sits above the ad so it is always on screen. Maestro reads it by `testID` (exposed as
+the Android resource ID) and checks the exact text.
+
+| `testID` | Text | Meaning |
+|---|---|---|
+| `e2e-root` | (whole screen) | Present once the app has launched: the **app launches** check |
+| `status-init` | `init: initializing` / `init: initialized` / `init: error: <message>` | `AdgeistProvider` state |
+| `status-ad-rendered` | `ad rendered: no` → `ad rendered: yes` | `yes` once `AL1` (`AD_LOADED`) arrives: the **ad rendered** check |
+| `status-click-handled` | `click handled: no` → `click handled: yes` | `yes` once `AI1` (`AD_CLICKED`) arrives: the **click handled** check |
+| `status-unexpected` | `unexpected: none` or `unexpected: AE1, AW6` | Every distinct `AE*`, `RWAE1` or `AW*` code received, except allowed warnings |
+| `event-log` | `events: none` or `events: AL1, AI1` | Every code received, in order |
+| `ad-container` | (the ad) | The box around `HTML5AdView`, used to tap the ad |
+
+Allowed warnings are listed in `ALLOWED_WARNING_CODES` in `overlay/App.tsx`. It is empty, so any
+warning counts as unexpected. Events are kept in React state, so the panel keeps its values
+while the app is in the background, for example after a tap opens a browser.
 
 `overlay/` is the only source of the screen. Change it there, then copy it into the apps:
 
