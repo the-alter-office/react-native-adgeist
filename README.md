@@ -138,7 +138,8 @@ What it does, per version:
    environment variables, so real values are never committed.
 5. Adds the `com.adgeistkit.ads.ADGEIST_APP_ID` `<meta-data>` entry to
    `android/app/src/main/AndroidManifest.xml`, using that placeholder.
-6. Runs `yarn install` and checks that `node_modules/react-native` is the requested version.
+6. Copies `overlay/` into the app (see [The E2E screen](#the-e2e-screen)).
+7. Runs `yarn install` and checks that `node_modules/react-native` is the requested version.
 
 The Java/Kotlin `namespace` stays `ai.adgeist.e2e` in every app; only `applicationId` changes.
 Each app keeps the template's release build type, which signs with the debug keystore.
@@ -176,12 +177,63 @@ Installs `@thealteroffice/react-native-adgeist` at one exact version in the apps
 newly published version is available yet. Every run ends with `Installed: N, failed: N`;
 the exit code is non-zero if the version is not available or any app fails.
 
-The committed apps carry a baseline SDK version (the `qa` dist-tag when the apps were set up).
+The committed apps carry a baseline SDK version, currently `0.0.39`. Versions before it
+(for example `0.0.34-qa`) have a different `HTML5AdView` API without `onAdEvent`, which the E2E
+screen depends on.
 CI installs the requested version on top of it for each run without committing it.
 
 `-beta` versions use a snapshot of the native Android SDK and need the Sonatype snapshot
 repository to build; the script prints a warning for them. `-qa` and release versions use the
 native SDK from Maven Central.
+
+## The E2E screen
+
+Every app opens directly on one screen, `overlay/App.tsx`, integrated the way a publisher would:
+
+- `AdgeistProvider` with no backend override (the `-qa` package has the QA backend built in) and no
+  `customAdgeistAppID` (the app ID comes from the `ADGEIST_APP_ID` manifest entry).
+- One `HTML5AdView` inside it, using the ad unit and size from the app's `e2e.config.json`:
+  `adSize` for a fixed ad unit, or `adIsResponsive` inside a box of `adSize.height` for a
+  responsive one.
+- `onAdEvent` records every event. The screen shows the provider state
+  (`init: initializing | initialized | error`), the event codes received in order, and a log of
+  each event's code, type, message and reason.
+
+`overlay/` is the only source of the screen. Change it there, then copy it into the apps:
+
+```
+yarn apply-overlay
+yarn apply-overlay --app rn-0.77
+```
+
+`generate-app` applies it automatically, so regenerated apps get the same screen.
+
+### Ad unit configuration
+
+Each app reads `e2e.config.json`, which is git-ignored and must exist before the app is built,
+because the release build bundles it into the APK:
+
+```
+export ADGEIST_E2E_AD_UNIT_ID=<ad unit id>
+export ADGEIST_E2E_AD_RESPONSIVE=false
+export ADGEIST_E2E_AD_WIDTH=320
+export ADGEIST_E2E_AD_HEIGHT=480
+yarn write-e2e-config
+```
+
+Any variable that is not set falls back to `config/e2e.defaults.json`, which holds placeholders.
+With the placeholder ad unit the app still starts, but the ad request is rejected (for example
+`AW6`), which is enough to check the integration is wired up. The ad unit ID is printed as
+`env (hidden)` and is never written anywhere except the git-ignored `e2e.config.json`.
+
+The AdGeist app ID and the package name are not in `e2e.config.json`; they are Gradle
+properties (see [Generating an app](#generating-an-app)):
+
+```
+cd apps/rn-0.77/android
+./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a \
+  -Pe2eAdgeistAppId=<app id> -Pe2eApplicationId=<package name>
+```
 
 ## Layout
 

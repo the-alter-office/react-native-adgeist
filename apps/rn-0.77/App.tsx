@@ -1,118 +1,119 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useCallback, useState } from 'react';
+import type { NativeSyntheticEvent } from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { AdgeistProvider, HTML5AdView } from '@thealteroffice/react-native-adgeist';
+import type { AdViewEvent } from '@thealteroffice/react-native-adgeist';
+import config from './e2e.config.json';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+type InitState = 'initializing' | 'initialized' | 'error';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+type ReceivedEvent = {
+  code: string;
+  type: string;
+  message: string;
+  reason: string;
+};
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+function AdPlacement({ onEvent }: { onEvent: (event: ReceivedEvent) => void }) {
+  const handleAdEvent = useCallback(
+    (event: NativeSyntheticEvent<AdViewEvent>) => {
+      const { code, type, message, data } = event.nativeEvent;
+      onEvent({ code, type, message, reason: data?.reason ?? '' });
+    },
+    [onEvent]
+  );
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  if (config.adIsResponsive) {
+    return (
+      <View style={[styles.adBox, { height: config.adSize.height }]}>
+        <HTML5AdView adUnitID={config.adUnitId} adIsResponsive onAdEvent={handleAdEvent} />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={styles.adBox}>
+      <HTML5AdView
+        adUnitID={config.adUnitId}
+        adSize={{ width: config.adSize.width, height: config.adSize.height }}
+        onAdEvent={handleAdEvent}
+      />
     </View>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+export default function App() {
+  const [initState, setInitState] = useState<InitState>('initializing');
+  const [initError, setInitError] = useState('');
+  const [events, setEvents] = useState<ReceivedEvent[]>([]);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const handleInitSuccess = useCallback(() => setInitState('initialized'), []);
+  const handleInitError = useCallback((error: Error) => {
+    setInitState('error');
+    setInitError(error.message);
+  }, []);
+  const handleEvent = useCallback(
+    (event: ReceivedEvent) => setEvents((current) => [...current, event]),
+    []
+  );
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
+    <View style={styles.root}>
+      <StatusBar barStyle="dark-content" />
+      <Text style={styles.title}>Adgeist E2E</Text>
+      <Text style={styles.line}>
+        init: {initState}
+        {initError ? ` (${initError})` : ''}
+      </Text>
+      <Text style={styles.line}>
+        events: {events.length === 0 ? 'none' : events.map((e) => e.code).join(', ')}
+      </Text>
+      <AdgeistProvider
+        onInitializationSuccess={handleInitSuccess}
+        onInitializationError={handleInitError}
+      >
+        <AdPlacement onEvent={handleEvent} />
+      </AdgeistProvider>
+      <ScrollView style={styles.log}>
+        {events.map((e, index) => (
+          <Text key={index} style={styles.logLine}>
+            {e.code} {e.type}: {e.message}
+            {e.reason ? ` (${e.reason})` : ''}
+          </Text>
+        ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  root: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    paddingTop: 48,
+    paddingHorizontal: 16,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
+  title: {
     fontSize: 18,
-    fontWeight: '400',
+    fontWeight: '600',
+    color: '#111111',
+    marginBottom: 8,
   },
-  highlight: {
-    fontWeight: '700',
+  line: {
+    fontSize: 14,
+    color: '#111111',
+    marginBottom: 4,
+  },
+  adBox: {
+    alignSelf: 'center',
+    marginVertical: 12,
+  },
+  log: {
+    flex: 1,
+  },
+  logLine: {
+    fontSize: 12,
+    color: '#444444',
+    marginBottom: 2,
   },
 });
-
-export default App;

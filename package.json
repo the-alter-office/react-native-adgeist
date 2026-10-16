@@ -10,7 +10,9 @@
   "scripts": {
     "resolve-versions": "node scripts/resolve-versions.js --from 0.77 --to 0.86",
     "generate-app": "node scripts/generate-app.js",
-    "install-sdk": "node scripts/install-sdk.js"
+    "install-sdk": "node scripts/install-sdk.js",
+    "apply-overlay": "node scripts/apply-overlay.js",
+    "write-e2e-config": "node scripts/write-e2e-config.js"
   },
   "packageManager": "yarn@1.22.22"
 }

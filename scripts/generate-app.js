@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { fetchJson, registryUrl, parseVersion, compareLines } = require('./lib/npm-downloads');
 const { YARN_CLASSIC, run, assertYarnClassic } = require('./lib/yarn');
+const { applyOverlay } = require('./apply-overlay');
 
 const root = path.join(__dirname, '..');
 const matrixPath = path.join(root, 'config/matrix.json');
@@ -283,6 +284,7 @@ async function generateApp(version, args, matrix) {
   pinReactNative(appDir, version);
   patchBuildGradle(appDir);
   patchManifest(appDir);
+  console.log(`🎨 Overlay: ${applyOverlay(appDir).join(', ')}`);
 
   if (!args.skipInstall) {
     assertYarnClassic(appDir);

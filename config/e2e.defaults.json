@@ -1,10 +1,10 @@
 {
-  "adgeistAppId": "PLACEHOLDER_ADGEIST_APP_ID",
+  "adgeistAppId": "6ab4e1cbbe276125a3c1a861",
   "packageName": "ai.adgeist.e2e",
-  "adUnitId": "PLACEHOLDER_AD_UNIT_ID",
+  "adUnitId": "6ab4efbabe276125a3c1af52",
   "adIsResponsive": false,
   "adSize": {
     "width": 320,
-    "height": 480
+    "height": 148
   }
 }
