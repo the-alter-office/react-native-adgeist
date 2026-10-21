@@ -78,6 +78,40 @@ To get started with the project, run `yarn` in the root directory to install the
 
 ```sh
 yarn
+yarn fetch-adgeistkit   # downloads the iOS AdgeistKit.xcframework (required before pod install)
+```
+
+Run the example app:
+
+```sh
+yarn example:beta       # or :qa / :prod; sets src/env.ts and starts Metro
+yarn example android
+yarn example ios
+```
+
+JS changes hot-reload. Native changes need a rebuild. Native sources are under `Pods > Development Pods` in Xcode and `@thealteroffice/react-native-adgeist` in Android Studio.
+
+## Environments
+
+| Branch | Environment | npm version  | dist-tag | AdgeistKit (iOS) |
+| ------ | ----------- | ------------ | -------- | ---------------- |
+| `main` | beta        | `X.Y.Z-beta` | `beta`   | as pinned        |
+| `qa`   | qa          | `X.Y.Z-qa`   | `qa`     | stable           |
+| `prod` | prod        | `X.Y.Z`      | `latest` | stable           |
+
+- `src/env.ts` is generated. Change it with `yarn set-env <beta|qa|prod>` or `yarn set-env --domain <url>`.
+- Never commit a modified `src/env.ts`. Its committed values are empty strings and CI fills them in. Run `git restore src/env.ts` before committing.
+- To release a new version, bump `PACKAGE_VERSION` in `src/constants.ts`. Never edit the `package.json` version by hand; `yarn sync-version` derives it.
+
+## AdgeistKit (iOS native SDK)
+
+The iOS SDK is a prebuilt `AdgeistKit.xcframework`, downloaded from the [adgeist-publisher-ios-sdk releases](https://github.com/the-alter-office/adgeist-publisher-ios-sdk/releases). It is pinned in the `adgeistKit` block of `package.json` (`version`, `url`, `checksum`).
+
+- `yarn fetch-adgeistkit` installs the pinned version into `ios/Frameworks`, checking it against the checksum. It runs as part of `yarn prepare`, and skips the download if that version is already installed.
+- `yarn update-adgeistkit <version>` changes the pin. It downloads that release, computes its checksum and rewrites the `adgeistKit` block. It fails if the release doesn't exist.
+
+```sh
+yarn update-adgeistkit 1.0.26-beta.1
 yarn fetch-adgeistkit
 ```
 
@@ -126,46 +160,4 @@ Remember to add tests for your change if possible. Run the unit tests by:
 yarn test
 ```
 
-## Commit message convention
-
-We follow the [conventional commits specification](https://www.conventionalcommits.org/en) for our commit messages:
-
-- `fix`: bug fixes, e.g. fix crash due to deprecated method.
-- `feat`: new features, e.g. add new method to the module.
-- `refactor`: code refactor, e.g. migrate from class components to hooks.
-- `docs`: changes into documentation, e.g. add usage example for the module.
-- `test`: adding or updating tests, e.g. add integration tests using detox.
-- `chore`: tooling changes, e.g. change CI config.
-
-Keep the header under 100 characters and put the details in the body. Our commit-msg hook runs commitlint to verify that your commit message matches this format when committing.
-
-## Linting and tests
-
-We use [TypeScript](https://www.typescriptlang.org/) for type checking, [ESLint](https://eslint.org/) with [Prettier](https://prettier.io/) for linting and formatting the code, and [Jest](https://jestjs.io/) for testing.
-
-Our pre-commit hooks run ESLint on the staged files and `tsc` when committing. They do not run the tests, so run `yarn test` yourself before opening a pull request.
-
-## Scripts
-
-The `package.json` file contains various scripts for common tasks:
-
-- `yarn`: setup project by installing dependencies.
-- `yarn typecheck`: type-check files with TypeScript.
-- `yarn lint`: lint files with ESLint (`yarn lint --fix` to auto-fix).
-- `yarn test`: run unit tests with Jest.
-- `yarn example:beta`: configure the build for beta and start the Metro server for the example app (also `:qa`, `:prod`).
-- `yarn configure-build <beta|qa|prod>`: generate `src/config.ts` for an environment.
-- `yarn fetch-adgeistkit`: install the pinned iOS AdgeistKit into `ios/Frameworks`.
-- `yarn update-adgeistkit <ios|android> <version>`: change a platform's AdgeistKit pin.
-- `yarn prepare`: build the library.
-
-## Sending a pull request
-
-> **Working on your first pull request?** You can learn how from this _free_ series: [How to Contribute to an Open Source Project on GitHub](https://app.egghead.io/playlists/how-to-contribute-to-an-open-source-project-on-github).
-
-When you're sending a pull request:
-
-- Prefer small pull requests focused on one change.
-- Verify that linters and tests are passing.
-- Review the documentation to make sure it looks good.
-- For pull requests that change the API or implementation, discuss with maintainers first by opening an issue.
+Lefthook runs ESLint and `tsc` on commit, and commitlint on the message. Use [conventional commits](https://www.conventionalcommits.org/en) (`fix:`, `feat:`, `refactor:`, `docs:`, `test:`, `chore:`). Keep the header under 100 characters and put the details in the body.
