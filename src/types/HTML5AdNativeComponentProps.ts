@@ -26,7 +26,8 @@ export type AdViewEventCode =
   | 'AW6'
   | 'AW7'
   | 'AW8'
-  | 'RWAE1';
+  | 'RWAE1'
+  | 'RWAW1';
 
 export interface AdViewEventData {
   reason: string;
