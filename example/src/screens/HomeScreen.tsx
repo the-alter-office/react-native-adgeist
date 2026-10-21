@@ -104,6 +104,13 @@ export default function HomeScreen({ navigation }: Props) {
           >
             <Text style={styles.buttonText}>Fixed Adspace</Text>
           </Pressable>
+
+          <Pressable
+            style={[styles.button, styles.profileButton]}
+            onPress={() => navigation.push('Preview')}
+          >
+            <Text style={styles.buttonText}>Preview</Text>
+          </Pressable>
         </View>
 
         {showProvider && (

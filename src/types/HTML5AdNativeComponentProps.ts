@@ -72,7 +72,7 @@ export interface HTML5AdNativeComponentProps {
    *
    * It does not decide the creative's size; the adspace on adgeist.ai does.
    *
-   * @see https://github.com/the-alter-office/react-native-adgeist#what-adsize-actually-does
+   * @see https://github.com/the-alter-office/react-native-adgeist#sizing
    */
   adSize?: AdSize;
 
@@ -102,7 +102,7 @@ export interface HTML5AdNativeComponentProps {
    * }}
    * ```
    *
-   * @see https://github.com/the-alter-office/react-native-adgeist#ad-events
+   * @see https://github.com/the-alter-office/react-native-adgeist#events
    */
   onAdEvent?: (event: NativeSyntheticEvent<AdViewEvent>) => void;
 }
