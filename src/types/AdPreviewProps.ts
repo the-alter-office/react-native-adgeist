@@ -17,8 +17,6 @@ export type AdPreviewMedia = 'image' | 'gif' | 'video';
  *
  * Renders a sample creative for layout work. No ad request, no impression,
  * no reporting. Replace with `HTML5AdView` before release.
- *
- * @platform ios — all props are no-ops on Android.
  */
 export interface HTML5AdViewPreviewProps {
   /** @default 'banner' */
@@ -73,7 +71,11 @@ export interface HTML5AdViewPreviewProps {
    */
   reserveSpace?: boolean;
 
-  /** Native preview events: `AD_LOADED`, `AD_CLICKED`, `AD_NO_FILL`, `AD_NETWORK_ERROR`, `AD_WARNING`. */
+  /**
+   * Native preview events: `AD_LOADED`, `AD_CLICKED`, `AD_NO_FILL`, `AD_NETWORK_ERROR`, `AD_WARNING`.
+   *
+   * @platform ios — never called on Android, where the preview reports nothing.
+   */
   onAdEvent?: (event: NativeSyntheticEvent<AdViewEvent>) => void;
 }
 

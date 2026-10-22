@@ -7,10 +7,6 @@ enum class WrapperEventCode(val type: String, val message: String) {
     RWAE1(
         type = "AD_INTERNAL_ERROR",
         message = "Ad failed to load: starting the ad request threw an exception"
-    ),
-    RWAW1(
-        type = "AD_WARNING",
-        message = "Ad preview is not implemented on Android yet"
     )
 }
 

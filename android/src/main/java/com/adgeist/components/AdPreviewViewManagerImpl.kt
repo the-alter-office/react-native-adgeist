@@ -1,13 +1,11 @@
 package com.adgeist.components
 
 import android.util.Log
-import android.widget.FrameLayout
-import com.adgeist.utils.WrapperEventCode
-import com.adgeist.utils.buildAdEvent
+import com.adgeistkit.ads.AdPreviewMedia
+import com.adgeistkit.ads.AdSize
+import com.adgeistkit.data.models.AdSpaceType
 import com.facebook.react.bridge.ReadableMap
-import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
-import com.facebook.react.uimanager.events.RCTEventEmitter
 
 object AdPreviewViewManagerImpl {
     const val NAME = "AdPreviewNativeComponent"
@@ -16,80 +14,90 @@ object AdPreviewViewManagerImpl {
     const val AD_EVENT_LISTENER = "onAdEvent"
     const val AD_SIZE_CHANGED_LISTENER = "onAdSizeChanged"
 
-    fun createViewInstance(reactContext: ThemedReactContext): FrameLayout {
-        return FrameLayout(reactContext)
-    }
+    fun createViewInstance(reactContext: ThemedReactContext): ReactAdPreviewView =
+        ReactAdPreviewView(reactContext)
 
-    fun setPreviewType(view: FrameLayout, type: String?) {
-        // TODO: not implemented on Android
-    }
-
-    fun setPreviewMedia(view: FrameLayout, media: String?) {
-        // TODO: not implemented on Android
-    }
-
-    fun setCreativeUrl(view: FrameLayout, creativeUrl: String?) {
-        // TODO: not implemented on Android
-    }
-
-    fun setCompanionUrl(view: FrameLayout, companionUrl: String?) {
-        // TODO: not implemented on Android
-    }
-
-    fun setTitle(view: FrameLayout, title: String?) {
-        // TODO: not implemented on Android
-    }
-
-    fun setDescription(view: FrameLayout, description: String?) {
-        // TODO: not implemented on Android
-    }
-
-    fun setCtaUrl(view: FrameLayout, ctaUrl: String?) {
-        // TODO: not implemented on Android
-    }
-
-    fun setDeepLinkUrl(view: FrameLayout, deepLinkUrl: String?) {
-        // TODO: not implemented on Android
-    }
-
-    fun setIsResponsive(view: FrameLayout, isResponsive: Boolean) {
-        // TODO: not implemented on Android
-    }
-
-    fun setAdSize(view: FrameLayout, adSizeMap: ReadableMap?) {
-        // TODO: not implemented on Android
-    }
-
-    fun setReserveSpace(view: FrameLayout, reserveSpace: Boolean) {
-        // TODO: not implemented on Android
-    }
-
-    fun loadAd(view: FrameLayout) {
-        val payload = buildAdEvent(WrapperEventCode.RWAW1, reason = null)
-
-        view.post {
-            sendEvent(view, AD_EVENT_LISTENER, payload)
+    fun setPreviewType(view: ReactAdPreviewView, type: String?) {
+        view.previewType = when (type?.lowercase()) {
+            "display" -> AdSpaceType.DISPLAY
+            "companion" -> AdSpaceType.COMPANION
+            else -> AdSpaceType.BANNER
         }
     }
 
-    fun destroyAd(view: FrameLayout) {
-        // TODO: not implemented on Android
+    fun setPreviewMedia(view: ReactAdPreviewView, media: String?) {
+        view.previewMedia = when (media?.lowercase()) {
+            "gif" -> AdPreviewMedia.GIF
+            "video" -> AdPreviewMedia.VIDEO
+            else -> AdPreviewMedia.IMAGE
+        }
     }
 
-    private fun sendEvent(view: FrameLayout, eventName: String, params: WritableMap) {
-        val reactContext = view.context as? ThemedReactContext
+    fun setCreativeUrl(view: ReactAdPreviewView, creativeUrl: String?) {
+        view.creativeUrl = creativeUrl?.takeIf { it.isNotBlank() }
+    }
 
-        if (reactContext == null) {
-            Log.w(TAG, "Unable to send event $eventName: ThemedReactContext not found")
-            return
-        }
+    fun setCompanionUrl(view: ReactAdPreviewView, companionUrl: String?) {
+        view.companionUrl = companionUrl?.takeIf { it.isNotBlank() }
+    }
+
+    fun setTitle(view: ReactAdPreviewView, title: String?) {
+        view.adTitle = title.orEmpty()
+    }
+
+    fun setDescription(view: ReactAdPreviewView, description: String?) {
+        view.adDescription = description.orEmpty()
+    }
+
+    fun setCtaUrl(view: ReactAdPreviewView, ctaUrl: String?) {
+        view.ctaUrl = ctaUrl?.takeIf { it.isNotBlank() } ?: ReactAdPreviewView.DEFAULT_CTA_URL
+    }
+
+    fun setDeepLinkUrl(view: ReactAdPreviewView, deepLinkUrl: String?) {
+        view.deepLinkUrl = deepLinkUrl?.takeIf { it.isNotBlank() }
+    }
+
+    fun setIsResponsive(view: ReactAdPreviewView, isResponsive: Boolean) {
+        view.adIsResponsive = isResponsive
+    }
+
+    fun setAdSize(view: ReactAdPreviewView, adSizeMap: ReadableMap?) {
+        if (adSizeMap == null) return
 
         try {
-            reactContext
-                .getJSModule(RCTEventEmitter::class.java)
-                .receiveEvent(view.id, eventName, params)
+            val width = adSizeMap.getDimension("width")
+            val height = adSizeMap.getDimension("height")
+
+            view.adSize = when {
+                width > 0 && height > 0 -> AdSize(width, height)
+                width > 0 -> AdSize.width(width)
+                height > 0 -> AdSize.height(height)
+                else -> null
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "Error sending event $eventName", e)
+            Log.e(TAG, "Error setting preview size", e)
         }
     }
+
+    fun setReserveSpace(view: ReactAdPreviewView, reserveSpace: Boolean) {
+    }
+
+    fun loadAd(view: ReactAdPreviewView) {
+        try {
+            view.load()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading preview", e)
+        }
+    }
+
+    fun destroyAd(view: ReactAdPreviewView) {
+        try {
+            view.destroy()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error destroying preview view", e)
+        }
+    }
+
+    private fun ReadableMap.getDimension(key: String): Int =
+        if (hasKey(key) && !isNull(key)) getDouble(key).toInt() else 0
 }

@@ -1,7 +1,6 @@
 package com.adgeist.components
 
 import android.util.Log
-import android.widget.FrameLayout
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.MapBuilder
@@ -9,66 +8,66 @@ import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 
-class AdPreviewViewManager : SimpleViewManager<FrameLayout>() {
+class AdPreviewViewManager : SimpleViewManager<ReactAdPreviewView>() {
 
     override fun getName(): String = AdPreviewViewManagerImpl.NAME
 
-    override fun createViewInstance(reactContext: ThemedReactContext): FrameLayout {
+    override fun createViewInstance(reactContext: ThemedReactContext): ReactAdPreviewView {
         return AdPreviewViewManagerImpl.createViewInstance(reactContext)
     }
 
     @ReactProp(name = "type")
-    fun setType(view: FrameLayout, type: String?) {
+    fun setType(view: ReactAdPreviewView, type: String?) {
         AdPreviewViewManagerImpl.setPreviewType(view, type)
     }
 
     @ReactProp(name = "media")
-    fun setMedia(view: FrameLayout, media: String?) {
+    fun setMedia(view: ReactAdPreviewView, media: String?) {
         AdPreviewViewManagerImpl.setPreviewMedia(view, media)
     }
 
     @ReactProp(name = "creativeUrl")
-    fun setCreativeUrl(view: FrameLayout, creativeUrl: String?) {
+    fun setCreativeUrl(view: ReactAdPreviewView, creativeUrl: String?) {
         AdPreviewViewManagerImpl.setCreativeUrl(view, creativeUrl)
     }
 
     @ReactProp(name = "companionUrl")
-    fun setCompanionUrl(view: FrameLayout, companionUrl: String?) {
+    fun setCompanionUrl(view: ReactAdPreviewView, companionUrl: String?) {
         AdPreviewViewManagerImpl.setCompanionUrl(view, companionUrl)
     }
 
     @ReactProp(name = "title")
-    fun setTitle(view: FrameLayout, title: String?) {
+    fun setTitle(view: ReactAdPreviewView, title: String?) {
         AdPreviewViewManagerImpl.setTitle(view, title)
     }
 
     @ReactProp(name = "description")
-    fun setDescription(view: FrameLayout, description: String?) {
+    fun setDescription(view: ReactAdPreviewView, description: String?) {
         AdPreviewViewManagerImpl.setDescription(view, description)
     }
 
     @ReactProp(name = "ctaUrl")
-    fun setCtaUrl(view: FrameLayout, ctaUrl: String?) {
+    fun setCtaUrl(view: ReactAdPreviewView, ctaUrl: String?) {
         AdPreviewViewManagerImpl.setCtaUrl(view, ctaUrl)
     }
 
     @ReactProp(name = "deepLinkUrl")
-    fun setDeepLinkUrl(view: FrameLayout, deepLinkUrl: String?) {
+    fun setDeepLinkUrl(view: ReactAdPreviewView, deepLinkUrl: String?) {
         AdPreviewViewManagerImpl.setDeepLinkUrl(view, deepLinkUrl)
     }
 
     @ReactProp(name = "isResponsive", defaultBoolean = true)
-    fun setIsResponsive(view: FrameLayout, isResponsive: Boolean) {
+    fun setIsResponsive(view: ReactAdPreviewView, isResponsive: Boolean) {
         AdPreviewViewManagerImpl.setIsResponsive(view, isResponsive)
     }
 
     @ReactProp(name = "adSize")
-    fun setAdSize(view: FrameLayout, adSizeMap: ReadableMap?) {
+    fun setAdSize(view: ReactAdPreviewView, adSizeMap: ReadableMap?) {
         AdPreviewViewManagerImpl.setAdSize(view, adSizeMap)
     }
 
     @ReactProp(name = "reserveSpace", defaultBoolean = false)
-    fun setReserveSpace(view: FrameLayout, reserveSpace: Boolean) {
+    fun setReserveSpace(view: ReactAdPreviewView, reserveSpace: Boolean) {
         AdPreviewViewManagerImpl.setReserveSpace(view, reserveSpace)
     }
 
@@ -83,7 +82,7 @@ class AdPreviewViewManager : SimpleViewManager<FrameLayout>() {
         return MapBuilder.of("loadAd", COMMAND_LOAD_AD)
     }
 
-    override fun receiveCommand(root: FrameLayout, commandId: Int, args: ReadableArray?) {
+    override fun receiveCommand(root: ReactAdPreviewView, commandId: Int, args: ReadableArray?) {
         try {
             when (commandId) {
                 COMMAND_LOAD_AD -> {
@@ -98,11 +97,11 @@ class AdPreviewViewManager : SimpleViewManager<FrameLayout>() {
         }
     }
 
-    fun loadAd(view: FrameLayout) {
+    fun loadAd(view: ReactAdPreviewView) {
         AdPreviewViewManagerImpl.loadAd(view)
     }
 
-    override fun onDropViewInstance(view: FrameLayout) {
+    override fun onDropViewInstance(view: ReactAdPreviewView) {
         super.onDropViewInstance(view)
         AdPreviewViewManagerImpl.destroyAd(view)
     }

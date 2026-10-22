@@ -9,22 +9,27 @@ export default function PreviewScreen() {
           type="banner"
           media={'gif'}
           adSize={{
-            width: 300,
-            height: 200,
+            width: 380,
+            height: 300,
           }}
         />
         <HTML5AdViewPreview
           type="companion"
           deepLinkUrl="hello://com"
+          title="This is a companion adspace"
+          description="We show the description using this"
           adSize={{
-            width: 300,
-            height: 300,
+            width: 380,
+            height: 400,
           }}
         />
         <HTML5AdViewPreview
           type="display"
+          title="This is a display adspace"
+          description="We show the description using this"
+
           adSize={{
-            // width: 300,
+            width: 400,
             height: 300,
           }}
         />

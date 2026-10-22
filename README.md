@@ -153,7 +153,7 @@ Sometimes you want the layout settled before the adspace exists, or you want to 
 
 No ad request goes out, no ad unit ID is involved, and your Adgeist app ID doesn't need to be set. Nothing is reported either — no impressions, no clicks, no telemetry — so your live numbers stay clean.
 
-It's iOS only for now. On Android the component renders an empty box and reports [`RWAW1`](#event-reference) through `onAdEvent`.
+It runs on both platforms, but `onAdEvent` is iOS only: the Android preview renders and a tap still opens the CTA, it just reports nothing back. Don't gate anything on a preview event there.
 
 ```tsx
 import { HTML5AdViewPreview } from '@thealteroffice/react-native-adgeist';
@@ -295,7 +295,6 @@ Prefixes: `AL` lifecycle, `AI` interaction, `AE` error, `AW` warning. Codes star
 | AE3 | `AD_INTERNAL_ERROR` | Ad failed to render | While rendering the creative | Web view error | Contact support with `code` and `data.reason` |
 | AE4 | `AD_INTERNAL_ERROR` | Ad response could not be parsed | After the ad response | Response format not supported by this SDK version | Retry later; if it keeps happening, contact support with `code` |
 | RWAE1 | `AD_INTERNAL_ERROR` | Ad failed to load | When the ad starts loading (Android only) | Starting the ad request threw an exception | Contact support with `code` and `data.reason` |
-| RWAW1 | `AD_WARNING` | Ad preview is not implemented | On `loadAd()` from an [`HTML5AdViewPreview`](#preview) (Android only) | The preview surface has no Android implementation yet | Run the preview on iOS |
 | AW1 | `AD_WARNING` | SDK not initialized | When the ad loads | The ad is not inside an `AdgeistProvider` | Wrap your app in [`AdgeistProvider`](#initialize) |
 | AW2 | `AD_WARNING` | Ad unit ID is empty | When the ad loads | `adUnitID` is empty | Pass your ad unit ID as `adUnitID` |
 | AW3 | `AD_WARNING` | Ad has no size | After the ad response | Fixed-size ad with no `adSize` | Pass `adSize`, or set `adIsResponsive={true}` |
