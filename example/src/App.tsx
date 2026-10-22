@@ -6,6 +6,7 @@ import HomeScreen from './screens/HomeScreen';
 import TestScreen from './screens/TestScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import FixedAdspaceScreen from './screens/FixedAdspaceScreen';
+import PreviewScreen from './screens/PreviewScreen';
 import ScenariosScreen from './screens/ScenariosScreen';
 import VerticalRailScreen from './screens/scenarios/VerticalRailScreen';
 import BottomBannerScreen from './screens/scenarios/BottomBannerScreen';
@@ -21,6 +22,7 @@ export type RootTabParamList = {
 export type RootStackParamList = {
   Tabs: NavigatorScreenParams<RootTabParamList>;
   FixedAdspace: undefined;
+  Preview: undefined;
   Scenarios: undefined;
   VerticalRail: undefined;
   BottomBanner: undefined;
@@ -71,6 +73,11 @@ export default function App() {
           name="FixedAdspace"
           component={FixedAdspaceScreen}
           options={{ title: 'Fixed Adspace' }}
+        />
+        <Stack.Screen
+          name="Preview"
+          component={PreviewScreen}
+          options={{ title: 'Preview' }}
         />
         <Stack.Screen
           name="Scenarios"
