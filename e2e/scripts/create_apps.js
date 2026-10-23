@@ -147,6 +147,8 @@ function createApp({ line, version, appDir }) {
       APP_NAME,
       '--template',
       `@react-native-community/template@${version}`,
+      '--version',
+      version,
       '--directory',
       path.join(root, appDir),
       '--package-name',
