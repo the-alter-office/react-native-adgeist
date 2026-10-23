@@ -1,0 +1,9 @@
+appId: ${APP_ID}
+---
+- scrollUntilVisible:
+    element:
+      id: ${KIND}-status-click-handled
+      text: 'click handled: yes'
+    direction: UP
+    timeout: 10000
+    label: Wait up to 10 s for AI1 (AD_CLICKED) from the ${KIND} ad

@@ -1,0 +1,5 @@
+appId: ${APP_ID}
+---
+- takeScreenshot:
+    path: screenshots/${TEST_ID}
+    label: Save the final screen as evidence

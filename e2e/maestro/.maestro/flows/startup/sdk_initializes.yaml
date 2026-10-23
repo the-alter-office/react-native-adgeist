@@ -1,0 +1,16 @@
+appId: ${APP_ID}
+name: STARTUP-01 SDK initializes when the app launches
+tags:
+  - android
+  - startup
+env:
+  TEST_ID: STARTUP-01
+onFlowComplete:
+  - runFlow: ../../subflows/capture_evidence.yaml
+---
+- runFlow:
+    file: ../../subflows/launch_app_fresh.yaml
+    label: 'Step 1: launch the app with cleared state'
+- runFlow:
+    file: ../../subflows/assert_sdk_initialized.yaml
+    label: 'Verify: AdgeistProvider initialized without error'

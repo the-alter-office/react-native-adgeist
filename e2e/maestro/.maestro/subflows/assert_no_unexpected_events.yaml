@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+---
+- scrollUntilVisible:
+    element:
+      id: ${KIND}-status-unexpected
+    direction: UP
+    timeout: 10000
+    label: Scroll to the ${KIND} status panel
+- assertVisible:
+    id: ${KIND}-status-unexpected
+    text: 'unexpected: none'
+    label: No unexpected AE / AW / RWAE1 events from the ${KIND} ad

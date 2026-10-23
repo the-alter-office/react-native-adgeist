@@ -1,0 +1,34 @@
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      notVisible:
+        id: open-companion
+    label: Press back (leaves an ad screen, or a browser opened by a tap)
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 2000
+- runFlow:
+    when:
+      notVisible:
+        id: open-companion
+    label: Press back once more (browser, then ad screen)
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 2000
+- runFlow:
+    when:
+      notVisible:
+        id: open-companion
+    label: Bring the app back to the front without clearing its state
+    commands:
+      - launchApp:
+          stopApp: false
+          clearState: false
+- extendedWaitUntil:
+    visible:
+      id: open-companion
+    timeout: 20000
+    label: Wait up to 20 s for the Home screen

@@ -1,0 +1,6 @@
+flows:
+  - flows/*/*
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - STARTUP-01 SDK initializes when the app launches

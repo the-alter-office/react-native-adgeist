@@ -1,0 +1,16 @@
+appId: ${APP_ID}
+---
+- runFlow:
+    file: go_home.yaml
+    label: Go to the Home screen
+- tapOn:
+    id: open-${KIND}
+    label: Open the ${KIND} ad screen
+- extendedWaitUntil:
+    visible:
+      id: ${KIND}-screen
+    timeout: 10000
+    label: Wait up to 10 s for the ${KIND} ad screen
+- assertNotVisible:
+    id: ${KIND}-ad-missing
+    label: The ${KIND} ad is configured (its unit ID is set in .env)

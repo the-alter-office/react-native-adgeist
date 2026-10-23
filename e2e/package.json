@@ -1,0 +1,19 @@
+{
+  "name": "react-native-adgeist-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Android E2E matrix for @thealteroffice/react-native-adgeist across React Native versions",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19.4"
+  },
+  "scripts": {
+    "update-matrix": "node scripts/update_matrix.js --from 0.77 --to 0.86",
+    "create-apps": "node scripts/create_apps.js",
+    "integrate-sdk": "node scripts/integrate_sdk.js",
+    "run:metro": "node scripts/run_app.js metro",
+    "run:release": "node scripts/run_app.js release",
+    "maestro:release": "node scripts/run_app.js maestro",
+    "uninstall": "node scripts/run_app.js uninstall"
+  }
+}

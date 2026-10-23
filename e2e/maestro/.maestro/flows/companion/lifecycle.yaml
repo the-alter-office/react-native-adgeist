@@ -1,0 +1,30 @@
+appId: ${APP_ID}
+name: COMPANION-01 Companion ad lifecycle
+tags:
+  - android
+  - companion
+  - lifecycle
+env:
+  TEST_ID: COMPANION-01
+  KIND: companion
+onFlowComplete:
+  - runFlow: ../../subflows/capture_evidence.yaml
+---
+- runFlow:
+    file: ../../subflows/open_ad_screen.yaml
+    label: 'Step 1: open the companion ad screen from Home'
+- runFlow:
+    file: ../../subflows/assert_ad_rendered.yaml
+    label: 'Verify: AL1 (AD_LOADED) received and the companion ad is on screen'
+- runFlow:
+    file: ../../subflows/tap_ad.yaml
+    label: 'Step 2: tap the companion ad'
+- runFlow:
+    file: ../../subflows/return_to_ad_screen.yaml
+    label: 'Step 3: return to the companion ad screen if the tap opened a browser'
+- runFlow:
+    file: ../../subflows/assert_click_handled.yaml
+    label: 'Verify: AI1 (AD_CLICKED) received'
+- runFlow:
+    file: ../../subflows/assert_no_unexpected_events.yaml
+    label: 'Verify: no unexpected AE / AW / RWAE1 events'

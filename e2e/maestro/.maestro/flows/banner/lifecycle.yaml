@@ -1,0 +1,30 @@
+appId: ${APP_ID}
+name: BANNER-01 Banner ad lifecycle
+tags:
+  - android
+  - banner
+  - lifecycle
+env:
+  TEST_ID: BANNER-01
+  KIND: banner
+onFlowComplete:
+  - runFlow: ../../subflows/capture_evidence.yaml
+---
+- runFlow:
+    file: ../../subflows/open_ad_screen.yaml
+    label: 'Step 1: open the banner ad screen from Home'
+- runFlow:
+    file: ../../subflows/assert_ad_rendered.yaml
+    label: 'Verify: AL1 (AD_LOADED) received and the banner ad is on screen'
+- runFlow:
+    file: ../../subflows/tap_ad.yaml
+    label: 'Step 2: tap the banner ad'
+- runFlow:
+    file: ../../subflows/return_to_ad_screen.yaml
+    label: 'Step 3: return to the banner ad screen if the tap opened a browser'
+- runFlow:
+    file: ../../subflows/assert_click_handled.yaml
+    label: 'Verify: AI1 (AD_CLICKED) received'
+- runFlow:
+    file: ../../subflows/assert_no_unexpected_events.yaml
+    label: 'Verify: no unexpected AE / AW / RWAE1 events'

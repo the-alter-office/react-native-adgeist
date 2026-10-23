@@ -1,0 +1,13 @@
+appId: ${APP_ID}
+---
+- scrollUntilVisible:
+    element:
+      id: ${KIND}-ad-container
+    direction: DOWN
+    timeout: 10000
+    label: Scroll to the ${KIND} ad
+- tapOn:
+    id: ${KIND}-ad-container
+    label: Tap the centre of the ${KIND} ad
+- waitForAnimationToEnd:
+    timeout: 3000

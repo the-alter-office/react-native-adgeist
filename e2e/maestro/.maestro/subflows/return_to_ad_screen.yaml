@@ -1,0 +1,25 @@
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      notVisible:
+        id: ${KIND}-screen
+    label: Press back to leave the browser or app opened by the tap
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 2000
+- runFlow:
+    when:
+      notVisible:
+        id: ${KIND}-screen
+    label: Bring the app back to the front without clearing its state
+    commands:
+      - launchApp:
+          stopApp: false
+          clearState: false
+- extendedWaitUntil:
+    visible:
+      id: ${KIND}-screen
+    timeout: 10000
+    label: Wait up to 10 s to be back on the ${KIND} ad screen

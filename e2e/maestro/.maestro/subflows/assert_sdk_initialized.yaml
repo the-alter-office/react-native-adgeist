@@ -1,0 +1,16 @@
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    notVisible:
+      id: status-init
+      text: 'init: initializing'
+    timeout: 20000
+    label: Wait up to 20 s for AdgeistProvider to finish initializing
+- assertNotVisible:
+    id: status-init
+    text: 'init: error.*'
+    label: AdgeistProvider did not report an initialization error
+- assertVisible:
+    id: status-init
+    text: 'init: initialized'
+    label: AdgeistProvider is initialized

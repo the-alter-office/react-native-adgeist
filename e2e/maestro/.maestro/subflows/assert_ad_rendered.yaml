@@ -1,0 +1,14 @@
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible:
+      id: ${KIND}-status-ad-rendered
+      text: 'ad rendered: yes'
+    timeout: 30000
+    label: Wait up to 30 s for AL1 (AD_LOADED) from the ${KIND} ad
+- scrollUntilVisible:
+    element:
+      id: ${KIND}-ad-container
+    direction: DOWN
+    timeout: 10000
+    label: The ${KIND} ad is on screen
