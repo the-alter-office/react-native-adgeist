@@ -1,0 +1,89 @@
+name: E2E Android
+
+on:
+  workflow_dispatch:
+    inputs:
+      sdk_version:
+        description: SDK version or dist-tag to test. Empty uses the E2E_SDK_VERSION repository variable.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-android:
+    name: E2E Android matrix
+    # if: github.ref == 'refs/heads/qa'
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    defaults:
+      run:
+        working-directory: e2e
+    env:
+      SDK_VERSION: ${{ inputs.sdk_version || vars.E2E_SDK_VERSION }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Check the SDK version
+        run: |
+          if [ -z "$SDK_VERSION" ]; then
+            echo "::error::Set the E2E_SDK_VERSION repository variable, or enter sdk_version when running the workflow."
+            exit 1
+          fi
+          echo "Testing @thealteroffice/react-native-adgeist@$SDK_VERSION"
+
+      - name: Write .env
+        env:
+          ADGEIST_E2E_APP_ID: ${{ secrets.ADGEIST_E2E_APP_ID }}
+          ADGEIST_E2E_PACKAGE_NAME: ${{ secrets.ADGEIST_E2E_PACKAGE_NAME }}
+          ADGEIST_E2E_AD1_UNIT_ID: ${{ secrets.ADGEIST_E2E_AD1_UNIT_ID }}
+          ADGEIST_E2E_AD1_RESPONSIVE: ${{ secrets.ADGEIST_E2E_AD1_RESPONSIVE }}
+          ADGEIST_E2E_AD1_WIDTH: ${{ secrets.ADGEIST_E2E_AD1_WIDTH }}
+          ADGEIST_E2E_AD1_HEIGHT: ${{ secrets.ADGEIST_E2E_AD1_HEIGHT }}
+          ADGEIST_E2E_AD2_UNIT_ID: ${{ secrets.ADGEIST_E2E_AD2_UNIT_ID }}
+          ADGEIST_E2E_AD2_RESPONSIVE: ${{ secrets.ADGEIST_E2E_AD2_RESPONSIVE }}
+          ADGEIST_E2E_AD2_WIDTH: ${{ secrets.ADGEIST_E2E_AD2_WIDTH }}
+          ADGEIST_E2E_AD2_HEIGHT: ${{ secrets.ADGEIST_E2E_AD2_HEIGHT }}
+          ADGEIST_E2E_AD3_UNIT_ID: ${{ secrets.ADGEIST_E2E_AD3_UNIT_ID }}
+          ADGEIST_E2E_AD3_RESPONSIVE: ${{ secrets.ADGEIST_E2E_AD3_RESPONSIVE }}
+          ADGEIST_E2E_AD3_WIDTH: ${{ secrets.ADGEIST_E2E_AD3_WIDTH }}
+          ADGEIST_E2E_AD3_HEIGHT: ${{ secrets.ADGEIST_E2E_AD3_HEIGHT }}
+        run: |
+          env | grep '^ADGEIST_E2E_' > .env
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Integrate the SDK into every app
+        run: npm run integrate-sdk -- "$SDK_VERSION"
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run and test every app
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          working-directory: e2e
+          script: ./scripts/ci.sh
