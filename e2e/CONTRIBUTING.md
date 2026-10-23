@@ -168,7 +168,9 @@ Before doing anything, `run:metro`, `run:release` and `maestro:release`:
 
 - check that the required values are in `.env`
 - check that `--app <line>` is given, the line is in `matrix.json`, the app is created and the SDK
-  is installed
+  is in its `package.json`
+- run `npm install` in the app if its `node_modules` is missing or the installed SDK version
+  differs from its `package.json`
 - pick the device: `ANDROID_SERIAL` if set, otherwise the only connected device
 - uninstall the previously installed E2E app, whichever line it was
 
@@ -195,7 +197,7 @@ Any failing step stops the run with that step's error.
 | 10 | The line is not in `matrix.json` | `0.99 is not in matrix.json` |
 | 11 | `matrix.json` is missing | `matrix.json not found. Run npm run update-matrix first.` |
 | 12 | The app is not created | `apps/rn-0.78 does not exist. Run npm run create-apps -- --app 0.78 first.` |
-| 13 | The SDK is not installed in the app | `apps/rn-0.78 has no SDK installed. Run npm run integrate-sdk -- <version> --app 0.78 first.` |
+| 13 | The SDK is not in the app's `package.json` (the app was never integrated) | `apps/rn-0.78 has no SDK. Run npm run integrate-sdk -- <version> --app 0.78 first.` |
 | 14 | A required value is missing in `.env` | `Missing values: …. Add them to .env at the repo root.` |
 | 15 | No device or emulator connected | `No device or emulator connected.` |
 | 16 | More than one device and no `ANDROID_SERIAL` | `Set ANDROID_SERIAL to one of: …` |

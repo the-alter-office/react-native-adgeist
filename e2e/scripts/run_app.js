@@ -68,8 +68,15 @@ function appDir(line) {
   if (!fs.existsSync(path.join(dir, 'package.json'))) {
     fail(`${entry.appDir} does not exist. Run npm run create-apps -- --app ${line} first.`);
   }
-  if (!fs.existsSync(path.join(dir, 'node_modules', SDK_PACKAGE))) {
-    fail(`${entry.appDir} has no SDK installed. Run npm run integrate-sdk -- <version> --app ${line} first.`);
+  const wanted = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8')).dependencies?.[SDK_PACKAGE];
+  if (!wanted) {
+    fail(`${entry.appDir} has no SDK. Run npm run integrate-sdk -- <version> --app ${line} first.`);
+  }
+  const installedPath = path.join(dir, 'node_modules', SDK_PACKAGE, 'package.json');
+  const installed = fs.existsSync(installedPath) ? JSON.parse(fs.readFileSync(installedPath, 'utf8')).version : null;
+  if (installed !== wanted) {
+    console.log(`📥 Installing ${entry.appDir} dependencies (${SDK_PACKAGE}@${wanted})`);
+    run('npm', ['install', '--no-audit', '--no-fund'], dir);
   }
   return dir;
 }
