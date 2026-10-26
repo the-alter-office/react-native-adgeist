@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-for line in $(node -p "require('./matrix.json').lines.filter((entry, index) => index < 2).map((entry) => entry.line).join(' ')"); do
+for line in $(node -p "require('./matrix.json').lines.map((entry) => entry.line).join(' ')"); do
   echo "▶ React Native ${line}"
   npm run maestro:release -- --app "${line}"
   npm run uninstall
