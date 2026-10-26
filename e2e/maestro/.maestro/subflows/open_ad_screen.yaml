@@ -3,6 +3,12 @@ appId: ${APP_ID}
 - runFlow:
     file: go_home.yaml
     label: Go to the Home screen
+- scrollUntilVisible:
+    element:
+      id: open-${KIND}
+    direction: DOWN
+    timeout: 10000
+    label: Scroll to the ${KIND} ad entry
 - tapOn:
     id: open-${KIND}
     label: Open the ${KIND} ad screen
