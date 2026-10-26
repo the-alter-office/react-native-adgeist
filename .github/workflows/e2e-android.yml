@@ -1,6 +1,8 @@
 name: E2E Android
 
 on:
+  push:
+    branches: [e2e/matrix-improvements]
   workflow_dispatch:
     inputs:
       sdk_version:
@@ -14,7 +16,7 @@ permissions:
 jobs:
   e2e-android:
     name: E2E Android matrix
-    if: github.ref == 'refs/heads/qa'
+    # if: github.ref == 'refs/heads/qa'
     runs-on: ubuntu-latest
     timeout-minutes: 240
     defaults:
@@ -87,11 +89,3 @@ jobs:
           disable-animations: true
           working-directory: e2e
           script: ./scripts/ci.sh
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-results
-          path: e2e/results/
-          if-no-files-found: ignore
