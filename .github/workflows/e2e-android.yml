@@ -89,3 +89,11 @@ jobs:
           disable-animations: true
           working-directory: e2e
           script: ./scripts/ci.sh
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: e2e/results/
+          if-no-files-found: ignore
