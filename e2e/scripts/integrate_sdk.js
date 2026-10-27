@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const { resetChecks, runCheck, runCaptured } = require('./report');
 
 const root = path.join(__dirname, '..');
 const matrixPath = path.join(root, 'matrix.json');
@@ -93,7 +94,7 @@ function applyTemplate(appDir, extraDependencies = {}) {
   fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
 }
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv.slice(2));
   const version = resolveSdkVersion(args.spec);
   console.log(`📦 ${SDK_PACKAGE}@${version}`);
@@ -104,18 +105,23 @@ function main() {
   const failures = [];
   for (const relativeDir of appDirs(args.apps)) {
     const appDir = path.join(root, relativeDir);
+    const line = path.basename(relativeDir).replace(/^rn-/, '');
+    resetChecks(line);
     try {
-      if (!fs.existsSync(path.join(appDir, 'package.json'))) {
-        throw new Error('does not exist. Run npm run create-apps first.');
-      }
-      applyTemplate(appDir, { [SDK_PACKAGE]: version });
-      execFileSync('npm', ['install', '--no-audit', '--no-fund'], { cwd: appDir, stdio: 'inherit' });
-
-      const installedPath = path.join(appDir, 'node_modules', SDK_PACKAGE, 'package.json');
-      const installed = JSON.parse(fs.readFileSync(installedPath, 'utf8')).version;
-      if (installed !== version) {
-        throw new Error(`installed ${SDK_PACKAGE} is ${installed}, expected ${version}`);
-      }
+      await runCheck(line, 'integrate', () => {
+        if (!fs.existsSync(path.join(appDir, 'package.json'))) {
+          throw new Error(`${relativeDir} does not exist. Run npm run create-apps first.`);
+        }
+        applyTemplate(appDir, { [SDK_PACKAGE]: version });
+      });
+      await runCheck(line, 'sdk-install', async () => {
+        await runCaptured('npm', ['install', '--no-audit', '--no-fund'], appDir);
+        const installedPath = path.join(appDir, 'node_modules', SDK_PACKAGE, 'package.json');
+        const installed = JSON.parse(fs.readFileSync(installedPath, 'utf8')).version;
+        if (installed !== version) {
+          throw new Error(`installed ${SDK_PACKAGE} is ${installed}, expected ${version}`);
+        }
+      });
       console.log(`✅ ${relativeDir}`);
     } catch (error) {
       console.error(`❌ ${relativeDir}: ${error.message}`);

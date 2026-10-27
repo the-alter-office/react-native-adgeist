@@ -149,6 +149,10 @@ template screens.
 Connect one emulator or device before running them. With more than one connected, set
 `ANDROID_SERIAL=<serial>`. See [CONTRIBUTING.md](CONTRIBUTING.md) for what happens in each case.
 
+Each check (integrate, SDK install, build, install, launch, Maestro) is saved to
+`results/rn-<line>/checks.json`. In CI, `scripts/ci.sh` runs every app and writes the table to
+`results/summary.md` and the run's Summary page.
+
 The Maestro tests can also be run on their own against an installed app; see
 [maestro/README.md](maestro/README.md).
 

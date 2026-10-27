@@ -14,6 +14,7 @@ const path = require('path');
 const net = require('net');
 const { execFileSync, spawn } = require('child_process');
 const { loadEnv, requireEnv } = require('./env');
+const { runCheck, runCaptured } = require('./report');
 
 const root = path.join(__dirname, '..');
 const matrixPath = path.join(root, 'matrix.json');
@@ -154,24 +155,57 @@ async function runMetro(dir, packageName) {
   metro.on('exit', (code) => process.exit(code ?? 0));
 }
 
-function runRelease(dir, packageName) {
-  const abi = execFileSync('adb', ['shell', 'getprop', 'ro.product.cpu.abi'], { encoding: 'utf8' }).trim();
-  run('./gradlew', ['assembleRelease', `-PreactNativeArchitectures=${abi}`, '--console=plain'], path.join(dir, 'android'));
-  run('adb', ['install', '-r', path.join(dir, RELEASE_APK)]);
+function isRunning(packageName) {
+  try {
+    return execFileSync('adb', ['shell', 'pidof', packageName], { encoding: 'utf8', stdio: 'pipe' }).trim() !== '';
+  } catch {
+    return false;
+  }
+}
+
+// Launches the app and fails if it is not running 5 s later; the crash buffer goes to crash.log.
+async function launch(line, packageName) {
+  execFileSync('adb', ['logcat', '-c', '-b', 'crash'], { stdio: 'pipe' });
   execFileSync('adb', ['shell', 'monkey', '-p', packageName, '-c', 'android.intent.category.LAUNCHER', '1'], {
     stdio: 'pipe',
   });
-  console.log(`🚀 ${packageName} launched`);
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  if (isRunning(packageName)) {
+    console.log(`🚀 ${packageName} launched`);
+    return;
+  }
+  const crash = execFileSync('adb', ['logcat', '-d', '-b', 'crash'], { encoding: 'utf8' });
+  const crashFile = path.join(root, 'results', `rn-${line}`, 'crash.log');
+  fs.mkdirSync(path.dirname(crashFile), { recursive: true });
+  fs.writeFileSync(crashFile, crash, 'utf8');
+  console.error(crash.split('\n').filter((text) => text.includes('AndroidRuntime')).slice(0, 40).join('\n'));
+  const exception = crash.match(/AndroidRuntime: ((?:[\w$]+\.)+[\w$]*(?:Exception|Error)\b.*)/)?.[1];
+  throw new Error(`crashed on launch: ${exception ?? 'the app is not running 5 s after launch'}`);
+}
+
+async function runRelease(line, dir, packageName) {
+  const abi = execFileSync('adb', ['shell', 'getprop', 'ro.product.cpu.abi'], { encoding: 'utf8' }).trim();
+  await runCheck(line, 'build', () =>
+    runCaptured('./gradlew', ['assembleRelease', `-PreactNativeArchitectures=${abi}`, '--console=plain'], path.join(dir, 'android'))
+  );
+  await runCheck(line, 'install', () => runCaptured('adb', ['install', '-r', path.join(dir, RELEASE_APK)], root));
+  await runCheck(line, 'launch', () => launch(line, packageName));
 }
 
 function runMaestro(line, serial) {
-  run('node', [
-    path.join(root, 'maestro/scripts/run.js'),
-    '--results-dir',
-    `results/rn-${line}/maestro`,
-    '--device',
-    serial,
-  ]);
+  return runCheck(line, 'maestro', () => {
+    try {
+      run('node', [
+        path.join(root, 'maestro/scripts/run.js'),
+        '--results-dir',
+        `results/rn-${line}/maestro`,
+        '--device',
+        serial,
+      ]);
+    } catch {
+      throw new Error(`flows failed, see rn-${line}/maestro/report.html`);
+    }
+  });
 }
 
 async function main() {
@@ -209,9 +243,9 @@ async function main() {
       await runMetro(dir, packageName);
       return;
     }
-    runRelease(dir, packageName);
+    await runRelease(line, dir, packageName);
     if (mode === 'maestro') {
-      runMaestro(line, serial);
+      await runMaestro(line, serial);
     }
   } catch (error) {
     fail(error.message);
