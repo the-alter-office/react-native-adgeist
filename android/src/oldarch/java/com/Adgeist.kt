@@ -41,8 +41,7 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
           .trackViewableImpression(
             timeToVisible.toLong(),
             scrollDepth.toFloat(),
-            visibilityRatio.toFloat(),
-            viewTime.toLong()
+            visibilityRatio.toFloat()
           )
           .build()
 

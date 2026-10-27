@@ -1,13 +1,15 @@
 package com.adgeist.components
 
 import android.util.Log
-import android.view.View
 import androidx.annotation.RequiresPermission
+import com.adgeist.utils.WrapperEventCode
+import com.adgeist.utils.buildAdEvent
 import com.adgeistkit.ads.AdListener
 import com.adgeistkit.ads.AdSize
-import com.adgeistkit.ads.AdType
 import com.adgeistkit.ads.AdView
+import com.adgeistkit.ads.AdgeistEvent
 import com.adgeistkit.request.AdRequest
+import com.adgeistkit.utilities.AdgeistEmbedderApi
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
@@ -18,21 +20,21 @@ object HTML5AdViewManagerImpl {
     const val NAME = "HTML5AdNativeComponent"
     private const val TAG = "HTML5AdViewManagerImpl"
 
-    const val EVENT_AD_LOADED = "onAdLoaded"
-    const val EVENT_AD_FAILED_TO_LOAD = "onAdFailedToLoad"
-    const val EVENT_AD_OPENED = "onAdOpened"
-    const val EVENT_AD_CLOSED = "onAdClosed"
-    const val EVENT_AD_CLICKED = "onAdClicked"
+    const val AD_EVENT_LISTENER = "onAdEvent"
+    const val AD_SIZE_CHANGED_LISTENER = "onAdSizeChanged"
 
     private val viewContextMap = mutableMapOf<Int, ThemedReactContext>()
 
+    @OptIn(AdgeistEmbedderApi::class)
     fun createViewInstance(reactContext: ThemedReactContext): AdView {
         Log.d(TAG, "Creating AdView with ThemedReactContext: ${reactContext.hashCode()}")
-        val adView = AdView(reactContext)
+        val adView = ReactAdView(reactContext)
         // react-native-screens destroys/recreates the host fragment whenever a
         // screen is covered, so fragment onDestroy is not a teardown signal
         // here; RN drives teardown via onDropViewInstance instead
         adView.watchFragmentLifecycle = false
+        adView.isFrameworkHosted = true
+        adView.setAdListener(createAdListener(adView))
         viewContextMap[System.identityHashCode(adView)] = reactContext
         Log.d(TAG, "AdView created with hash: ${System.identityHashCode(adView)} and context hash: ${reactContext.hashCode()}")
         return adView
@@ -49,27 +51,50 @@ object HTML5AdViewManagerImpl {
     }
 
     fun setAdSize(view: AdView, adSizeMap: ReadableMap?) {
-        if (adSizeMap != null) {
-            try {
-                val width = adSizeMap.getInt("width")
-                val height = adSizeMap.getInt("height")
+        if (adSizeMap == null) return
 
-                val adSize = AdSize(width, height)
+        try {
+            val width = adSizeMap.getDimension("width")
+            val height = adSizeMap.getDimension("height")
 
-                view.setAdDimension(adSize)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error setting ad size", e)
+            val adSize = when {
+                width > 0 && height > 0 -> AdSize(width, height)
+                width > 0 -> AdSize.width(width)
+                height > 0 -> AdSize.height(height)
+                else -> return
             }
+
+            view.setAdDimension(adSize)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting ad size", e)
         }
     }
 
-    fun setAdType(view: AdView, adType: String?) {
-        val typeToSet = adType ?: "BANNER"
-        try {
-            view.adType = AdType.valueOf(typeToSet)
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Invalid ad type: $typeToSet. Must be BANNER, DISPLAY, or COMPANION", e)
-            view.adType = AdType.BANNER
+    fun setReserveSpace(view: AdView, reserveSpace: Boolean) {
+        view.reserveSpace = reserveSpace
+    }
+
+    @OptIn(AdgeistEmbedderApi::class)
+    private fun createAdListener(view: AdView): AdListener = object : AdListener() {
+        override fun onAdEvent(event: AdgeistEvent) {
+            val payload = buildAdEvent(
+                code = event.code.name,
+                type = event.type.name,
+                message = event.message,
+                reason = event.data?.reason
+            )
+
+            view.post {
+                sendEvent(view, AD_EVENT_LISTENER, payload)
+            }
+        }
+
+        override fun onAdSizeResolved(adSize: AdSize) {
+            val event = Arguments.createMap().apply {
+                putDouble("width", adSize.width.toDouble())
+                putDouble("height", adSize.height.toDouble())
+            }
+            sendEvent(view, AD_SIZE_CHANGED_LISTENER, event)
         }
     }
 
@@ -78,60 +103,28 @@ object HTML5AdViewManagerImpl {
         try {
             val adRequest = AdRequest.Builder().build()
 
-            view.setAdListener(object : AdListener() {
-                override fun onAdLoaded() {
-                  view.post {
-                    sendEvent(view, EVENT_AD_LOADED, Arguments.createMap())
-                    measureAndLayout(view)
-                  }
-                }
-
-                override fun onAdFailedToLoad(error: String) {
-                    val event = Arguments.createMap().apply {
-                        putString("error", error)
-                    }
-                    sendEvent(view, EVENT_AD_FAILED_TO_LOAD, event)
-                }
-
-                override fun onAdOpened() {
-                    sendEvent(view, EVENT_AD_OPENED, Arguments.createMap())
-                }
-
-                override fun onAdClosed() {
-                    sendEvent(view, EVENT_AD_CLOSED, Arguments.createMap())
-                }
-
-                override fun onAdClicked() {
-                    sendEvent(view, EVENT_AD_CLICKED, Arguments.createMap())
-                }
-            })
-
             view.loadAd(adRequest)
         } catch (e: Exception) {
-            val event = Arguments.createMap().apply {
-                putString("error", e.message ?: "Unknown error")
+            val payload = buildAdEvent(
+                WrapperEventCode.RWAE1,
+                reason = listOfNotNull(e::class.java.simpleName, e.message).joinToString(": ")
+            )
+
+            view.post {
+                sendEvent(view, AD_EVENT_LISTENER, payload)
             }
-            sendEvent(view, EVENT_AD_FAILED_TO_LOAD, event)
         }
     }
 
     fun destroyAd(view: AdView) {
         try {
-            view.destroy()
+            view.destroyAd()
         } catch (e: Exception) {
             Log.e(TAG, "Error destroying ad view", e)
         } finally {
             // Clean up the context reference
             viewContextMap.remove(System.identityHashCode(view))
         }
-    }
-
-    private fun measureAndLayout(view: AdView) {
-        view.measure(
-            View.MeasureSpec.makeMeasureSpec(view.width, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(view.height, View.MeasureSpec.EXACTLY)
-        )
-        view.layout(view.left, view.top, view.right, view.bottom)
     }
 
     private fun sendEvent(view: AdView, eventName: String, params: WritableMap) {
@@ -148,4 +141,7 @@ object HTML5AdViewManagerImpl {
             Log.w(TAG, "Unable to send event $eventName: ThemedReactContext not found or view already destroyed")
         }
     }
+
+    private fun ReadableMap.getDimension(key: String): Int =
+        if (hasKey(key) && !isNull(key)) getDouble(key).toInt() else 0
 }

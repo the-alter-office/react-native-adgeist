@@ -13,14 +13,19 @@ import {
   Platform,
   StatusBar,
 } from 'react-native';
+import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../App';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { RootStackParamList, RootTabParamList } from '../App';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<RootTabParamList, 'Home'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
 export default function HomeScreen({ navigation }: Props) {
   const [appId, setAppId] = useState('69a6777707df2b1527e357f9');
-  const [bundleId, setBundleId] = useState('com.leaguex.crm.beta');
+  const [bundleId, setBundleId] = useState('adgeist.example');
   const [backendDomain, setbackendDomain] = useState(
     'https://beta.v2.bg-services.adgeist.ai'
   );
@@ -29,7 +34,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   const [config, setConfig] = useState({
     appId: '69a6777707df2b1527e357f9',
-    bundleId: 'com.leaguex.crm.beta',
+    bundleId: 'adgeist.example',
     backendDomain: 'https://beta.v2.bg-services.adgeist.ai',
   });
 
@@ -95,9 +100,16 @@ export default function HomeScreen({ navigation }: Props) {
 
           <Pressable
             style={[styles.button, styles.profileButton]}
-            onPress={() => navigation.push('Profile')}
+            onPress={() => navigation.push('FixedAdspace')}
           >
-            <Text style={styles.buttonText}>Go to Profile</Text>
+            <Text style={styles.buttonText}>Fixed Adspace</Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.button, styles.profileButton]}
+            onPress={() => navigation.push('Preview')}
+          >
+            <Text style={styles.buttonText}>Preview</Text>
           </Pressable>
         </View>
 

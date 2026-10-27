@@ -102,60 +102,40 @@ using namespace facebook::react;
         }
     }
 
-    if (oldPropsStruct.adType != newProps.adType) {
-        // Pass the string value ("BANNER", "DISPLAY", or "COMPANION"), or nil to use default "BANNER" in Swift
-        // The Swift layer converts the string to AdType enum
-        std::string adTypeStr = toString(newProps.adType);
-        _swiftView.adType = adTypeStr.empty()
-            ? nil
-            : [NSString stringWithUTF8String:adTypeStr.c_str()];
+    if (oldPropsStruct.reserveSpace != newProps.reserveSpace) {
+        _swiftView.reserveSpace = newProps.reserveSpace;
     }
 
     [super updateProps:props oldProps:oldProps];
 }
 
-- (void)onAdLoaded:(NativeHTML5AdView *)view
+- (void)onAdEvent:(NativeHTML5AdView *)view
+              code:(NSString *)code
+              type:(NSString *)type
+           message:(NSString *)message
+            reason:(NSString *)reason
 {
     if (_eventEmitter) {
+        HTML5AdNativeComponentEventEmitter::OnAdEvent event{};
+        event.code = code ? std::string([code UTF8String]) : "";
+        event.type = type ? std::string([type UTF8String]) : "";
+        event.message = message ? std::string([message UTF8String]) : "";
+        event.data.reason = reason ? std::string([reason UTF8String]) : "";
         std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
-            ->onAdLoaded(HTML5AdNativeComponentEventEmitter::OnAdLoaded{});
+            ->onAdEvent(event);
     }
 }
 
-- (void)onAdFailedToLoad:(NativeHTML5AdView *)view error:(NSString *)error
+- (void)onAdSizeChanged:(NativeHTML5AdView *)view width:(double)width height:(double)height
 {
     if (_eventEmitter) {
-        HTML5AdNativeComponentEventEmitter::OnAdFailedToLoad event{};
-        event.error = error ? std::string([error UTF8String]) : "";
+        HTML5AdNativeComponentEventEmitter::OnAdSizeChanged event{};
+        event.width = width;
+        event.height = height;
         std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
-            ->onAdFailedToLoad(event);
+            ->onAdSizeChanged(event);
     }
 }
-
-- (void)onAdOpened:(NativeHTML5AdView *)view
-{
-    if (_eventEmitter) {
-        std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
-            ->onAdOpened(HTML5AdNativeComponentEventEmitter::OnAdOpened{});
-    }
-}
-
-- (void)onAdClosed:(NativeHTML5AdView *)view
-{
-    if (_eventEmitter) {
-        std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
-            ->onAdClosed(HTML5AdNativeComponentEventEmitter::OnAdClosed{});
-    }
-}
-
-- (void)onAdClicked:(NativeHTML5AdView *)view
-{
-    if (_eventEmitter) {
-        std::static_pointer_cast<const HTML5AdNativeComponentEventEmitter>(_eventEmitter)
-            ->onAdClicked(HTML5AdNativeComponentEventEmitter::OnAdClicked{});
-    }
-}
-
 
 - (void)handleCommand:(NSString const *)commandName args:(NSArray const *)args
 {
@@ -201,13 +181,6 @@ Class<RCTComponentViewProtocol> HTML5AdNativeComponentCls(void)
 @import adgeist;
 #endif
 
-// Associated object keys for event blocks
-static const char *kOnAdLoadedKey = "onAdLoaded";
-static const char *kOnAdFailedToLoadKey = "onAdFailedToLoad";
-static const char *kOnAdOpenedKey = "onAdOpened";
-static const char *kOnAdClosedKey = "onAdClosed";
-static const char *kOnAdClickedKey = "onAdClicked";
-
 @interface RCTNativeHTML5AdManager () <NativeHTML5AdDelegate>
 @end
 
@@ -225,13 +198,10 @@ RCT_EXPORT_MODULE(HTML5AdNativeComponent)
 RCT_EXPORT_VIEW_PROPERTY(adUnitID, NSString)
 RCT_EXPORT_VIEW_PROPERTY(adIsResponsive, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(adSize, NSDictionary)
-RCT_EXPORT_VIEW_PROPERTY(adType, NSString)
+RCT_EXPORT_VIEW_PROPERTY(reserveSpace, BOOL)
 
-RCT_EXPORT_VIEW_PROPERTY(onAdLoaded, RCTDirectEventBlock)
-RCT_EXPORT_VIEW_PROPERTY(onAdFailedToLoad, RCTDirectEventBlock)
-RCT_EXPORT_VIEW_PROPERTY(onAdOpened, RCTDirectEventBlock)
-RCT_EXPORT_VIEW_PROPERTY(onAdClosed, RCTDirectEventBlock)
-RCT_EXPORT_VIEW_PROPERTY(onAdClicked, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onAdEvent, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onAdSizeChanged, RCTDirectEventBlock)
 
 RCT_EXPORT_METHOD(loadAd:(nonnull NSNumber *)reactTag)
 {
@@ -255,35 +225,22 @@ RCT_EXPORT_METHOD(destroy:(nonnull NSNumber *)reactTag)
 
 - (NSArray<NSString *> *)customDirectEventTypes
 {
-    return @[@"onAdLoaded", @"onAdFailedToLoad", @"onAdOpened", @"onAdClosed", @"onAdClicked"];
+    return @[@"onAdEvent", @"onAdSizeChanged"];
 }
 
 // NativeHTML5AdDelegate methods
 // Note: In Old Architecture, events are handled directly by the NativeHTML5AdView via properties.
 // The delegate methods are kept empty or for logging as the View now calls the block directly.
-- (void)onAdLoaded:(NativeHTML5AdView *)view
+- (void)onAdEvent:(NativeHTML5AdView *)view
+              code:(NSString *)code
+              type:(NSString *)type
+           message:(NSString *)message
+            reason:(NSString *)reason
 {
-    // Handled by view property
 }
 
-- (void)onAdFailedToLoad:(NativeHTML5AdView *)view error:(NSString *)error
+- (void)onAdSizeChanged:(NativeHTML5AdView *)view width:(double)width height:(double)height
 {
-    // Handled by view property
-}
-
-- (void)onAdOpened:(NativeHTML5AdView *)view
-{
-    // Handled by view property
-}
-
-- (void)onAdClosed:(NativeHTML5AdView *)view
-{
-    // Handled by view property
-}
-
-- (void)onAdClicked:(NativeHTML5AdView *)view
-{
-    // Handled by view property
 }
 
 @end
