@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-// Records each app's check results in results/rn-<line>/checks.json, and turns them into one
-// summary table: results/summary.md, plus the GitHub job summary in CI.
+// Records each app's check results in results/summary.json, then adds the totals to it and prints
+// them as a table (also to the GitHub job summary in CI).
 // Run with: node scripts/report.js <line> [<line> ...]
 
 const fs = require('fs');
@@ -9,7 +9,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const root = path.join(__dirname, '..');
-const resultsDir = path.join(root, 'results');
+const summaryPath = path.join(root, 'results', 'summary.json');
 const CHECKS = [
   ['integrate', 'Integrate'],
   ['sdk-install', 'SDK install'],
@@ -19,24 +19,28 @@ const CHECKS = [
   ['maestro', 'Maestro'],
 ];
 
-function checksPath(line) {
-  return path.join(resultsDir, `rn-${line}`, 'checks.json');
+function readSummary() {
+  return fs.existsSync(summaryPath) ? JSON.parse(fs.readFileSync(summaryPath, 'utf8')) : { apps: {} };
 }
 
-function readChecks(line) {
-  const file = checksPath(line);
-  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+function writeSummary(summary) {
+  fs.mkdirSync(path.dirname(summaryPath), { recursive: true });
+  fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2) + '\n', 'utf8');
 }
 
 function recordCheck(line, check, status, detail) {
-  const checks = readChecks(line);
-  checks[check] = detail ? { status, detail: String(detail).split('\n')[0].slice(0, 300) } : { status };
-  fs.mkdirSync(path.dirname(checksPath(line)), { recursive: true });
-  fs.writeFileSync(checksPath(line), JSON.stringify(checks, null, 2) + '\n', 'utf8');
+  const summary = readSummary();
+  summary.apps[line] = {
+    ...summary.apps[line],
+    [check]: detail ? { status, detail: String(detail).split('\n')[0].slice(0, 300) } : { status },
+  };
+  writeSummary(summary);
 }
 
 function resetChecks(line) {
-  fs.rmSync(checksPath(line), { force: true });
+  const summary = readSummary();
+  delete summary.apps[line];
+  writeSummary(summary);
 }
 
 // Runs action and records the check as passed, or as failed with the error message (and rethrows).
@@ -86,32 +90,34 @@ function runCaptured(command, args, cwd) {
   });
 }
 
-function summary(lines) {
-  const failures = [];
+// The first check that did not pass, or null if every check passed.
+function firstFailure(line, checks = {}) {
+  for (const [check, title] of CHECKS) {
+    const result = checks[check];
+    if (result?.status !== 'passed') {
+      return { line, check: title, detail: result ? result.detail ?? 'failed' : 'did not report a result, see the log' };
+    }
+  }
+  return null;
+}
+
+function toMarkdown(summary, lines) {
   const rows = lines.map((line) => {
-    const checks = readChecks(line);
+    const checks = summary.apps[line] ?? {};
     let blocked = false;
-    const cells = CHECKS.map(([check, title]) => {
+    const cells = CHECKS.map(([check]) => {
       if (blocked) {
         return '⏭️';
       }
-      const result = checks[check];
-      if (result?.status === 'passed') {
-        return '✅';
-      }
-      blocked = true;
-      if (result?.status === 'failed') {
-        failures.push(`- **${line}** · ${title}: ${result.detail ?? 'failed'}`);
-        return '❌';
-      }
-      failures.push(`- **${line}** · ${title}: did not report a result, see the log`);
-      return '⚪';
+      const status = checks[check]?.status;
+      blocked = status !== 'passed';
+      return status === 'passed' ? '✅' : status === 'failed' ? '❌' : '⚪';
     });
     return `| ${line} | ${cells.join(' | ')} |`;
   });
 
   const version = process.env.SDK_VERSION ? ` · SDK ${process.env.SDK_VERSION}` : '';
-  const markdown = [
+  return [
     `## E2E Android${version}`,
     '',
     `| React Native | ${CHECKS.map(([, title]) => title).join(' | ')} |`,
@@ -120,9 +126,10 @@ function summary(lines) {
     '',
     '✅ passed · ❌ failed · ⏭️ skipped after an earlier failure · ⚪ no result',
     '',
-    ...(failures.length > 0 ? ['### Failures', '', ...failures, ''] : ['All checks passed.', '']),
+    ...(summary.failures.length > 0
+      ? ['### Failures', '', ...summary.failures.map(({ line, check, detail }) => `- **${line}** · ${check}: ${detail}`), '']
+      : ['All checks passed.', '']),
   ].join('\n');
-  return { markdown, failed: failures.length > 0 };
 }
 
 function main() {
@@ -131,14 +138,19 @@ function main() {
     console.error('❌ Usage: node scripts/report.js <line> [<line> ...]');
     process.exit(1);
   }
-  const { markdown, failed } = summary(lines);
-  fs.mkdirSync(resultsDir, { recursive: true });
-  fs.writeFileSync(path.join(resultsDir, 'summary.md'), markdown, 'utf8');
+  const summary = readSummary();
+  summary.failures = lines.map((line) => firstFailure(line, summary.apps[line])).filter(Boolean);
+  summary.total = lines.length;
+  summary.failed = summary.failures.length;
+  summary.passed = summary.total - summary.failed;
+  writeSummary(summary);
+
+  const markdown = toMarkdown(summary, lines);
   if (process.env.GITHUB_STEP_SUMMARY) {
     fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
   }
   console.log(`\n${markdown}`);
-  process.exit(failed ? 1 : 0);
+  process.exit(summary.failed > 0 ? 1 : 0);
 }
 
 if (require.main === module) {

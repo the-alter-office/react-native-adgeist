@@ -28,6 +28,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Record start time
+        run: echo "E2E_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -94,3 +97,65 @@ jobs:
           name: e2e-results
           path: e2e/results/
           if-no-files-found: ignore
+
+      - name: Send Slack notification
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_AUTOMATION_TEST_WEBHOOK_URL }}
+          JOB_STATUS: ${{ job.status }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          SUMMARY_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ "$JOB_STATUS" = "success" ]; then
+            STATUS_EMOJI="✅"
+            STATUS_TEXT="Passed"
+          else
+            STATUS_EMOJI="❌"
+            STATUS_TEXT="Failed"
+          fi
+
+          DURATION="$(( ($(date +%s) - ${E2E_STARTED_AT:-$(date +%s)}) / 60 ))"
+          if [ -f results/summary.json ]; then
+            SUMMARY="$(jq -r '"\(.passed) passed, \(.failed) failed (\(.total) React Native versions)"' results/summary.json) in $DURATION min"
+            FAILURES="$(jq -r '.failures[] | "• \(.line) · \(.check): \(.detail)"' results/summary.json)"
+          else
+            SUMMARY="No results: the run stopped before the apps were tested ($DURATION min)"
+            FAILURES=""
+          fi
+
+          MESSAGE="$(cat <<EOF
+          *React Native SDK E2E (Android) Results*
+          $STATUS_EMOJI *Status:* $STATUS_TEXT
+          *SDK:* @thealteroffice/react-native-adgeist@${SDK_VERSION:-unknown}
+          *Summary:* $SUMMARY
+          *Repository:* $REPOSITORY
+          *Branch:* $BRANCH
+          EOF
+          )"
+
+          if [ -n "$FAILURES" ]; then
+            MESSAGE="$MESSAGE
+
+          *Failed versions:*
+          $FAILURES"
+          fi
+
+          PAYLOAD="$(
+            jq -n \
+              --arg text "$MESSAGE" \
+              --arg reportUrl "$SUMMARY_URL" \
+              '{
+                text: $text,
+                reportUrl: $reportUrl
+              }'
+          )"
+
+          curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data "$PAYLOAD" \
+            "$SLACK_WEBHOOK_URL"
