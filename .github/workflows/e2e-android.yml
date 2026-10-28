@@ -115,6 +115,11 @@ jobs:
             STATUS_TEXT="Failed"
           fi
 
+          SDK_PACKAGE="@thealteroffice/react-native-adgeist"
+          SDK_EXACT="$(npm view "$SDK_PACKAGE@$SDK_VERSION" version 2>/dev/null | tail -n 1)"
+          SDK_EXACT="${SDK_EXACT:-${SDK_VERSION:-unknown}}"
+          SDK_LINK="https://www.npmjs.com/package/$SDK_PACKAGE/v/$SDK_EXACT"
+
           DURATION="$(( ($(date +%s) - ${E2E_STARTED_AT:-$(date +%s)}) / 60 ))"
           if [ -f results/summary.json ]; then
             SUMMARY="$(jq -r '"\(.passed) passed, \(.failed) failed (\(.total) React Native versions)"' results/summary.json) in $DURATION min"
@@ -127,7 +132,7 @@ jobs:
           MESSAGE="$(cat <<EOF
           *React Native SDK E2E (Android) Results*
           $STATUS_EMOJI *Status:* $STATUS_TEXT
-          *SDK:* @thealteroffice/react-native-adgeist@${SDK_VERSION:-unknown}
+          *SDK:* $SDK_LINK
           *Summary:* $SUMMARY
           *Repository:* $REPOSITORY
           *Branch:* $BRANCH
