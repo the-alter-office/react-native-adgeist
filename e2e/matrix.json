@@ -1,41 +1,19 @@
 {
   "package": "react-native",
-  "fetchedAt": "2026-10-22T10:25:55.387Z",
+  "fetchedAt": "2026-10-29T09:28:57.872Z",
   "source": "npm downloads API (last-week) + npm view versions",
   "range": {
-    "from": "0.77",
-    "to": "0.86"
+    "from": "0.79",
+    "to": "0.88"
   },
   "lines": [
     {
-      "line": "0.77",
-      "version": "0.77.3",
-      "downloads": 21151,
-      "shareOfLine": "49.59%",
-      "lineDownloads": 42654,
-      "lineShare": "0.48%",
-      "latestPatch": "0.77.3",
-      "reason": "most downloaded patch",
-      "appDir": "apps/rn-0.77"
-    },
-    {
-      "line": "0.78",
-      "version": "0.78.3",
-      "downloads": 35002,
-      "shareOfLine": "45.91%",
-      "lineDownloads": 76244,
-      "lineShare": "0.86%",
-      "latestPatch": "0.78.3",
-      "reason": "most downloaded patch",
-      "appDir": "apps/rn-0.78"
-    },
-    {
       "line": "0.79",
-      "version": "0.79.6",
-      "downloads": 67578,
-      "shareOfLine": "34.91%",
-      "lineDownloads": 193605,
-      "lineShare": "2.18%",
+      "version": "0.79.2",
+      "downloads": 228764,
+      "shareOfLine": "38.84%",
+      "lineDownloads": 588967,
+      "lineShare": "3.63%",
       "latestPatch": "0.79.7",
       "reason": "most downloaded patch",
       "appDir": "apps/rn-0.79"
@@ -43,10 +21,10 @@
     {
       "line": "0.80",
       "version": "0.80.0",
-      "downloads": 20918,
-      "shareOfLine": "31.73%",
-      "lineDownloads": 65931,
-      "lineShare": "0.74%",
+      "downloads": 54863,
+      "shareOfLine": "35.42%",
+      "lineDownloads": 154914,
+      "lineShare": "0.95%",
       "latestPatch": "0.80.3",
       "reason": "most downloaded patch",
       "appDir": "apps/rn-0.80"
@@ -54,10 +32,10 @@
     {
       "line": "0.81",
       "version": "0.81.5",
-      "downloads": 1086773,
-      "shareOfLine": "81.10%",
-      "lineDownloads": 1339981,
-      "lineShare": "15.06%",
+      "downloads": 1784762,
+      "shareOfLine": "80.62%",
+      "lineDownloads": 2213862,
+      "lineShare": "13.64%",
       "latestPatch": "0.81.6",
       "reason": "most downloaded patch",
       "appDir": "apps/rn-0.81"
@@ -65,10 +43,10 @@
     {
       "line": "0.82",
       "version": "0.82.1",
-      "downloads": 40094,
-      "shareOfLine": "76.47%",
-      "lineDownloads": 52433,
-      "lineShare": "0.59%",
+      "downloads": 94823,
+      "shareOfLine": "82.99%",
+      "lineDownloads": 114260,
+      "lineShare": "0.70%",
       "latestPatch": "0.82.1",
       "reason": "most downloaded patch",
       "appDir": "apps/rn-0.82"
@@ -76,10 +54,10 @@
     {
       "line": "0.83",
       "version": "0.83.10",
-      "downloads": 187560,
-      "shareOfLine": "27.73%",
-      "lineDownloads": 676474,
-      "lineShare": "7.60%",
+      "downloads": 305360,
+      "shareOfLine": "27.02%",
+      "lineDownloads": 1129963,
+      "lineShare": "6.96%",
       "latestPatch": "0.83.10",
       "reason": "most downloaded patch",
       "appDir": "apps/rn-0.83"
@@ -87,10 +65,10 @@
     {
       "line": "0.84",
       "version": "0.84.1",
-      "downloads": 136000,
-      "shareOfLine": "77.10%",
-      "lineDownloads": 176401,
-      "lineShare": "1.98%",
+      "downloads": 257271,
+      "shareOfLine": "79.29%",
+      "lineDownloads": 324448,
+      "lineShare": "2.00%",
       "latestPatch": "0.84.1",
       "reason": "most downloaded patch",
       "appDir": "apps/rn-0.84"
@@ -98,10 +76,10 @@
     {
       "line": "0.85",
       "version": "0.85.3",
-      "downloads": 891803,
-      "shareOfLine": "93.12%",
-      "lineDownloads": 957709,
-      "lineShare": "10.76%",
+      "downloads": 1285313,
+      "shareOfLine": "91.02%",
+      "lineDownloads": 1412083,
+      "lineShare": "8.70%",
       "latestPatch": "0.85.3",
       "reason": "most downloaded patch",
       "appDir": "apps/rn-0.85"
@@ -109,13 +87,35 @@
     {
       "line": "0.86",
       "version": "0.86.3",
-      "downloads": 2775988,
-      "shareOfLine": "72.37%",
-      "lineDownloads": 3835747,
-      "lineShare": "43.11%",
+      "downloads": 4078247,
+      "shareOfLine": "68.43%",
+      "lineDownloads": 5959520,
+      "lineShare": "36.71%",
       "latestPatch": "0.86.3",
       "reason": "most downloaded patch",
       "appDir": "apps/rn-0.86"
+    },
+    {
+      "line": "0.87",
+      "version": "0.87.1",
+      "downloads": 458819,
+      "shareOfLine": "84.04%",
+      "lineDownloads": 545944,
+      "lineShare": "3.36%",
+      "latestPatch": "0.87.1",
+      "reason": "most downloaded patch",
+      "appDir": "apps/rn-0.87"
+    },
+    {
+      "line": "0.88",
+      "version": "0.88.0",
+      "downloads": 2261662,
+      "shareOfLine": "98.98%",
+      "lineDownloads": 2284987,
+      "lineShare": "14.07%",
+      "latestPatch": "0.88.1",
+      "reason": "most downloaded patch",
+      "appDir": "apps/rn-0.88"
     }
   ]
 }
