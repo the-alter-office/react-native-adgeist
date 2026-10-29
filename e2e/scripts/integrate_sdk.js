@@ -14,6 +14,7 @@ const matrixPath = path.join(root, 'matrix.json');
 const templateDir = path.join(root, 'template', 'app');
 const dependenciesPath = path.join(root, 'template', 'dependencies.json');
 const SDK_PACKAGE = '@thealteroffice/react-native-adgeist';
+const LINE_PACKAGES = ['react-native-screens', 'react-native-safe-area-context'];
 
 const USAGE = `Usage:
   node scripts/integrate_sdk.js <version | dist-tag> [--app <x.y> ...]
@@ -94,6 +95,25 @@ function applyTemplate(appDir, extraDependencies = {}) {
   fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
 }
 
+// A new line has no entry under "lines" yet, so it got the default (latest) versions. Saves what was
+// installed (as ~major.minor.0), so recreating this app later keeps versions that work with its line.
+function saveLineVersions(appDir, line) {
+  const template = JSON.parse(fs.readFileSync(dependenciesPath, 'utf8'));
+  if (template.lines?.[line]) {
+    return;
+  }
+  const versions = Object.fromEntries(
+    LINE_PACKAGES.map((name) => {
+      const installedPath = path.join(appDir, 'node_modules', name, 'package.json');
+      const [major, minor] = JSON.parse(fs.readFileSync(installedPath, 'utf8')).version.split('.');
+      return [name, `~${major}.${minor}.0`];
+    })
+  );
+  template.lines = { ...template.lines, [line]: versions };
+  fs.writeFileSync(dependenciesPath, JSON.stringify(template, null, 2) + '\n', 'utf8');
+  console.log(`📌 Saved ${Object.entries(versions).map(([name, range]) => `${name}@${range}`).join(', ')} for React Native ${line} in template/dependencies.json`);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const version = resolveSdkVersion(args.spec);
@@ -121,6 +141,7 @@ async function main() {
         if (installed !== version) {
           throw new Error(`installed ${SDK_PACKAGE} is ${installed}, expected ${version}`);
         }
+        saveLineVersions(appDir, line);
       });
       console.log(`✅ ${relativeDir}`);
     } catch (error) {

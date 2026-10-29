@@ -8,7 +8,7 @@
     "node": ">=20.19.4"
   },
   "scripts": {
-    "update-matrix": "node scripts/update_matrix.js --from 0.77 --to 0.86",
+    "update-matrix": "node scripts/update_matrix.js",
     "create-apps": "node scripts/create_apps.js",
     "integrate-sdk": "node scripts/integrate_sdk.js",
     "run:metro": "node scripts/run_app.js metro",

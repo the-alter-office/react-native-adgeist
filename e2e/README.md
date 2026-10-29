@@ -77,7 +77,7 @@ example `npm run run:release -- --app 0.77`); the values are built into the app.
 one. The best public signal for that is how often each version is downloaded from npm.
 
 **What it does.** `npm run update-matrix` reads last week's npm download counts for
-`react-native`, and for each minor line from 0.77 to 0.86 picks the patch version with the most
+`react-native`, and for each of the newest 10 minor lines picks the patch version with the most
 downloads. It writes the result to `matrix.json`: one entry per line, with the chosen version and
 the app folder (`apps/rn-<line>`) that tests it. Every other script reads `matrix.json` to know
 which apps exist and which version each one runs.
@@ -87,9 +87,17 @@ which apps exist and which version each one runs.
 - Whenever you want to check whether publishers have moved to a different patch of a line, for
   example before a release.
 
-It replaces `matrix.json` each time; `git diff matrix.json` shows what changed, and an app only
-needs regenerating if its line's version changed. The range of lines (0.77 to 0.86) is set in the
-`update-matrix` script in `package.json`; widen it there to add a new React Native line.
+`matrix.json` is only rewritten when a line was added or removed, or a line's version changed, and
+the script prints those changes. When a new React Native line comes out, the window moves: the new
+line is added and the oldest one dropped. The window size (10) is `LINE_COUNT` in
+`scripts/update_matrix.js`.
+
+**Weekly update.** The `E2E matrix update` workflow runs this every Monday on `dev`. If anything
+changed, it runs `create-apps -- --prune` (creates new and changed apps, deletes dropped ones),
+integrates the SDK into those apps, opens or updates a PR to `dev`, and posts the PR link to Slack.
+A new line gets the latest `react-native-screens` and `react-native-safe-area-context` (the
+`default` versions in `template/dependencies.json`), and `integrate-sdk` saves the installed
+versions under `lines` for that line, so recreating its app later keeps versions that work with it.
 
 ## Creating the apps: `create-apps`
 
@@ -107,7 +115,8 @@ It does not install the SDK; that is the next step.
 - When an app is broken or half-created: it is recreated.
 
 Apps that are already complete and on the right version are left alone, so running it again is
-safe. To recreate specific apps anyway, pass `--app <line>` and `--replace`. See
+safe. To recreate specific apps anyway, pass `--app <line>` and `--replace`. `--prune` also deletes
+`apps/rn-*` folders whose line is no longer in `matrix.json`. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for what happens in each case.
 
 ## Installing the SDK: `integrate-sdk`

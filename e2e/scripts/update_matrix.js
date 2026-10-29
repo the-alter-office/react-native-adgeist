@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-// Picks the most downloaded React Native patch for each minor line and saves it to matrix.json.
+// Picks the most downloaded React Native patch for each minor line and saves it to matrix.json,
+// only when a line or its version changed.
 // Run with: npm run update-matrix
 
 const fs = require('fs');
@@ -11,45 +12,70 @@ const root = path.join(__dirname, '..');
 const matrixPath = path.join(root, 'matrix.json');
 const PACKAGE = 'react-native';
 const STABLE_VERSION = /^(\d+)\.(\d+)\.(\d+)$/;
-const LINE = /^(\d+)\.(\d+)$/;
+const LINE_COUNT = 10;
 
 const USAGE = `Usage:
-  node scripts/update_matrix.js --from <x.y> --to <x.y>
+  node scripts/update_matrix.js
 
-Writes matrix.json: for each React Native minor line from --from to --to, the patch version with
-the most npm downloads in the last week. An existing matrix.json is replaced.`;
+Writes matrix.json: for each of the newest ${LINE_COUNT} React Native minor lines, the patch version
+with the most npm downloads in the last week. matrix.json is only rewritten when a line was added
+or removed, or a line's version changed.`;
 
 function fail(message) {
   console.error(`❌ ${message}`);
   process.exit(1);
 }
 
-// "0.77" -> 77, so lines can be compared.
-function lineNumber(line) {
-  const match = LINE.exec(line ?? '');
-  if (!match) {
-    fail(`Invalid line "${line}", expected <major>.<minor> such as 0.77\n\n${USAGE}`);
-  }
-  return Number(match[1]) * 1000 + Number(match[2]);
+// Orders two lines such as "0.79" and "0.100": by major first, then by minor.
+function compareLines(a, b) {
+  const [aMajor, aMinor] = a.split('.').map(Number);
+  const [bMajor, bMinor] = b.split('.').map(Number);
+  return aMajor - bMajor || aMinor - bMinor;
 }
 
-// Reads --from and --to.
-function parseArgs(argv) {
-  const args = { from: null, to: null };
-  for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === '--from' || argv[i] === '--to') {
-      args[argv[i].slice(2)] = argv[++i];
-    } else {
-      fail(`Unknown argument: ${argv[i]}\n\n${USAGE}`);
+// The newest LINE_COUNT lines, up to the "latest" dist-tag's line. The cap skips placeholder
+// releases such as react-native@1000.0.0.
+function selectLines(publishedLines) {
+  const newest = latestVersion().split('.').slice(0, 2).join('.');
+  return publishedLines
+    .filter((line) => compareLines(line, newest) <= 0)
+    .sort(compareLines)
+    .slice(-LINE_COUNT);
+}
+
+// What changed between the saved matrix and the new one, comparing only line and version.
+function matrixChanges(previous, lines) {
+  const before = new Map(previous.map((entry) => [entry.line, entry.version]));
+  const after = new Map(lines.map((entry) => [entry.line, entry.version]));
+  const changes = [];
+  const apps = [];
+  for (const [line, version] of after) {
+    if (!before.has(line)) {
+      changes.push(`+ ${line} (${version})`);
+      apps.push(line);
+    } else if (before.get(line) !== version) {
+      changes.push(`${line}: ${before.get(line)} → ${version}`);
+      apps.push(line);
     }
   }
-  if (!args.from || !args.to) {
-    fail(`--from and --to are required\n\n${USAGE}`);
+  for (const line of before.keys()) {
+    if (!after.has(line)) {
+      changes.push(`- ${line}`);
+    }
   }
-  if (lineNumber(args.from) > lineNumber(args.to)) {
-    fail(`--from ${args.from} is after --to ${args.to}`);
+  return { changes, apps };
+}
+
+// In GitHub Actions, passes the result on to the next steps.
+function writeOutputs(changes, apps) {
+  if (!process.env.GITHUB_OUTPUT) {
+    return;
   }
-  return args;
+  fs.appendFileSync(
+    process.env.GITHUB_OUTPUT,
+    `changed=${changes.length > 0}\napps=${apps.join(' ')}\nchanges<<CHANGES_EOF\n${changes.join('\n')}\nCHANGES_EOF\n`,
+    'utf8'
+  );
 }
 
 // Last week's downloads per version.
@@ -64,7 +90,17 @@ async function fetchDownloads() {
 
 // All published versions.
 function publishedVersions() {
-  return JSON.parse(execFileSync('npm', ['view', PACKAGE, 'versions', '--json'], { encoding: 'utf8' }));
+  return JSON.parse(
+    execFileSync('npm', ['view', PACKAGE, 'versions', '--json'], {
+      encoding: 'utf8',
+    })
+  );
+}
+
+function latestVersion() {
+  return execFileSync('npm', ['view', PACKAGE, 'dist-tags.latest'], {
+    encoding: 'utf8',
+  }).trim();
 }
 
 function percent(part, whole) {
@@ -72,7 +108,9 @@ function percent(part, whole) {
 }
 
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
+  if (process.argv.length > 2) {
+    fail(`Unknown argument: ${process.argv[2]}\n\n${USAGE}`);
+  }
   const downloads = await fetchDownloads();
   const patchesByLine = new Map();
   let totalDownloads = 0;
@@ -89,28 +127,27 @@ async function main() {
     if (!patchesByLine.has(line)) {
       patchesByLine.set(line, []);
     }
-    patchesByLine.get(line).push({ version, patch: Number(match[3]), downloads: count });
+    patchesByLine
+      .get(line)
+      .push({ version, patch: Number(match[3]), downloads: count });
   }
 
-  const from = lineNumber(args.from);
-  const to = lineNumber(args.to);
-  const missing = [];
   const lines = [];
 
   // Pick the most downloaded patch of each line.
-  for (let number = from; number <= to; number++) {
-    const line = `${Math.floor(number / 1000)}.${number % 1000}`;
-    const patches = patchesByLine.get(line);
-    if (!patches) {
-      missing.push(line);
-      continue;
-    }
+  console.log(patchesByLine.keys());
 
+  for (const line of selectLines([...patchesByLine.keys()])) {
+    const patches = patchesByLine.get(line);
     patches.sort((a, b) => a.patch - b.patch);
     const lineDownloads = patches.reduce((sum, p) => sum + p.downloads, 0);
     const latest = patches[patches.length - 1];
     const top =
-      lineDownloads === 0 ? latest : patches.reduce((best, p) => (p.downloads >= best.downloads ? p : best));
+      lineDownloads === 0
+        ? latest
+        : patches.reduce((best, p) =>
+            p.downloads >= best.downloads ? p : best
+          );
 
     lines.push({
       line,
@@ -120,26 +157,35 @@ async function main() {
       lineDownloads,
       lineShare: percent(lineDownloads, totalDownloads),
       latestPatch: latest.version,
-      reason: lineDownloads === 0 ? 'latest patch (no downloads in line)' : 'most downloaded patch',
+      reason:
+        lineDownloads === 0
+          ? 'latest patch (no downloads in line)'
+          : 'most downloaded patch',
       appDir: `apps/rn-${line}`,
     });
   }
 
-  if (missing.length > 0) {
-    fail(`No stable ${PACKAGE} versions published for line(s): ${missing.join(', ')}`);
+  const previous = fs.existsSync(matrixPath)
+    ? JSON.parse(fs.readFileSync(matrixPath, 'utf8')).lines
+    : [];
+  const { changes, apps } = matrixChanges(previous, lines);
+  writeOutputs(changes, apps);
+  if (changes.length === 0) {
+    console.log('\n✅ No changes, matrix.json is up to date');
+    return;
   }
 
   const matrix = {
     package: PACKAGE,
     fetchedAt: new Date().toISOString(),
     source: 'npm downloads API (last-week) + npm view versions',
-    range: { from: args.from, to: args.to },
+    range: { from: lines[0].line, to: lines[lines.length - 1].line },
     lines,
   };
   fs.writeFileSync(matrixPath, JSON.stringify(matrix, null, 2) + '\n', 'utf8');
-
-  console.table(lines.map(({ appDir, ...row }) => row));
-  console.log(`\n✅ Wrote ${lines.length} lines to matrix.json`);
+  console.log(
+    `\n✅ Updated matrix.json:\n${changes.map((change) => `   ${change}`).join('\n')}`
+  );
 }
 
 main().catch((error) => fail(error.message));

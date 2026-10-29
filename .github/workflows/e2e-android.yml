@@ -1,8 +1,6 @@
 name: E2E Android
 
 on:
-  push:
-    branches: [e2e/matrix-improvements]
   workflow_dispatch:
     inputs:
       sdk_version:
@@ -129,22 +127,25 @@ jobs:
             FAILURES=""
           fi
 
+          FAILED_SECTION=""
+          if [ -n "$FAILURES" ]; then
+            FAILED_SECTION=$'\n*Failed versions:*\n'"$FAILURES"$'\n'
+          fi
+
           MESSAGE="$(cat <<EOF
-          *React Native SDK E2E (Android) Results*
+          *React Native SDK E2E Tests (Android)*
+          The SDK was installed into an app for each supported React Native version, built, launched on an emulator and tested with Maestro.
+
           $STATUS_EMOJI *Status:* $STATUS_TEXT
-          *SDK:* $SDK_LINK
           *Summary:* $SUMMARY
+
+          *SDK:* $SDK_LINK
           *Repository:* $REPOSITORY
           *Branch:* $BRANCH
+          ${FAILED_SECTION}
+          👇 Open the run summary to see the checks, Maestro reports and screenshots for every React Native version.
           EOF
           )"
-
-          if [ -n "$FAILURES" ]; then
-            MESSAGE="$MESSAGE
-
-          *Failed versions:*
-          $FAILURES"
-          fi
 
           PAYLOAD="$(
             jq -n \
