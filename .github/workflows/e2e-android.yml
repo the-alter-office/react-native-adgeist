@@ -1,6 +1,8 @@
 name: E2E Android
 
 on:
+  push:
+    branches: [e2e/matrix]
   workflow_dispatch:
     inputs:
       sdk_version:
@@ -14,7 +16,6 @@ permissions:
 jobs:
   e2e-android:
     name: E2E Android matrix
-    # if: github.ref == 'refs/heads/qa'
     runs-on: ubuntu-latest
     timeout-minutes: 240
     defaults:

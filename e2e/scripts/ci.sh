@@ -8,7 +8,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 : "${SDK_VERSION:?Set SDK_VERSION to the SDK version or dist-tag to test}"
 
-lines=$(node -p "require('./matrix.json').lines.filter((entry, index) => index == 0).map((entry) => entry.line).join(' ')")
+lines=$(node -p "require('./matrix.json').lines.map((entry) => entry.line).join(' ')")
 rm -rf results
 
 for line in ${lines}; do
