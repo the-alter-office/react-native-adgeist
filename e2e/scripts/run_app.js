@@ -185,9 +185,11 @@ async function launch(line, packageName) {
 
 async function runRelease(line, dir, packageName) {
   const abi = execFileSync('adb', ['shell', 'getprop', 'ro.product.cpu.abi'], { encoding: 'utf8' }).trim();
-  await runCheck(line, 'build', () =>
-    runCaptured('./gradlew', ['assembleRelease', `-PreactNativeArchitectures=${abi}`, '--console=plain'], path.join(dir, 'android'))
-  );
+  const gradleArgs = ['assembleRelease', `-PreactNativeArchitectures=${abi}`, '--console=plain'];
+  if (process.env.CI) {
+    gradleArgs.push('--no-daemon', '-Pkotlin.compiler.execution.strategy=in-process');
+  }
+  await runCheck(line, 'build', () => runCaptured('./gradlew', gradleArgs, path.join(dir, 'android')));
   await runCheck(line, 'install', () => runCaptured('adb', ['install', '-r', path.join(dir, RELEASE_APK)], root));
   await runCheck(line, 'launch', () => launch(line, packageName));
 }

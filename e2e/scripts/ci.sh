@@ -17,6 +17,13 @@ for line in ${lines}; do
     npm run maestro:release -- --app "${line}"
   fi
   npm run uninstall
+  if [ -n "${CI:-}" ]; then
+    app_dir=$(node -p "require('./matrix.json').lines.find((entry) => entry.line === '${line}').appDir")
+    rm -rf "${app_dir}/node_modules" "${app_dir}/android/app/build" "${app_dir}/android/app/.cxx" \
+      "${app_dir}/android/build" "${app_dir}/android/.gradle"
+  fi
+  df -h /
+  free -m 2>/dev/null || true
   echo "::endgroup::"
 done
 
