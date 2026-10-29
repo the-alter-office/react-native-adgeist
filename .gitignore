@@ -89,3 +89,6 @@ ios/Frameworks/
 
 # E2E
 .env
+
+# E2E results
+e2e/results/

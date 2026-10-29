@@ -1,0 +1,125 @@
+name: E2E matrix update
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-matrix:
+    name: Update the React Native matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: e2e
+    env:
+      SDK_VERSION: ${{ vars.E2E_SDK_VERSION }}
+      BASE_BRANCH: ${{ github.event_name == 'schedule' && 'dev' || github.ref_name }}
+    steps:
+      - name: Checkout the base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASE_BRANCH }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Update matrix.json
+        id: matrix
+        run: npm run update-matrix
+
+      - name: Create new apps and remove retired ones
+        if: steps.matrix.outputs.changed == 'true'
+        run: npm run create-apps -- --prune
+
+      - name: Integrate the SDK into the changed apps
+        if: steps.matrix.outputs.changed == 'true' && steps.matrix.outputs.apps != ''
+        env:
+          APPS: ${{ steps.matrix.outputs.apps }}
+        run: |
+          args=()
+          for line in $APPS; do
+            args+=(--app "$line")
+          done
+          npm run integrate-sdk -- "$SDK_VERSION" "${args[@]}"
+
+      - name: Write the PR description
+        if: steps.matrix.outputs.changed == 'true'
+        env:
+          CHANGES: ${{ steps.matrix.outputs.changes }}
+        run: |
+          {
+            echo "## Weekly React Native matrix update"
+            echo
+            echo "We test the AdGeist React Native SDK inside real React Native apps: one app for each of the 10 newest React Native versions (0.x), each on the patch that developers download most. The weekly check of npm downloads changed which versions those are, so this PR updates the apps:"
+            echo
+            echo "$CHANGES"
+            echo
+            echo "New and updated apps are integrated with \`@thealteroffice/react-native-adgeist@$SDK_VERSION\`."
+            echo "A new React Native line gets the latest \`react-native-screens\` and \`react-native-safe-area-context\`; the installed versions are saved for it in \`e2e/template/dependencies.json\`."
+            echo
+            echo "These apps are tested by the E2E Android run on \`qa\` after this is merged."
+          } > "$RUNNER_TEMP/pr_body.md"
+
+      - name: Create or update the PR
+        id: pr
+        if: steps.matrix.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          base: ${{ env.BASE_BRANCH }}
+          branch: e2e/update-matrix
+          delete-branch: true
+          title: 'e2e: update React Native matrix'
+          commit-message: 'e2e: update React Native matrix'
+          body-path: ${{ runner.temp }}/pr_body.md
+          add-paths: |
+            e2e/matrix.json
+            e2e/apps
+            e2e/template/dependencies.json
+
+      - name: Send Slack notification
+        if: steps.pr.outputs.pull-request-url != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_AUTOMATION_TEST_WEBHOOK_URL }}
+          PR_URL: ${{ steps.pr.outputs.pull-request-url }}
+          CHANGES: ${{ steps.matrix.outputs.changes }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          MESSAGE="$(cat <<EOF
+          *React Native E2E Matrix Update*
+          We test the AdGeist React Native SDK inside real React Native apps: one app for each of the 10 newest React Native versions (0.x), each on the patch that developers download most. The weekly check of npm downloads changed which versions those are, so a pull request updates the apps.
+
+          $CHANGES
+
+          *Repository:* $REPOSITORY
+          *Base branch:* $BASE_BRANCH
+
+          👇 Review the pull request and merge it into $BASE_BRANCH.
+          EOF
+          )"
+
+          PAYLOAD="$(
+            jq -n \
+              --arg text "$MESSAGE" \
+              --arg reportUrl "$PR_URL" \
+              '{
+                text: $text,
+                reportUrl: $reportUrl
+              }'
+          )"
+
+          curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data "$PAYLOAD" \
+            "$SLACK_WEBHOOK_URL"

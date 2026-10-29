@@ -2,8 +2,8 @@
   "default": {
     "@react-navigation/native": "^7.5.0",
     "@react-navigation/native-stack": "^7.20.0",
-    "react-native-safe-area-context": "^5.8.0",
-    "react-native-screens": "^4.10.0"
+    "react-native-safe-area-context": "^5.10.0",
+    "react-native-screens": "^4.26.0"
   },
   "lines": {
     "0.77": {
@@ -45,6 +45,14 @@
     "0.86": {
       "react-native-screens": "~4.26.0",
       "react-native-safe-area-context": "~5.10.0"
+    },
+    "0.87": {
+      "react-native-screens": "~4.30.0",
+      "react-native-safe-area-context": "~5.11.0"
+    },
+    "0.88": {
+      "react-native-screens": "~4.30.0",
+      "react-native-safe-area-context": "~5.11.0"
     }
   },
   "devDependencies": {

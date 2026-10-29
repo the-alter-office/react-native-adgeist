@@ -44,7 +44,7 @@ node maestro/scripts/run.js --include-tags banner
 ```
 
 It reads the package name from `.env`, runs every test, and writes the results to
-`results/maestro/`: `report.xml` (JUnit) and a `screenshots/` folder with the final screen of each
+`results/maestro/`: `report.html` (detailed HTML report with every step) and a `screenshots/` folder with the final screen of each
 test. Any other option is passed to Maestro (`--include-tags`, `--device`, …).
 `npm run maestro:release` builds and installs an app, then runs this same runner.
 

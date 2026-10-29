@@ -2,7 +2,7 @@
 
 // Creates one React Native app per line in matrix.json (apps/rn-<line>) at that line's version,
 // and patches its Android build so the package name and AdGeist app ID come from .env.
-// Run with: npm run create-apps -- [--app 0.77 ...] [--replace]
+// Run with: npm run create-apps -- [--app 0.77 ...] [--replace] [--prune]
 
 const fs = require('fs');
 const path = require('path');
@@ -15,11 +15,12 @@ const NAMESPACE = 'ai.adgeist.e2e';
 const APP_ID_META_DATA = 'com.adgeistkit.ads.ADGEIST_APP_ID';
 
 const USAGE = `Usage:
-  node scripts/create_apps.js [--app <x.y> ...] [--replace]
+  node scripts/create_apps.js [--app <x.y> ...] [--replace] [--prune]
 
 Creates apps/rn-<line> for each line in matrix.json, using that line's React Native version.
 Without --app, every line. An existing app is skipped if it is complete and on that version;
-otherwise it is recreated. --replace recreates every selected app.`;
+otherwise it is recreated. --replace recreates every selected app. --prune also deletes
+apps/rn-* folders whose line is no longer in matrix.json.`;
 
 // Added to android/app/build.gradle: reads a value from the environment, or else from .env.
 const GRADLE_ENV = `def e2eDotEnv = { ->
@@ -61,12 +62,14 @@ function fail(message) {
 }
 
 function parseArgs(argv) {
-  const args = { apps: [], replace: false };
+  const args = { apps: [], replace: false, prune: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--app' && argv[i + 1]) {
       args.apps.push(argv[++i].replace(/^rn-/, ''));
     } else if (argv[i] === '--replace') {
       args.replace = true;
+    } else if (argv[i] === '--prune') {
+      args.prune = true;
     } else {
       fail(`Unknown argument: ${argv[i]}\n\n${USAGE}`);
     }
@@ -168,9 +171,24 @@ function createApp({ line, version, appDir }) {
   patchManifest(path.join(root, appDir));
 }
 
+// Deletes app folders whose line was dropped from matrix.json.
+function pruneApps() {
+  const appsDir = path.join(root, 'apps');
+  const kept = new Set(selectedLines([]).map((entry) => path.basename(entry.appDir)));
+  for (const name of fs.existsSync(appsDir) ? fs.readdirSync(appsDir) : []) {
+    if (name.startsWith('rn-') && !kept.has(name)) {
+      fs.rmSync(path.join(appsDir, name), { recursive: true, force: true });
+      console.log(`🗑️  apps/${name} is not in matrix.json, removed`);
+    }
+  }
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const failures = [];
+  if (args.prune) {
+    pruneApps();
+  }
 
   for (const entry of selectedLines(args.apps)) {
     const appDir = path.join(root, entry.appDir);
