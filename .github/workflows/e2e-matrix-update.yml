@@ -21,11 +21,12 @@ jobs:
         working-directory: e2e
     env:
       SDK_VERSION: ${{ vars.E2E_SDK_VERSION }}
+      BASE_BRANCH: ${{ github.event_name == 'schedule' && 'dev' || github.ref_name }}
     steps:
-      - name: Checkout dev
+      - name: Checkout the base branch
         uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: ${{ env.BASE_BRANCH }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -74,7 +75,7 @@ jobs:
         if: steps.matrix.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          base: dev
+          base: ${{ env.BASE_BRANCH }}
           branch: e2e/update-matrix
           delete-branch: true
           title: 'e2e: update React Native matrix'
@@ -101,9 +102,9 @@ jobs:
           $CHANGES
 
           *Repository:* $REPOSITORY
-          *Base branch:* dev
+          *Base branch:* $BASE_BRANCH
 
-          👇 Open the pull request to review the new and changed apps, then merge it into dev.
+          👇 Open the pull request to review the new and changed apps, then merge it into $BASE_BRANCH.
           EOF
           )"
 
