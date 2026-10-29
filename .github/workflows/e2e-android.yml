@@ -17,7 +17,7 @@ jobs:
   e2e-android:
     name: E2E Android matrix
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 135
     defaults:
       run:
         working-directory: e2e
@@ -80,6 +80,7 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Run and test every app
+        timeout-minutes: 120
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
