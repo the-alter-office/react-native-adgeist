@@ -58,13 +58,13 @@ jobs:
           CHANGES: ${{ steps.matrix.outputs.changes }}
         run: |
           {
-            echo "## React Native matrix changes"
+            echo "## Weekly React Native matrix update"
             echo
-            echo '```'
+            echo "We test the AdGeist React Native SDK inside real React Native apps: one app for each of the 10 newest React Native versions (0.x), each on the patch that developers download most. The weekly check of npm downloads changed which versions those are, so this PR updates the apps:"
+            echo
             echo "$CHANGES"
-            echo '```'
             echo
-            echo "New and changed apps are integrated with \`@thealteroffice/react-native-adgeist@$SDK_VERSION\`."
+            echo "New and updated apps are integrated with \`@thealteroffice/react-native-adgeist@$SDK_VERSION\`."
             echo "A new React Native line gets the latest \`react-native-screens\` and \`react-native-safe-area-context\`; the installed versions are saved for it in \`e2e/template/dependencies.json\`."
             echo
             echo "These apps are tested by the E2E Android run on \`qa\` after this is merged."
@@ -96,15 +96,14 @@ jobs:
         run: |
           MESSAGE="$(cat <<EOF
           *React Native E2E Matrix Update*
-          The weekly check of npm downloads changed which React Native versions the E2E apps test. A pull request with the updated apps is ready.
+          We test the AdGeist React Native SDK inside real React Native apps: one app for each of the 10 newest React Native versions (0.x), each on the patch that developers download most. The weekly check of npm downloads changed which versions those are, so a pull request updates the apps.
 
-          *Changes:*
           $CHANGES
 
           *Repository:* $REPOSITORY
           *Base branch:* $BASE_BRANCH
 
-          👇 Open the pull request to review the new and changed apps, then merge it into $BASE_BRANCH.
+          👇 Review the pull request and merge it into $BASE_BRANCH.
           EOF
           )"
 

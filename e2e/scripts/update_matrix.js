@@ -43,26 +43,30 @@ function selectLines(publishedLines) {
     .slice(-LINE_COUNT);
 }
 
-// What changed between the saved matrix and the new one, comparing only line and version.
+// What changed between the saved matrix and the new one, comparing only line and version, as
+// readable sections: new, updated and removed apps.
 function matrixChanges(previous, lines) {
   const before = new Map(previous.map((entry) => [entry.line, entry.version]));
   const after = new Map(lines.map((entry) => [entry.line, entry.version]));
-  const changes = [];
-  const apps = [];
+  const created = [];
+  const updated = [];
+  const removed = [...before.keys()].filter((line) => !after.has(line));
   for (const [line, version] of after) {
     if (!before.has(line)) {
-      changes.push(`+ ${line} (${version})`);
-      apps.push(line);
+      created.push(`- React Native ${line}: app created on ${version}`);
     } else if (before.get(line) !== version) {
-      changes.push(`${line}: ${before.get(line)} → ${version}`);
-      apps.push(line);
+      updated.push(`- React Native ${line}: app recreated on ${version} (was ${before.get(line)})`);
     }
   }
-  for (const line of before.keys()) {
-    if (!after.has(line)) {
-      changes.push(`- ${line}`);
-    }
-  }
+
+  const sections = [
+    ['New apps (a new React Native line is out):', created],
+    ['Updated apps (the most downloaded patch of the line changed):', updated],
+    [`Removed apps (the line is no longer one of the newest ${LINE_COUNT}):`, removed.map((line) => `- React Native ${line}: app deleted`)],
+  ].filter(([, items]) => items.length > 0);
+
+  const changes = sections.map(([title, items]) => [title, ...items].join('\n')).join('\n\n');
+  const apps = lines.map((entry) => entry.line).filter((line) => before.get(line) !== after.get(line));
   return { changes, apps };
 }
 
@@ -73,7 +77,7 @@ function writeOutputs(changes, apps) {
   }
   fs.appendFileSync(
     process.env.GITHUB_OUTPUT,
-    `changed=${changes.length > 0}\napps=${apps.join(' ')}\nchanges<<CHANGES_EOF\n${changes.join('\n')}\nCHANGES_EOF\n`,
+    `changed=${changes !== ''}\napps=${apps.join(' ')}\nchanges<<CHANGES_EOF\n${changes}\nCHANGES_EOF\n`,
     'utf8'
   );
 }
@@ -170,7 +174,7 @@ async function main() {
     : [];
   const { changes, apps } = matrixChanges(previous, lines);
   writeOutputs(changes, apps);
-  if (changes.length === 0) {
+  if (changes === '') {
     console.log('\n✅ No changes, matrix.json is up to date');
     return;
   }
@@ -183,9 +187,7 @@ async function main() {
     lines,
   };
   fs.writeFileSync(matrixPath, JSON.stringify(matrix, null, 2) + '\n', 'utf8');
-  console.log(
-    `\n✅ Updated matrix.json:\n${changes.map((change) => `   ${change}`).join('\n')}`
-  );
+  console.log(`\n✅ Updated matrix.json\n\n${changes}`);
 }
 
 main().catch((error) => fail(error.message));
