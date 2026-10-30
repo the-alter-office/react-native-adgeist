@@ -16,6 +16,9 @@ Make sure that your app's build file uses the following values:
 
 - Minimum SDK version of 23 or higher
 - Compile SDK version of 35 or higher
+- On React Native 0.80, version 0.80.3 or higher. React Native 0.80.0–0.80.2 have a Gradle bug
+  (fixed in 0.80.3) where the Android C++ build can start before libraries generate their code, so
+  the build fails with `CXX1429 ... add_subdirectory given source ... which is not an existing directory`.
 
 ## Configure your app
 

@@ -122,4 +122,19 @@ if (isNewArchitectureEnabled()) {
     libraryName = "Adgeist"
     codegenJavaPackageName = "com.adgeist"
   }
+
+  // React Native 0.80.0-0.80.2: the app's CMake configure can run before this library's codegen
+  // (generateCodegenArtifactsFromSchema, run by preBuild), so the build fails with CXX1429
+  // "add_subdirectory given source .../android/build/generated/source/codegen/jni/ which is not an
+  // existing directory". React Native's Gradle plugin does not make the app wait for library codegen.
+  // The block below made :app:preBuild depend on this library's preBuild, which fixed it for this SDK.
+  // Commented out because it is a React Native bug, fixed in 0.80.3 (ReactRootProjectPlugin makes
+  // :app:preBuild depend on every library's preBuild), and it also breaks other codegen libraries such
+  // as react-native-screens on those patches, which this block cannot fix. Publishers on 0.80 should
+  // use 0.80.3 or later. Uncomment if we need to support 0.80.0-0.80.2 again.
+  //
+  // gradle.projectsEvaluated {
+  //   def appPreBuild = rootProject.subprojects.find { it.name == "app" }?.tasks?.findByName("preBuild")
+  //   appPreBuild?.dependsOn(tasks.named("preBuild"))
+  // }
 }
