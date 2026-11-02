@@ -1,6 +1,7 @@
 package com.adgeist
 
 import androidx.annotation.Nullable
+import com.adgeist.components.AdPreviewViewManager
 import com.adgeist.components.HTML5AdViewManager
 import com.facebook.react.TurboReactPackage
 import com.facebook.react.bridge.NativeModule
@@ -38,6 +39,6 @@ class AdgeistPackage : TurboReactPackage() {
   }
 
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-    return listOf(HTML5AdViewManager())
+    return listOf(HTML5AdViewManager(), AdPreviewViewManager())
   }
 }
