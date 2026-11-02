@@ -21,14 +21,44 @@ jobs:
     defaults:
       run:
         working-directory: e2e
-    env:
-      SDK_VERSION: ${{ inputs.sdk_version || vars.E2E_SDK_VERSION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Record start time
         run: echo "E2E_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Set up SDK dependencies
+        if: github.event_name == 'push'
+        uses: ./.github/actions/setup
+
+      - name: Configure the QA build
+        if: github.event_name == 'push'
+        working-directory: .
+        run: yarn configure-build qa --publish
+
+      - name: Use stable AdgeistKit releases
+        if: github.event_name == 'push'
+        working-directory: .
+        run: |
+          for PLATFORM in ios android; do
+            VERSION="$(
+              node -p "require('./package.json').adgeistKit.${PLATFORM}.version"
+            )"
+            STABLE="${VERSION%%-*}"
+
+            echo "Switching AdgeistKit $PLATFORM $VERSION -> $STABLE"
+            yarn update-adgeistkit "$PLATFORM" "$STABLE"
+          done
+
+      - name: Pack the SDK
+        id: pack
+        if: github.event_name == 'push'
+        working-directory: .
+        run: |
+          mkdir -p "$RUNNER_TEMP/sdk"
+          npm pack --pack-destination "$RUNNER_TEMP/sdk"
+          echo "tgz=$(ls "$RUNNER_TEMP"/sdk/*.tgz)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -42,6 +72,8 @@ jobs:
           java-version: 17
 
       - name: Check the SDK version
+        env:
+          SDK_VERSION: ${{ steps.pack.outputs.tgz || inputs.sdk_version || vars.E2E_SDK_VERSION }}
         run: |
           if [ -z "$SDK_VERSION" ]; then
             echo "::error::Set the E2E_SDK_VERSION repository variable, or enter sdk_version when running the workflow."
@@ -81,6 +113,8 @@ jobs:
 
       - name: Run and test every app
         timeout-minutes: 120
+        env:
+          SDK_VERSION: ${{ steps.pack.outputs.tgz || inputs.sdk_version || vars.E2E_SDK_VERSION }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -98,72 +132,78 @@ jobs:
           path: e2e/results/
           if-no-files-found: ignore
 
-      - name: Send Slack notification
-        if: always()
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_AUTOMATION_TEST_WEBHOOK_URL }}
-          JOB_STATUS: ${{ job.status }}
-          REPOSITORY: ${{ github.repository }}
-          BRANCH: ${{ github.ref_name }}
-          SUMMARY_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          if [ "$JOB_STATUS" = "success" ]; then
-            STATUS_EMOJI="✅"
-            STATUS_TEXT="Passed"
-          else
-            STATUS_EMOJI="❌"
-            STATUS_TEXT="Failed"
-          fi
+      # - name: Send Slack notification
+      #   if: always()
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_AUTOMATION_TEST_WEBHOOK_URL }}
+      #     SDK_VERSION: ${{ steps.pack.outputs.tgz || inputs.sdk_version || vars.E2E_SDK_VERSION }}
+      #     JOB_STATUS: ${{ job.status }}
+      #     REPOSITORY: ${{ github.repository }}
+      #     BRANCH: ${{ github.ref_name }}
+      #     SUMMARY_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      #   run: |
+      #     if [ "$JOB_STATUS" = "success" ]; then
+      #       STATUS_EMOJI="✅"
+      #       STATUS_TEXT="Passed"
+      #     else
+      #       STATUS_EMOJI="❌"
+      #       STATUS_TEXT="Failed"
+      #     fi
 
-          SDK_PACKAGE="@thealteroffice/react-native-adgeist"
-          SDK_EXACT="$(npm view "$SDK_PACKAGE@$SDK_VERSION" version 2>/dev/null | tail -n 1)"
-          SDK_EXACT="${SDK_EXACT:-${SDK_VERSION:-unknown}}"
-          SDK_LINK="https://www.npmjs.com/package/$SDK_PACKAGE/v/$SDK_EXACT"
+      #     SDK_PACKAGE="@thealteroffice/react-native-adgeist"
+      #     if [[ "$SDK_VERSION" == *.tgz ]]; then
+      #       SDK_EXACT="$(tar -xzOf "$SDK_VERSION" package/package.json | jq -r .version)"
+      #       SDK_LINK="$SDK_EXACT built from $BRANCH @ ${GITHUB_SHA::7}: $GITHUB_SERVER_URL/$REPOSITORY/commit/$GITHUB_SHA"
+      #     else
+      #       SDK_EXACT="$(npm view "$SDK_PACKAGE@$SDK_VERSION" version 2>/dev/null | tail -n 1)"
+      #       SDK_EXACT="${SDK_EXACT:-${SDK_VERSION:-unknown}}"
+      #       SDK_LINK="https://www.npmjs.com/package/$SDK_PACKAGE/v/$SDK_EXACT"
+      #     fi
 
-          DURATION="$(( ($(date +%s) - ${E2E_STARTED_AT:-$(date +%s)}) / 60 ))"
-          if [ -f results/summary.json ]; then
-            SUMMARY="$(jq -r '"\(.passed) passed, \(.failed) failed (\(.total) React Native versions)"' results/summary.json) in $DURATION min"
-            FAILURES="$(jq -r '.failures[] | "• \(.line) · \(.check): \(.detail)"' results/summary.json)"
-          else
-            SUMMARY="No results: the run stopped before the apps were tested ($DURATION min)"
-            FAILURES=""
-          fi
+      #     DURATION="$(( ($(date +%s) - ${E2E_STARTED_AT:-$(date +%s)}) / 60 ))"
+      #     if [ -f results/summary.json ]; then
+      #       SUMMARY="$(jq -r '"\(.passed) passed, \(.failed) failed (\(.total) React Native versions)"' results/summary.json) in $DURATION min"
+      #       FAILURES="$(jq -r '.failures[] | "• \(.line) · \(.check): \(.detail)"' results/summary.json)"
+      #     else
+      #       SUMMARY="No results: the run stopped before the apps were tested ($DURATION min)"
+      #       FAILURES=""
+      #     fi
 
-          FAILED_SECTION=""
-          if [ -n "$FAILURES" ]; then
-            FAILED_SECTION=$'\n*Failed versions:*\n'"$FAILURES"$'\n'
-          fi
+      #     FAILED_SECTION=""
+      #     if [ -n "$FAILURES" ]; then
+      #       FAILED_SECTION=$'\n*Failed versions:*\n'"$FAILURES"$'\n'
+      #     fi
 
-          MESSAGE="$(cat <<EOF
-          *React Native SDK E2E Tests (Android)*
-          The SDK was installed into an app for each supported React Native version, built, launched on an emulator and tested with Maestro.
+      #     MESSAGE="$(cat <<EOF
+      #     *React Native SDK E2E Tests (Android)*
+      #     The SDK was installed into an app for each supported React Native version, built, launched on an emulator and tested with Maestro.
 
-          $STATUS_EMOJI *Status:* $STATUS_TEXT
-          *Summary:* $SUMMARY
+      #     $STATUS_EMOJI *Status:* $STATUS_TEXT
+      #     *Summary:* $SUMMARY
 
-          *SDK:* $SDK_LINK
-          *Repository:* $REPOSITORY
-          *Branch:* $BRANCH
-          ${FAILED_SECTION}
-          👇 Open the run summary to see the checks, Maestro reports and screenshots for every React Native version.
-          EOF
-          )"
+      #     *SDK:* $SDK_LINK
+      #     *Repository:* $REPOSITORY
+      #     *Branch:* $BRANCH
+      #     ${FAILED_SECTION}
+      #     👇 Open the run summary to see the checks, Maestro reports and screenshots for every React Native version.
+      #     EOF
+      #     )"
 
-          PAYLOAD="$(
-            jq -n \
-              --arg text "$MESSAGE" \
-              --arg reportUrl "$SUMMARY_URL" \
-              '{
-                text: $text,
-                reportUrl: $reportUrl
-              }'
-          )"
+      #     PAYLOAD="$(
+      #       jq -n \
+      #         --arg text "$MESSAGE" \
+      #         --arg reportUrl "$SUMMARY_URL" \
+      #         '{
+      #           text: $text,
+      #           reportUrl: $reportUrl
+      #         }'
+      #     )"
 
-          curl \
-            --fail-with-body \
-            --silent \
-            --show-error \
-            --request POST \
-            --header "Content-Type: application/json" \
-            --data "$PAYLOAD" \
-            "$SLACK_WEBHOOK_URL"
+      #     curl \
+      #       --fail-with-body \
+      #       --silent \
+      #       --show-error \
+      #       --request POST \
+      #       --header "Content-Type: application/json" \
+      #       --data "$PAYLOAD" \
+      #       "$SLACK_WEBHOOK_URL"

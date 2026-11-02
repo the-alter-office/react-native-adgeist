@@ -56,6 +56,15 @@ function parseArgs(argv) {
   return { mode, line };
 }
 
+// The version inside a local SDK build (.tgz) the app was integrated with.
+function tarballVersion(file, appDir) {
+  if (!fs.existsSync(file)) {
+    fail(`${appDir} uses the local SDK build ${file}, which no longer exists. Run integrate-sdk again.`);
+  }
+  const pkg = execFileSync('tar', ['-xOzf', file, 'package/package.json'], { encoding: 'utf8' });
+  return JSON.parse(pkg).version;
+}
+
 // The app folder, checked to be in matrix.json, created and integrated.
 function appDir(line) {
   if (!fs.existsSync(matrixPath)) {
@@ -69,10 +78,11 @@ function appDir(line) {
   if (!fs.existsSync(path.join(dir, 'package.json'))) {
     fail(`${entry.appDir} does not exist. Run npm run create-apps -- --app ${line} first.`);
   }
-  const wanted = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8')).dependencies?.[SDK_PACKAGE];
-  if (!wanted) {
+  const dependency = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8')).dependencies?.[SDK_PACKAGE];
+  if (!dependency) {
     fail(`${entry.appDir} has no SDK. Run npm run integrate-sdk -- <version> --app ${line} first.`);
   }
+  const wanted = dependency.startsWith('file:') ? tarballVersion(dependency.slice(5), entry.appDir) : dependency;
   const installedPath = path.join(dir, 'node_modules', SDK_PACKAGE, 'package.json');
   const installed = fs.existsSync(installedPath) ? JSON.parse(fs.readFileSync(installedPath, 'utf8')).version : null;
   if (installed !== wanted) {
