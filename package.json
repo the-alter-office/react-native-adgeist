@@ -46,12 +46,12 @@
   },
   "adgeistKit": {
     "android": {
-      "version" : "1.1.37-beta-SNAPSHOT"
+      "version": "1.1.38-beta-SNAPSHOT"
     },
     "ios": {
-      "version": "1.0.24-beta.2",
-      "url": "https://github.com/the-alter-office/adgeist-publisher-ios-sdk/releases/download/1.0.24-beta.2/AdgeistKit.xcframework.zip",
-      "checksum": "ff1850115ce44df9a80a27d14422d2e5c97727d7cf576272739ad00cb20bea15"
+      "version": "1.0.25-beta.1",
+      "url": "https://github.com/the-alter-office/adgeist-publisher-ios-sdk/releases/download/1.0.25-beta.1/AdgeistKit.xcframework.zip",
+      "checksum": "c03e1907eeace47619c22976c4ceeb7e5c96df751ae10839b6026eaa4261d060"
     }
   },
   "keywords": [
@@ -179,12 +179,14 @@
     "android": {
       "javaPackageName": "com.adgeist",
       "componentProvider": {
-        "HTML5AdNativeComponent": "HTML5AdViewManager"
+        "HTML5AdNativeComponent": "HTML5AdViewManager",
+        "AdPreviewNativeComponent": "AdPreviewViewManager"
       }
     },
     "ios": {
       "componentProvider": {
-        "HTML5AdNativeComponent": "RCTNativeHTML5AdManager"
+        "HTML5AdNativeComponent": "RCTNativeHTML5AdManager",
+        "AdPreviewNativeComponent": "RCTNativeAdPreviewManager"
       }
     }
   },

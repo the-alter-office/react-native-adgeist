@@ -75,7 +75,7 @@ public class NativeHTML5AdView: UIView {
         let width = adIsResponsive ? nil : dimension(dict?["width"])
         let height = dimension(dict?["height"])
 
-        let adView = AdView(adUnitId: adUnitID, width: width, height: height, reserveSpace: reserveSpace)
+        let adView = AdView(adId: adUnitID, width: width, height: height, reserveSpace: reserveSpace)
         adView.frame = bounds
         adView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         adView.onEvent = { [weak self, weak adView] event in
