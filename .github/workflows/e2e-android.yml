@@ -56,8 +56,9 @@ jobs:
         if: github.event_name == 'push'
         working-directory: .
         run: |
+          yarn prepare
           mkdir -p "$RUNNER_TEMP/sdk"
-          npm pack --pack-destination "$RUNNER_TEMP/sdk"
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP/sdk"
           echo "tgz=$(ls "$RUNNER_TEMP"/sdk/*.tgz)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Node.js
