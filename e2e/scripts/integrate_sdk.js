@@ -2,7 +2,7 @@
 
 // Integrates the SDK into the E2E apps the way a publisher would: copies the template screens,
 // adds their packages and installs the SDK version under test.
-// Run with: npm run integrate-sdk -- <version or dist-tag> [--app 0.77 ...]
+// Run with: npm run integrate-sdk -- <version | dist-tag | path/to/sdk.tgz> [--app 0.77 ...]
 
 const fs = require('fs');
 const path = require('path');
@@ -17,10 +17,11 @@ const SDK_PACKAGE = '@thealteroffice/react-native-adgeist';
 const LINE_PACKAGES = ['react-native-screens', 'react-native-safe-area-context'];
 
 const USAGE = `Usage:
-  node scripts/integrate_sdk.js <version | dist-tag> [--app <x.y> ...]
+  node scripts/integrate_sdk.js <version | dist-tag | path/to/sdk.tgz> [--app <x.y> ...]
 
 Copies template/app into each app, adds the packages from template/dependencies.json and installs
-the given SDK version. Without --app, every app in matrix.json.`;
+the given SDK: a published version or dist-tag, or a local build made with npm pack (.tgz).
+Without --app, every app in matrix.json.`;
 
 function fail(message) {
   console.error(`❌ ${message}`);
@@ -39,7 +40,7 @@ function parseArgs(argv) {
     }
   }
   if (!args.spec) {
-    fail(`An SDK version or dist-tag is required\n\n${USAGE}`);
+    fail(`An SDK version, dist-tag or .tgz file is required\n\n${USAGE}`);
   }
   return args;
 }
@@ -58,12 +59,25 @@ function npmView(args) {
   return JSON.parse(execFileSync('npm', ['view', ...args, '--json'], { encoding: 'utf8', stdio: 'pipe' }));
 }
 
-// "qa" or "0.0.39" -> the exact version published on npm.
-function resolveSdkVersion(spec) {
+function tarballVersion(file) {
+  const pkg = execFileSync('tar', ['-xOzf', file, 'package/package.json'], { encoding: 'utf8' });
+  return JSON.parse(pkg).version;
+}
+
+// "qa" or "0.0.39" -> the exact version published on npm, installed as that version.
+// "path/to/sdk.tgz" -> the version inside the tarball, installed from the file.
+function resolveSdk(spec) {
+  if (spec.endsWith('.tgz')) {
+    const file = path.resolve(spec);
+    if (!fs.existsSync(file)) {
+      fail(`${file} not found. Create it with npm pack in the SDK repo.`);
+    }
+    return { version: tarballVersion(file), dependency: `file:${file}`, tarball: true };
+  }
   try {
     const version = npmView([`${SDK_PACKAGE}@${spec}`, 'version']);
     if (typeof version === 'string') {
-      return version;
+      return { version, dependency: version, tarball: false };
     }
   } catch {}
   const tags = Object.entries(npmView([SDK_PACKAGE, 'dist-tags']))
@@ -114,10 +128,23 @@ function saveLineVersions(appDir, line) {
   console.log(`📌 Saved ${Object.entries(versions).map(([name, range]) => `${name}@${range}`).join(', ')} for React Native ${line} in template/dependencies.json`);
 }
 
+// A re-packed .tgz keeps its file name but not its checksum, so npm would reject the old
+// package-lock entry (EINTEGRITY). Dropping the entry makes npm read the file again.
+function forgetLockedSdk(appDir) {
+  const lockPath = path.join(appDir, 'package-lock.json');
+  if (!fs.existsSync(lockPath)) {
+    return;
+  }
+  const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+  delete lock.packages?.[`node_modules/${SDK_PACKAGE}`];
+  fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n', 'utf8');
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const version = resolveSdkVersion(args.spec);
-  console.log(`📦 ${SDK_PACKAGE}@${version}`);
+  const sdk = resolveSdk(args.spec);
+  const { version } = sdk;
+  console.log(`📦 ${SDK_PACKAGE}@${version}${sdk.tarball ? ` (local build: ${sdk.dependency.slice(5)})` : ''}`);
   if (version.includes('-beta')) {
     console.warn('⚠️  Beta builds need the Sonatype snapshot repository to build the native Android SDK.');
   }
@@ -132,9 +159,12 @@ async function main() {
         if (!fs.existsSync(path.join(appDir, 'package.json'))) {
           throw new Error(`${relativeDir} does not exist. Run npm run create-apps first.`);
         }
-        applyTemplate(appDir, { [SDK_PACKAGE]: version });
+        applyTemplate(appDir, { [SDK_PACKAGE]: sdk.dependency });
       });
       await runCheck(line, 'sdk-install', async () => {
+        if (sdk.tarball) {
+          forgetLockedSdk(appDir);
+        }
         await runCaptured('npm', ['install', '--no-audit', '--no-fund'], appDir);
         const installedPath = path.join(appDir, 'node_modules', SDK_PACKAGE, 'package.json');
         const installed = JSON.parse(fs.readFileSync(installedPath, 'utf8')).version;

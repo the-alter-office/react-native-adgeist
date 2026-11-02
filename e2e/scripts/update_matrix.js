@@ -13,6 +13,7 @@ const matrixPath = path.join(root, 'matrix.json');
 const PACKAGE = 'react-native';
 const STABLE_VERSION = /^(\d+)\.(\d+)\.(\d+)$/;
 const LINE_COUNT = 10;
+const SKIPPED_VERSIONS = new Set(['0.80.0', '0.80.1', '0.80.2']);
 
 const USAGE = `Usage:
   node scripts/update_matrix.js
@@ -145,11 +146,12 @@ async function main() {
     const patches = patchesByLine.get(line);
     patches.sort((a, b) => a.patch - b.patch);
     const lineDownloads = patches.reduce((sum, p) => sum + p.downloads, 0);
-    const latest = patches[patches.length - 1];
+    const candidates = patches.filter((p) => !SKIPPED_VERSIONS.has(p.version));
+    const latest = candidates[candidates.length - 1];
     const top =
       lineDownloads === 0
         ? latest
-        : patches.reduce((best, p) =>
+        : candidates.reduce((best, p) =>
             p.downloads >= best.downloads ? p : best
           );
 

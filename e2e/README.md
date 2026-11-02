@@ -99,6 +99,13 @@ A new line gets the latest `react-native-screens` and `react-native-safe-area-co
 `default` versions in `template/dependencies.json`), and `integrate-sdk` saves the installed
 versions under `lines` for that line, so recreating its app later keeps versions that work with it.
 
+**Skipped versions.** `SKIPPED_VERSIONS` in `scripts/update_matrix.js` lists patches that are never
+picked. React Native 0.80.0–0.80.2 have a Gradle bug, fixed in 0.80.3: the app's C++ build can start
+before libraries have generated their code, so the SDK and any other library with generated code
+(react-native-screens, react-native-safe-area-context) fail to build. It is a React Native bug, so the
+matrix tests the most downloaded patch that isn't skipped. The SDK-side workaround is kept, commented
+out, in the SDK's `android/build.gradle`.
+
 ## Creating the apps: `create-apps`
 
 **Why.** Each React Native line needs its own real app, created the same way a publisher starts a
@@ -134,6 +141,11 @@ installed SDK is that version.
 - After `create-apps`, to put the SDK into new apps.
 - Whenever you test a new SDK release, for example after a version is published to QA.
 - After changing anything in `template/`, so the apps get the updated screens.
+
+**Testing an unpublished SDK build.** Run `npm pack` in the SDK repo root, then pass the `.tgz` instead
+of a version: `npm run integrate-sdk -- ../thealteroffice-react-native-adgeist-0.0.39.tgz --app 0.80`.
+The app then installs the SDK from that file. Don't commit an app integrated this way; integrate it
+again with a published version first.
 
 Running it again with the same version is safe. Without `--app` it works on every app in
 `matrix.json`; pass `--app <line>` for specific apps. See [CONTRIBUTING.md](CONTRIBUTING.md) for
