@@ -1,7 +1,6 @@
 export interface AdgeistContextType {
   isInitialized: boolean;
   initializationError?: Error;
-  setAdgeistConsentModal: (value: boolean) => void;
 }
 
 export interface AdgeistProviderProps {

@@ -4,7 +4,6 @@ import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.adgeistkit.AdgeistCore
-import com.adgeistkit.data.models.AdData
 import com.adgeistkit.data.models.Event
 import com.adgeistkit.data.models.FixedAdResponse
 import com.adgeistkit.data.models.UserDetails
@@ -12,18 +11,32 @@ import com.adgeistkit.data.network.CreativeAnalytics
 import com.adgeistkit.data.network.FetchCreative
 
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.ReadableType
 import com.adgeist.utils.toWritableMap
 import com.adgeistkit.request.AnalyticsRequest
+import com.adgeistkit.utilities.AdgeistInternalApi
+import com.adgeistkit.utilities.CustomConfig
 
 class AdgeistImpl internal constructor(private val context: ReactApplicationContext) {
   private var adgeistInstance: AdgeistCore? = null
   private var getAd: FetchCreative? = null
   private var postCreativeAnalytic: CreativeAnalytics? = null
 
+  @OptIn(AdgeistInternalApi::class)
   fun initializeSdk(customBidRequestBackendDomain: String?, customPackageOrBundleID: String?, customAdgeistAppID: String?, customVersioning: String?, promise: Promise) {
     try {
       Log.d("AdgeistImpl", "SDK initialized with domain: ${customBidRequestBackendDomain ?: "default"}, package/bundle ID: ${customPackageOrBundleID ?: "default"}, app ID: ${customAdgeistAppID ?: "default"}, versioning: ${customVersioning ?: "default"}")
-      adgeistInstance = AdgeistCore.initialize(context.applicationContext, customBidRequestBackendDomain, customPackageOrBundleID, customAdgeistAppID, customVersioning)
+
+      adgeistInstance = AdgeistCore.initialize(
+        context.applicationContext,
+        CustomConfig(
+          backendDomain = customBidRequestBackendDomain,
+          packageOrBundleId = customPackageOrBundleID,
+          adgeistAppId = customAdgeistAppID,
+          versioning =  customVersioning
+        )
+      )
+
       getAd = adgeistInstance?.getCreative()
       postCreativeAnalytic = adgeistInstance?.postCreativeAnalytics()
       promise.resolve("SDK initialized with domain: ${customBidRequestBackendDomain ?: "default"}")
@@ -38,8 +51,8 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
   }
 
   fun fetchCreative(adSpaceId: String, buyType: String, promise: Promise) {
-    getAd?.fetchCreative(adSpaceId, buyType) { adData ->
-      if (adData.isSuccess && adData.data != null) {
+    getAd?.fetchCreative(adSpaceId) { adData ->
+      if (adData.error == null && adData.data != null) {
         when (val response = adData.data) {
           is FixedAdResponse -> {
             promise.resolve(response.toWritableMap())
@@ -49,7 +62,7 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
           }
         }
       } else {
-        promise.reject("AD_ERROR", adData.errorMessage)
+        promise.reject("AD_ERROR", adData.error?.name ?: "Unknown error")
       }
     } ?: promise.reject("NOT_INITIALIZED", "SDK not initialized")
   }
@@ -74,11 +87,10 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
     val eventType = eventMap.getStringSafe("eventType")
 
     if (eventType.isNullOrEmpty()) {
-        throw IllegalArgumentException("Event must have a non-empty eventType")
+        return
     }
 
-    val props = if (eventMap.hasKey("eventProperties")) eventMap.getMap("eventProperties") else null
-    val eventProps = props?.toHashMap() ?: emptyMap<String, Any>()
+    val eventProps = eventMap.getMapSafe("eventProperties")?.toHashMap() ?: emptyMap<String, Any>()
 
     val event = Event(
         eventType = eventType,
@@ -107,4 +119,7 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
 }
 
 fun ReadableMap.getStringSafe(key: String): String? =
-    if (this.hasKey(key) && !this.isNull(key)) this.getString(key) else null
+    if (this.hasKey(key) && this.getType(key) == ReadableType.String) this.getString(key) else null
+
+fun ReadableMap.getMapSafe(key: String): ReadableMap? =
+    if (this.hasKey(key) && this.getType(key) == ReadableType.Map) this.getMap(key) else null
