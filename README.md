@@ -107,7 +107,7 @@ setUserDetails({
 ```
 
 - Every field is optional. Pass `email` and `phone` raw, as the user typed them: the SDK only trims whitespace and does no hashing. `phone` must include the `+` country code.
-- Each call replaces the previous details. Call it after sign-in, and again on every app launch once the user is known.
+- Calls merge: fields you pass override earlier values, and fields you leave out keep them. Call it after sign-in, and again on every app launch once the user is known.
 - It returns nothing and never waits on the network. Ads that load before the call go out without identifiers.
 
 ## Show an ad
