@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 
-# Runs every app in matrix.json on the connected emulator (PLATFORM=android, the default) or the
-# booted simulator (PLATFORM=ios), one after another: integrates the SDK (SDK_VERSION), then builds,
+# Runs every app in matrix.json on the connected emulator (PLATFORM=android) or the booted
+# simulator (PLATFORM=ios), one after another: integrates the SDK (SDK_VERSION), then builds,
 # installs, launches and tests it. A failing app skips its remaining checks and the next app still
 # runs. Ends with the summary table from scripts/report.js.
 
 set -uo pipefail
 cd "$(dirname "$0")/.."
 : "${SDK_VERSION:?Set SDK_VERSION to the SDK version or dist-tag to test}"
-PLATFORM="${PLATFORM:-android}"
+: "${PLATFORM:?Set PLATFORM to android or ios}"
 export E2E_PLATFORM="${PLATFORM}"
 
-lines=$(node -p "require('./matrix.json').lines.filter((entry, index) => index == 0).map((entry) => entry.line).join(' ')")
+lines=$(node -p "require('./matrix.json').lines.filter((entry, index) => index < 2).map((entry) => entry.line).join(' ')")
 rm -rf "results/${PLATFORM}"
 
 for line in ${lines}; do

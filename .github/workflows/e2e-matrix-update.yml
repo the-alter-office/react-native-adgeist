@@ -65,7 +65,7 @@ jobs:
             echo "New and updated apps are integrated with \`@thealteroffice/react-native-adgeist@$SDK_VERSION\`."
             echo "A new React Native line gets the latest \`react-native-screens\` and \`react-native-safe-area-context\`; the installed versions are saved for it in \`e2e/template/dependencies.json\`."
             echo
-            echo "These apps are tested by the E2E Android run on \`qa\` after this is merged."
+            echo "These apps are tested by the E2E run (Android and iOS) on \`qa\` after this is merged."
           } > "$RUNNER_TEMP/pr_body.md"
 
       - name: Create or update the PR

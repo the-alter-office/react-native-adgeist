@@ -1,0 +1,441 @@
+name: E2E
+
+on:
+  push:
+    branches: [e2e/matrix]
+  workflow_dispatch:
+    inputs:
+      sdk_version:
+        description: SDK version or dist-tag to test. Empty uses the E2E_SDK_VERSION repository variable.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  ADGEIST_E2E_APP_ID: ${{ vars.ADGEIST_E2E_APP_ID }}
+  ADGEIST_E2E_PACKAGE_NAME: ${{ vars.ADGEIST_E2E_PACKAGE_NAME }}
+  ADGEIST_E2E_BUNDLE_ID: ${{ vars.ADGEIST_E2E_BUNDLE_ID }}
+  ADGEIST_E2E_AD1_UNIT_ID: ${{ vars.ADGEIST_E2E_AD1_UNIT_ID }}
+  ADGEIST_E2E_AD1_RESPONSIVE: ${{ vars.ADGEIST_E2E_AD1_RESPONSIVE }}
+  ADGEIST_E2E_AD1_WIDTH: ${{ vars.ADGEIST_E2E_AD1_WIDTH }}
+  ADGEIST_E2E_AD1_HEIGHT: ${{ vars.ADGEIST_E2E_AD1_HEIGHT }}
+  ADGEIST_E2E_AD2_UNIT_ID: ${{ vars.ADGEIST_E2E_AD2_UNIT_ID }}
+  ADGEIST_E2E_AD2_RESPONSIVE: ${{ vars.ADGEIST_E2E_AD2_RESPONSIVE }}
+  ADGEIST_E2E_AD2_WIDTH: ${{ vars.ADGEIST_E2E_AD2_WIDTH }}
+  ADGEIST_E2E_AD2_HEIGHT: ${{ vars.ADGEIST_E2E_AD2_HEIGHT }}
+  ADGEIST_E2E_AD3_UNIT_ID: ${{ vars.ADGEIST_E2E_AD3_UNIT_ID }}
+  ADGEIST_E2E_AD3_RESPONSIVE: ${{ vars.ADGEIST_E2E_AD3_RESPONSIVE }}
+  ADGEIST_E2E_AD3_WIDTH: ${{ vars.ADGEIST_E2E_AD3_WIDTH }}
+  ADGEIST_E2E_AD3_HEIGHT: ${{ vars.ADGEIST_E2E_AD3_HEIGHT }}
+
+jobs:
+  pack:
+    name: Pack the SDK
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      file: ${{ steps.pack.outputs.file }}
+      version: ${{ steps.pack.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SDK dependencies
+        uses: ./.github/actions/setup
+
+      - name: Configure the QA build
+        run: yarn configure-build qa --publish
+
+      - name: Use stable AdgeistKit releases
+        run: |
+          for PLATFORM in ios android; do
+            VERSION="$(
+              node -p "require('./package.json').adgeistKit.${PLATFORM}.version"
+            )"
+            STABLE="${VERSION%%-*}"
+
+            echo "Switching AdgeistKit $PLATFORM $VERSION -> $STABLE"
+            yarn update-adgeistkit "$PLATFORM" "$STABLE"
+          done
+
+      - name: Pack the SDK
+        id: pack
+        run: |
+          yarn prepare
+          mkdir -p "$RUNNER_TEMP/sdk"
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP/sdk"
+          TGZ="$(ls "$RUNNER_TEMP"/sdk/*.tgz)"
+          echo "file=$(basename "$TGZ")" >> "$GITHUB_OUTPUT"
+          echo "version=$(tar -xzOf "$TGZ" package/package.json | jq -r .version)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the SDK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-tgz
+          path: ${{ runner.temp }}/sdk/*.tgz
+          retention-days: 7
+
+  android:
+    name: E2E Android
+    needs: pack
+    if: ${{ !cancelled() && needs.pack.result != 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 135
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Download the SDK
+        if: github.event_name == 'push'
+        uses: actions/download-artifact@v4
+        with:
+          name: sdk-tgz
+          path: ${{ runner.temp }}/sdk
+
+      - name: Locate the SDK
+        id: sdk
+        if: github.event_name == 'push'
+        run: echo "tgz=$(ls "$RUNNER_TEMP"/sdk/*.tgz)" >> "$GITHUB_OUTPUT"
+
+      - name: Check the SDK version
+        env:
+          SDK_VERSION: ${{ steps.sdk.outputs.tgz || inputs.sdk_version || vars.E2E_SDK_VERSION }}
+        run: |
+          if [ -z "$SDK_VERSION" ]; then
+            echo "::error::Set the E2E_SDK_VERSION repository variable, or enter sdk_version when running the workflow."
+            exit 1
+          fi
+          echo "Testing @thealteroffice/react-native-adgeist@$SDK_VERSION"
+
+      - name: Write .env
+        run: env | grep '^ADGEIST_E2E_' > .env
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run and test every app
+        timeout-minutes: 120
+        env:
+          PLATFORM: android
+          SDK_VERSION: ${{ steps.sdk.outputs.tgz || inputs.sdk_version || vars.E2E_SDK_VERSION }}
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          working-directory: e2e
+          script: ./scripts/ci.sh
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-android
+          path: e2e/results/android/
+          if-no-files-found: ignore
+
+  ios:
+    name: E2E iOS
+    needs: pack
+    if: ${{ !cancelled() && needs.pack.result != 'failure' }}
+    runs-on: macos-26
+    timeout-minutes: 330
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: |
+          XCODE="$(ls -d /Applications/Xcode_26*.app | grep -iv beta | sort -V | tail -1)"
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Download the SDK
+        if: github.event_name == 'push'
+        uses: actions/download-artifact@v4
+        with:
+          name: sdk-tgz
+          path: ${{ runner.temp }}/sdk
+
+      - name: Locate the SDK
+        id: sdk
+        if: github.event_name == 'push'
+        run: echo "tgz=$(ls "$RUNNER_TEMP"/sdk/*.tgz)" >> "$GITHUB_OUTPUT"
+
+      - name: Check the SDK version
+        env:
+          SDK_VERSION: ${{ steps.sdk.outputs.tgz || inputs.sdk_version || vars.E2E_SDK_VERSION }}
+        run: |
+          if [ -z "$SDK_VERSION" ]; then
+            echo "::error::Set the E2E_SDK_VERSION repository variable, or enter sdk_version when running the workflow."
+            exit 1
+          fi
+          echo "Testing @thealteroffice/react-native-adgeist@$SDK_VERSION"
+
+      - name: Write .env
+        run: env | grep '^ADGEIST_E2E_' > .env
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Boot an iPhone simulator
+        run: |
+          UDID="$(xcrun simctl list devices available -j | jq -r '
+            .devices
+            | to_entries
+            | map(select(.key | test("iOS-[0-9]+-[0-9]+$")))
+            | sort_by(.key | capture("iOS-(?<major>[0-9]+)-(?<minor>[0-9]+)$") | [(.major | tonumber), (.minor | tonumber)])
+            | last
+            | .value
+            | map(select(.name | startswith("iPhone")))
+            | first
+            | .udid // empty')"
+          if [ -z "$UDID" ]; then
+            echo "::error::No available iPhone simulator found."
+            xcrun simctl list devices available
+            exit 1
+          fi
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl list devices booted
+          echo "IOS_SIMULATOR_UDID=$UDID" >> "$GITHUB_ENV"
+
+      - name: Run and test every app
+        timeout-minutes: 300
+        env:
+          PLATFORM: ios
+          SDK_VERSION: ${{ steps.sdk.outputs.tgz || inputs.sdk_version || vars.E2E_SDK_VERSION }}
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: 180000
+        run: ./scripts/ci.sh
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-ios
+          path: e2e/results/ios/
+          if-no-files-found: ignore
+
+  report:
+    name: Combined report
+    needs: [pack, android, ios]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout the matrix
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: e2e/matrix.json
+          sparse-checkout-cone-mode: false
+
+      - name: Download test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: e2e-results-*
+          path: results
+
+      - name: Write the combined report and notify Slack
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_AUTOMATION_TEST_WEBHOOK_URL }}
+          SDK_VERSION: ${{ needs.pack.outputs.file || inputs.sdk_version || vars.E2E_SDK_VERSION }}
+          PACK_VERSION: ${{ needs.pack.outputs.version }}
+          ANDROID_RESULT: ${{ needs.android.result }}
+          IOS_RESULT: ${{ needs.ios.result }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          RUN_ID: ${{ github.run_id }}
+          SUMMARY_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          EXPECTED="$(jq '.lines | length' e2e/matrix.json)"
+
+          stats() {
+            local file="results/e2e-results-$1/summary.json"
+            if [ -f "$file" ]; then
+              jq -c '
+                {integrate: "Integrate", "sdk-install": "SDK install", pods: "Pods", build: "Build", install: "Install", launch: "Launch", maestro: "Maestro"} as $titles
+                | if has("total") then
+                    {passed, failed, total, partial: false, failures}
+                  else
+                    (.apps | to_entries) as $apps
+                    | ($apps | map(select(.value.maestro.status != "passed"))) as $unfinished
+                    | {
+                        passed: (($apps | length) - ($unfinished | length)),
+                        failed: ($unfinished | length),
+                        total: ($apps | length),
+                        partial: true,
+                        failures: ($unfinished | map(
+                          (.value | to_entries | map(select(.value.status != "passed")) | first) as $check
+                          | {
+                              line: .key,
+                              check: (if $check then ($titles[$check.key] // $check.key) else "Stopped" end),
+                              detail: ($check.value.detail // "the job stopped while this app was being tested")
+                            }))
+                      }
+                  end' "$file"
+            fi
+          }
+
+          table_row() {
+            if [ -n "$2" ]; then
+              jq -r --arg name "$1" --arg expected "$EXPECTED" '"| \($name) | \(if .partial then "❌ stopped" elif .failed == 0 then "✅" else "❌" end) | \(.passed) | \(.failed) | \(if .partial then "\(.total) of \($expected)" else .total end) |"' <<< "$2"
+            else
+              echo "| $1 | ⚪ no results (job $3) | — | — | — |"
+            fi
+          }
+
+          platform_text() {
+            if [ -n "$2" ]; then
+              jq -r --arg name "$1" --arg expected "$EXPECTED" '"\($name): \(.passed) passed, \(.failed) failed (\(if .partial then "\(.total) of \($expected) React Native versions tested, the job stopped" else "\(.total) React Native versions" end))"' <<< "$2"
+            else
+              echo "$1: no results, the job stopped before the apps were tested ($3)"
+            fi
+          }
+
+          failures() {
+            if [ -n "$2" ]; then
+              jq -r --arg name "$1" --arg before "$3" --arg after "$4" '.failures[] | "\($before)\($name)\($after) · \(.line) · \(.check): \(.detail)"' <<< "$2"
+            fi
+          }
+
+          ANDROID_STATS="$(stats android)"
+          IOS_STATS="$(stats ios)"
+
+          SDK_PACKAGE="@thealteroffice/react-native-adgeist"
+          if [ -n "$PACK_VERSION" ]; then
+            SDK_EXACT="$PACK_VERSION"
+            SDK_LINK="$SDK_EXACT built from $BRANCH @ ${GITHUB_SHA::7}: $GITHUB_SERVER_URL/$REPOSITORY/commit/$GITHUB_SHA"
+          else
+            SDK_EXACT="$(npm view "$SDK_PACKAGE@$SDK_VERSION" version 2>/dev/null | tail -n 1)"
+            SDK_EXACT="${SDK_EXACT:-${SDK_VERSION:-unknown}}"
+            SDK_LINK="https://www.npmjs.com/package/$SDK_PACKAGE/v/$SDK_EXACT"
+          fi
+
+          STARTED_AT="$(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID" --jq .run_started_at)"
+          DURATION="$(( ($(date +%s) - $(date -d "$STARTED_AT" +%s)) / 60 ))"
+
+          if [ "$ANDROID_RESULT" = "success" ] && [ "$IOS_RESULT" = "success" ]; then
+            STATUS_EMOJI="✅"
+            STATUS_TEXT="Passed"
+          else
+            STATUS_EMOJI="❌"
+            STATUS_TEXT="Failed"
+          fi
+
+          SUMMARY_FAILURES="$(failures Android "$ANDROID_STATS" '- **' '**'; failures iOS "$IOS_STATS" '- **' '**')"
+          {
+            echo "## E2E combined · SDK $SDK_EXACT"
+            echo
+            echo "| Platform | Status | Passed | Failed | React Native versions |"
+            echo "|---|---|---|---|---|"
+            table_row Android "$ANDROID_STATS" "$ANDROID_RESULT"
+            table_row iOS "$IOS_STATS" "$IOS_RESULT"
+            echo
+            if [ -n "$SUMMARY_FAILURES" ]; then
+              echo "### Failures"
+              echo
+              echo "$SUMMARY_FAILURES"
+            elif [ "$STATUS_TEXT" = "Passed" ]; then
+              echo "All checks passed on both platforms."
+            else
+              echo "No failures were recorded, but a platform stopped before testing; see its job log."
+            fi
+            echo
+            echo "Duration: $DURATION min. Each platform's detailed table is in its own job summary above."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "::warning::SLACK_AUTOMATION_TEST_WEBHOOK_URL is not set; skipping the Slack message."
+            exit 0
+          fi
+
+          FAILURES="$(failures Android "$ANDROID_STATS" '• ' ''; failures iOS "$IOS_STATS" '• ' '')"
+          FAILED_SECTION=""
+          if [ -n "$FAILURES" ]; then
+            FAILED_SECTION=$'\n*Failed versions:*\n'"$FAILURES"$'\n'
+          fi
+
+          MESSAGE="$(cat <<EOF
+          *React Native SDK E2E Tests (Android and iOS)*
+          The SDK was installed into an app for each supported React Native version, built, launched on an Android emulator and an iOS simulator, and tested with Maestro.
+
+          $STATUS_EMOJI *Status:* $STATUS_TEXT ($DURATION min)
+          *Summary:*
+          $(platform_text Android "$ANDROID_STATS" "$ANDROID_RESULT")
+          $(platform_text iOS "$IOS_STATS" "$IOS_RESULT")
+
+          *SDK:* $SDK_LINK
+          *Repository:* $REPOSITORY
+          *Branch:* $BRANCH
+          ${FAILED_SECTION}
+          👇 Open the run summary to see the checks, Maestro reports and screenshots for every React Native version.
+          EOF
+          )"
+
+          PAYLOAD="$(
+            jq -n \
+              --arg text "$MESSAGE" \
+              --arg reportUrl "$SUMMARY_URL" \
+              '{
+                text: $text,
+                reportUrl: $reportUrl
+              }'
+          )"
+
+          curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data "$PAYLOAD" \
+            "$SLACK_WEBHOOK_URL"

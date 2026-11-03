@@ -190,7 +190,7 @@ ANDROID_SERIAL=emulator-5554 npm run maestro:release -- --app 0.79
 ```
 
 Each check (integrate, SDK install, Pods on iOS, build, install, launch, Maestro) is saved to
-`results/<platform>/summary.json`. `scripts/ci.sh` runs every app (set `PLATFORM=ios` for iOS) and,
+`results/<platform>/summary.json`. `scripts/ci.sh` runs every app (set `PLATFORM=android` or `PLATFORM=ios`) and,
 in CI, shows the table on the run's Summary page.
 
 ## iOS
@@ -225,6 +225,24 @@ The Maestro tests can also be run on their own against an installed app; see
 
 ## Scope
 
-- Android and iOS (simulator), against the QA backend. CI runs Android only for now.
+- Android and iOS (simulator), against the QA backend.
+
+## CI
+
+`.github/workflows/e2e.yml` runs on a push to `qa`, or by hand from the Actions tab (with an
+optional `sdk_version`). It has four jobs:
+
+| Job | Runner | What it does |
+|---|---|---|
+| `pack` | Ubuntu | Push only: builds the QA SDK (`yarn configure-build qa --publish`, stable AdgeistKit, `npm pack`) and uploads the `.tgz` as the `sdk-tgz` artifact |
+| `android` | Ubuntu | Boots an API 35 emulator and runs `PLATFORM=android scripts/ci.sh`; results in the `e2e-results-android` artifact |
+| `ios` | macOS | Selects Xcode 26, boots an iPhone simulator and runs `PLATFORM=ios scripts/ci.sh`; results in the `e2e-results-ios` artifact |
+| `report` | Ubuntu | Reads both `summary.json` files, writes the combined table to the run's Summary page and sends one Slack message |
+
+`android` and `ios` run in parallel and test the same `.tgz` on a push; on a manual run they install
+`sdk_version`, or else the `E2E_SDK_VERSION` repository variable. The values in `.env` come from
+repository variables of the same names, including both `ADGEIST_E2E_PACKAGE_NAME` and
+`ADGEIST_E2E_BUNDLE_ID`. Slack uses the `SLACK_AUTOMATION_TEST_WEBHOOK_URL` secret; without it the
+report job skips the message.
 - The checks confirm that the SDK reports an ad as rendered and a click as handled. They do not
   verify that impressions or clicks were recorded by the backend.
