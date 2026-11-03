@@ -17,7 +17,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="watch/[id]" options={{ title: '' }} />
-        <Stack.Screen name="settings" options={{ title: 'Plans & Ad Playground' }} />
+        <Stack.Screen name="plans" options={{ title: 'Plans' }} />
       </Stack>
     </SafeAreaProvider>
   );

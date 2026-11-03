@@ -1,41 +1,28 @@
 import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { useFlags } from '../state/flags';
-import { useEntitlement } from '../state/entitlement';
 import { colors, radius, spacing } from '../theme';
-import type { IAdSlotConfig, IContentItem } from '../types/content';
-import { AdSlot } from './AdSlot';
+import type { IContentItem } from '../types/content';
 
-type HeroEntry = { kind: 'content'; item: IContentItem } | { kind: 'masthead'; slot: IAdSlotConfig };
-
-const MASTHEAD_POSITION = 1;
 const MAX_WIDTH = 720;
 
-type HeroCarouselProps = { items: IContentItem[]; masthead: IAdSlotConfig | null };
+type HeroCarouselProps = { items: IContentItem[] };
 
-export function HeroCarousel({ items, masthead }: HeroCarouselProps) {
+export function HeroCarousel({ items }: HeroCarouselProps) {
   const { width: windowWidth } = useWindowDimensions();
-  const { enableMastheadAd } = useFlags();
-  const { tier } = useEntitlement();
   const width = Math.min(windowWidth, MAX_WIDTH) - spacing.lg * 2;
-
-  const entries: HeroEntry[] = items.map((item) => ({ kind: 'content', item }));
-  if (masthead && enableMastheadAd && tier !== 'PASS') {
-    entries.splice(Math.min(MASTHEAD_POSITION, entries.length), 0, { kind: 'masthead', slot: masthead });
-  }
 
   return (
     <FlatList
       horizontal
-      data={entries}
-      keyExtractor={(entry) => (entry.kind === 'content' ? entry.item.id : entry.slot.adUnitId)}
+      data={items}
+      keyExtractor={(item) => item.id}
       snapToInterval={width + spacing.md}
       decelerationRate="fast"
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.list}
-      renderItem={({ item: entry }) => (
+      renderItem={({ item }) => (
         <View style={[styles.slide, { width }]}>
-          {entry.kind === 'masthead' ? <AdSlot slot={entry.slot} fill /> : <HeroSlide item={entry.item} />}
+          <HeroSlide item={item} />
         </View>
       )}
     />
@@ -68,5 +55,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md },
   watch: { backgroundColor: colors.accent, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 6 },
   watchText: { color: colors.text, fontWeight: '800', fontSize: 13 },
-  premium: { backgroundColor: colors.ad, color: colors.black, fontSize: 10, fontWeight: '800', paddingHorizontal: 6, paddingVertical: 2, borderRadius: radius.sm, overflow: 'hidden' },
+  premium: { backgroundColor: colors.premium, color: colors.black, fontSize: 10, fontWeight: '800', paddingHorizontal: 6, paddingVertical: 2, borderRadius: radius.sm, overflow: 'hidden' },
 });

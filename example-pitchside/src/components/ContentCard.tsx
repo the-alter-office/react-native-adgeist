@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   badges: { flexDirection: 'row', gap: spacing.xs },
   badge: { color: colors.text, backgroundColor: colors.overlay, fontSize: 10, fontWeight: '700', paddingHorizontal: 6, paddingVertical: 2, borderRadius: radius.sm, overflow: 'hidden' },
   live: { backgroundColor: colors.live },
-  premium: { backgroundColor: colors.ad, color: colors.black },
+  premium: { backgroundColor: colors.premium, color: colors.black },
   title: { color: colors.text, fontSize: 14, fontWeight: '600', marginTop: spacing.sm },
   subtitle: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
 });

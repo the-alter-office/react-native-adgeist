@@ -7,8 +7,7 @@ export const colors = {
   textMuted: '#9AA3B5',
   accent: '#FF5A36',
   live: '#E5243B',
-  ad: '#F5C518',
-  success: '#2FBF71',
+  premium: '#F5C518',
   black: '#000000',
   overlay: 'rgba(0,0,0,0.6)',
 } as const;

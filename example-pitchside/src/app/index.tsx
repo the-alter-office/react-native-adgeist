@@ -3,14 +3,12 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchHome } from '../api/client';
-import { AdSlot } from '../components/AdSlot';
 import { HeroCarousel } from '../components/HeroCarousel';
 import { Rail } from '../components/Rail';
 import { SportPills } from '../components/SportPills';
 import { EmptyView, ErrorView, LoadingView } from '../components/StateViews';
 import { useAsync } from '../hooks/useAsync';
 import { useEntitlement } from '../state/entitlement';
-import { useFlags } from '../state/flags';
 import { colors, spacing } from '../theme';
 import type { HomePill, HomeSegment } from '../types/content';
 
@@ -18,33 +16,15 @@ const MAX_CONTENT_WIDTH = 720;
 
 export default function HomeScreen() {
   const [pill, setPill] = useState<HomePill>('ALL');
-  const [roadblockDismissed, setRoadblockDismissed] = useState(false);
-  const { enableRoadblock } = useFlags();
   const { tier } = useEntitlement();
   const home = useAsync(() => fetchHome(pill), [pill]);
 
   const renderSegment = (segment: HomeSegment) => {
     switch (segment.type) {
-      case 'ROADBLOCK':
-        if (!enableRoadblock || roadblockDismissed || tier === 'PASS') return null;
-        return (
-          <View key={segment.id} style={styles.padded}>
-            <AdSlot slot={segment.slot} />
-            <Pressable onPress={() => setRoadblockDismissed(true)} style={styles.dismiss} testID="roadblock-dismiss">
-              <Text style={styles.dismissText}>Hide ad ✕</Text>
-            </Pressable>
-          </View>
-        );
       case 'HERO':
-        return <HeroCarousel key={segment.id} items={segment.items} masthead={segment.masthead} />;
+        return <HeroCarousel key={segment.id} items={segment.items} />;
       case 'RAIL':
         return <Rail key={segment.id} title={segment.title} items={segment.items} />;
-      case 'BANNER':
-        return (
-          <View key={segment.id} style={[styles.padded, styles.banner]}>
-            <AdSlot slot={segment.slot} />
-          </View>
-        );
     }
   };
 
@@ -54,7 +34,7 @@ export default function HomeScreen() {
         <Text style={styles.logo}>
           pitch<Text style={styles.logoAccent}>side</Text>
         </Text>
-        <Pressable onPress={() => router.push('/settings')} style={styles.planButton} testID="open-settings">
+        <Pressable onPress={() => router.push('/plans')} style={styles.planButton} testID="open-plans">
           <Text style={styles.planText}>{tier === 'PASS' ? 'PASS ✓' : 'Get Pass'}</Text>
         </Pressable>
       </View>
@@ -80,8 +60,4 @@ const styles = StyleSheet.create({
   planText: { color: colors.accent, fontWeight: '700', fontSize: 12 },
   scroll: { paddingBottom: spacing.xl * 2, alignItems: 'center' },
   column: { width: '100%', maxWidth: MAX_CONTENT_WIDTH },
-  padded: { paddingHorizontal: spacing.lg, marginBottom: spacing.md },
-  banner: { marginTop: spacing.xl },
-  dismiss: { alignSelf: 'flex-end', paddingVertical: spacing.xs },
-  dismissText: { color: colors.textMuted, fontSize: 11 },
 });

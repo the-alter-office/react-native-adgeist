@@ -22,12 +22,7 @@ export async function fetchStream(contentId: string): Promise<IStreamResponse> {
     const videoSource = VIDEO_SOURCES[contentId];
     if (!item || !videoSource) throw new Error(`Content ${contentId} not found`);
     const related = CATALOG.filter((entry) => entry.id !== contentId && entry.sport === item.sport);
-    return {
-      item,
-      videoSource,
-      adFunded: item.isPremium ? { adDurationInSeconds: 30 } : null,
-      related,
-    };
+    return { item, videoSource, related };
   } catch (error) {
     throw error;
   }
