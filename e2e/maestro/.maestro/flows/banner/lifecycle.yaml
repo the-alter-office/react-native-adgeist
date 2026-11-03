@@ -2,6 +2,7 @@ appId: ${APP_ID}
 name: BANNER-01 Banner ad lifecycle
 tags:
   - android
+  - ios
   - banner
   - lifecycle
 env:

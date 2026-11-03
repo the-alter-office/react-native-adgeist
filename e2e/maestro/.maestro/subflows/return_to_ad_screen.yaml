@@ -4,6 +4,7 @@ appId: ${APP_ID}
     when:
       notVisible:
         id: ${KIND}-screen
+      platform: Android
     label: Press back to leave the browser or app opened by the tap
     commands:
       - back

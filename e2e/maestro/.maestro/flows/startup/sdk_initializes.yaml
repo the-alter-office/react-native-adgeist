@@ -2,6 +2,7 @@ appId: ${APP_ID}
 name: STARTUP-01 SDK initializes when the app launches
 tags:
   - android
+  - ios
   - startup
 env:
   TEST_ID: STARTUP-01

@@ -21,20 +21,22 @@ Every step has a label, so a failure names the test and the exact step, for exam
 
 ## Configuration
 
-The tests need one value: the app's package name, so Maestro knows which app to launch and check.
-It comes from `ADGEIST_E2E_PACKAGE_NAME` in the `.env` file next to the root `package.json` (see
+The tests need one value: the app's ID, so Maestro knows which app to launch and check. On
+Android it is the package name, `ADGEIST_E2E_PACKAGE_NAME`; on iOS the bundle ID,
+`ADGEIST_E2E_BUNDLE_ID` (with `E2E_PLATFORM=ios`). Both live in the `.env` file next to the root `package.json` (see
 "Configuration: `.env`" in the [root README](../README.md)).
 
 Inside the tests it is called `APP_ID`. Every test and subflow starts with `appId: ${APP_ID}`. The
-runner reads `ADGEIST_E2E_PACKAGE_NAME` from `.env` and passes it to Maestro as
-`-e APP_ID=<package name>`; with the Maestro CLI or Maestro Studio you set `APP_ID` yourself.
+runner reads the platform's variable from `.env` and passes it to Maestro as
+`-e APP_ID=<app ID>`; with the Maestro CLI or Maestro Studio you set `APP_ID` yourself.
 
 The ad unit IDs in `.env` are not used by the tests; they are built into the app.
 
 ## Running them
 
 The app must already be installed on the device (for example with
-`npm run run:release -- --app 0.77`), and `.env` must contain `ADGEIST_E2E_PACKAGE_NAME`.
+`npm run run:release -- --app 0.77`), and `.env` must contain `ADGEIST_E2E_PACKAGE_NAME` (Android) or
+`ADGEIST_E2E_BUNDLE_ID` (iOS).
 
 **With the runner** (recommended):
 
@@ -43,7 +45,7 @@ node maestro/scripts/run.js
 node maestro/scripts/run.js --include-tags banner
 ```
 
-It reads the package name from `.env`, runs every test, and writes the results to
+It reads the app ID from `.env`, runs every test, and writes the results to
 `results/maestro/`: `report.html` (detailed HTML report with every step) and a `screenshots/` folder with the final screen of each
 test. Any other option is passed to Maestro (`--include-tags`, `--device`, …).
 `npm run maestro:release` builds and installs an app, then runs this same runner.
@@ -51,10 +53,10 @@ test. Any other option is passed to Maestro (`--include-tags`, `--device`, …).
 **With the Maestro CLI directly:**
 
 ```
-maestro test maestro/.maestro -e APP_ID=<package name>
+maestro test maestro/.maestro -e APP_ID=<app ID>
 ```
 
-**In Maestro Studio:** open the `maestro/.maestro` folder and set `APP_ID` to the package name in
+**In Maestro Studio:** open the `maestro/.maestro` folder and set `APP_ID` to the app ID in
 the environment settings, then run a test from `flows/`.
 
 ## Layout

@@ -4,6 +4,7 @@ appId: ${APP_ID}
     when:
       notVisible:
         id: open-companion
+      platform: Android
     label: Press back (leaves an ad screen, or a browser opened by a tap)
     commands:
       - back
@@ -13,6 +14,7 @@ appId: ${APP_ID}
     when:
       notVisible:
         id: open-companion
+      platform: Android
     label: Press back once more (browser, then ad screen)
     commands:
       - back
@@ -27,6 +29,27 @@ appId: ${APP_ID}
       - launchApp:
           stopApp: false
           clearState: false
+- runFlow:
+    when:
+      notVisible:
+        id: open-companion
+      platform: Android
+    label: Press back after returning to the app (it reopens on the ad screen)
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 2000
+- runFlow:
+    when:
+      notVisible:
+        id: open-companion
+      platform: iOS
+    label: Tap the header back button after returning to the app (it reopens on the ad screen)
+    commands:
+      - tapOn:
+          id: BackButton
+      - waitForAnimationToEnd:
+          timeout: 2000
 - extendedWaitUntil:
     visible:
       id: open-companion

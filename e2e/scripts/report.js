@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Records each app's check results in results/summary.json, then adds the totals to it and prints
+// Records each app's check results in results/<platform>/summary.json, then adds the totals to it and prints
 // them as a table (also to the GitHub job summary in CI).
 // Run with: node scripts/report.js <line> [<line> ...]
 
@@ -9,23 +9,39 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const root = path.join(__dirname, '..');
-const summaryPath = path.join(root, 'results', 'summary.json');
-const CHECKS = [
+const PLATFORMS = { android: 'Android', ios: 'iOS' };
+const ALL_CHECKS = [
   ['integrate', 'Integrate'],
   ['sdk-install', 'SDK install'],
+  ['pods', 'Pods', 'ios'],
   ['build', 'Build'],
   ['install', 'Install'],
   ['launch', 'Launch'],
   ['maestro', 'Maestro'],
 ];
 
+function platform() {
+  const name = process.env.E2E_PLATFORM || 'android';
+  if (!PLATFORMS[name]) {
+    throw new Error(`Unknown platform: ${name}. Use android or ios.`);
+  }
+  return name;
+}
+
+function resultsDir() {
+  return path.join('results', platform());
+}
+
+const summaryPath = () => path.join(root, resultsDir(), 'summary.json');
+const checks = () => ALL_CHECKS.filter(([, , only]) => !only || only === platform());
+
 function readSummary() {
-  return fs.existsSync(summaryPath) ? JSON.parse(fs.readFileSync(summaryPath, 'utf8')) : { apps: {} };
+  return fs.existsSync(summaryPath()) ? JSON.parse(fs.readFileSync(summaryPath(), 'utf8')) : { apps: {} };
 }
 
 function writeSummary(summary) {
-  fs.mkdirSync(path.dirname(summaryPath), { recursive: true });
-  fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2) + '\n', 'utf8');
+  fs.mkdirSync(path.dirname(summaryPath()), { recursive: true });
+  fs.writeFileSync(summaryPath(), JSON.stringify(summary, null, 2) + '\n', 'utf8');
 }
 
 function recordCheck(line, check, status, detail) {
@@ -62,6 +78,7 @@ function errorLine(output) {
   }
   return (
     lines.find((text) => /^npm (ERR!|error) (?!code\b)/.test(text)) ??
+    lines.find((text) => /^\[!\] /.test(text)) ??
     lines.find((text) => /Failure \[.*\]/.test(text)) ??
     lines.findLast((text) => /\berror\b/i.test(text))
   );
@@ -91,9 +108,9 @@ function runCaptured(command, args, cwd) {
 }
 
 // The first check that did not pass, or null if every check passed.
-function firstFailure(line, checks = {}) {
-  for (const [check, title] of CHECKS) {
-    const result = checks[check];
+function firstFailure(line, results = {}) {
+  for (const [check, title] of checks()) {
+    const result = results[check];
     if (result?.status !== 'passed') {
       return { line, check: title, detail: result ? result.detail ?? 'failed' : 'did not report a result, see the log' };
     }
@@ -103,13 +120,13 @@ function firstFailure(line, checks = {}) {
 
 function toMarkdown(summary, lines) {
   const rows = lines.map((line) => {
-    const checks = summary.apps[line] ?? {};
+    const results = summary.apps[line] ?? {};
     let blocked = false;
-    const cells = CHECKS.map(([check]) => {
+    const cells = checks().map(([check]) => {
       if (blocked) {
         return '⏭️';
       }
-      const status = checks[check]?.status;
+      const status = results[check]?.status;
       blocked = status !== 'passed';
       return status === 'passed' ? '✅' : status === 'failed' ? '❌' : '⚪';
     });
@@ -118,10 +135,10 @@ function toMarkdown(summary, lines) {
 
   const version = process.env.SDK_VERSION ? ` · SDK ${process.env.SDK_VERSION}` : '';
   return [
-    `## E2E Android${version}`,
+    `## E2E ${PLATFORMS[platform()]}${version}`,
     '',
-    `| React Native | ${CHECKS.map(([, title]) => title).join(' | ')} |`,
-    `|---|${CHECKS.map(() => '---').join('|')}|`,
+    `| React Native | ${checks().map(([, title]) => title).join(' | ')} |`,
+    `|---|${checks().map(() => '---').join('|')}|`,
     ...rows,
     '',
     '✅ passed · ❌ failed · ⏭️ skipped after an earlier failure · ⚪ no result',
@@ -157,4 +174,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { recordCheck, resetChecks, runCheck, runCaptured };
+module.exports = { platform, resultsDir, recordCheck, resetChecks, runCheck, runCaptured };

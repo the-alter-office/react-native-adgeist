@@ -2,6 +2,7 @@ appId: ${APP_ID}
 name: COMPANION-01 Companion ad lifecycle
 tags:
   - android
+  - ios
   - companion
   - lifecycle
 env:

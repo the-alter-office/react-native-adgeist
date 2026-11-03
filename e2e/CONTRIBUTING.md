@@ -21,8 +21,9 @@ own, so nothing ever has to be exported. In every one, a variable already set in
 |---|---|---|
 | Node scripts (`scripts/*.js`, `maestro/scripts/run.js`) | everything | `scripts/env.js`: `loadEnv()` loads `.env` into `process.env` with Node's `process.loadEnvFile`; `requireEnv()` also stops with the list of missing required values. Programs a script starts (Gradle, Maestro) inherit that environment |
 | Android build (Gradle) | `ADGEIST_E2E_PACKAGE_NAME`, `ADGEIST_E2E_APP_ID` | `create-apps` adds `e2eDotEnv` and `e2eValue` to `android/app/build.gradle`. They read the environment, or else `.env`, and set `applicationId` and the manifest's `ADGEIST_APP_ID` entry, which the native SDK reads. A missing value stops the build with `… is not set` |
+| iOS build (Xcode) | `ADGEIST_E2E_BUNDLE_ID`, `ADGEIST_E2E_APP_ID` | `create-apps` sets `PRODUCT_BUNDLE_IDENTIFIER = "$(ADGEIST_E2E_BUNDLE_ID)"` in `project.pbxproj` and the `Info.plist` `ADGEIST_APP_ID` entry to `$(ADGEIST_E2E_APP_ID)`. Xcode can't read `.env`, so `run_app.js` passes both as `xcodebuild` build settings; `requireEnv()` stops first if one is missing |
 | The app's JavaScript | the `ADGEIST_E2E_AD<n>_*` values | `react-native-dotenv` in the app's `babel.config.js` reads `.env` when the JavaScript is bundled. `src/config.ts` imports the values from `@env`, and the plugin replaces them with the actual strings, so they are built into the app |
-| Maestro tests | `ADGEIST_E2E_PACKAGE_NAME` | `maestro/scripts/run.js` passes it to Maestro as `-e APP_ID=…`; every flow uses `appId: ${APP_ID}` |
+| Maestro tests | `ADGEIST_E2E_PACKAGE_NAME` (Android) or `ADGEIST_E2E_BUNDLE_ID` (iOS) | `maestro/scripts/run.js` picks the one for `E2E_PLATFORM` and passes it to Maestro as `-e APP_ID=…`; every flow uses `appId: ${APP_ID}` |
 
 Because the ad values are built into the app, two caches could keep old values after `.env`
 changes. `create-apps` handles both in `build.gradle`: `.env` is an input of the JavaScript bundle
@@ -37,8 +38,9 @@ Metro start each bundle with an empty cache. With `run:metro`, Metro is also sta
 3. If the app's JavaScript needs it, import it from `@env` in `template/app/src/config.ts` and
    declare it in `template/app/src/types/env.d.ts`, then run `integrate-sdk` so the apps get the
    change.
-4. If Gradle needs it, read it with `e2eValue("…")` in the Gradle code that `scripts/create_apps.js`
-   adds, then recreate the apps.
+4. If Gradle needs it, read it with `e2eValue("…")` in the Gradle code that
+   `scripts/utils/android.js` adds, then recreate the apps. If Xcode needs it, pass it in
+   `buildSettings` in `scripts/utils/ios.js` and reference it as `$(…)` in the iOS project.
 5. Add it to CI's secrets.
 
 ## `create-apps` scenarios
@@ -161,8 +163,10 @@ The examples assume `matrix.json` lists lines 0.77 to 0.86 and the dist-tags are
 
 ## `run:metro`, `run:release`, `maestro:release` and `uninstall` scenarios
 
-All four come from `scripts/run_app.js` and work on **one app at a time**, because every app has
-the same package name (`ADGEIST_E2E_PACKAGE_NAME`).
+All four come from `scripts/run_app.js`, which calls the platform code in `scripts/utils/android.js`
+or `scripts/utils/ios.js` (`--platform ios`). They work on **one app at a time**, because every app has
+the same package name (`ADGEIST_E2E_PACKAGE_NAME`) on Android and bundle ID
+(`ADGEIST_E2E_BUNDLE_ID`) on iOS.
 
 Before doing anything, `run:metro`, `run:release` and `maestro:release`:
 
@@ -181,7 +185,7 @@ Any failing step stops the run with that step's error.
 | # | Command | What happens |
 |---|---|---|
 | 1 | `npm run run:release -- --app 0.77` | Uninstalls the E2E app, builds a release APK for the device's CPU type, installs it and opens it |
-| 2 | `npm run maestro:release -- --app 0.77` | Everything in row 1, then the Maestro tests. Results go to `results/rn-0.77/maestro` |
+| 2 | `npm run maestro:release -- --app 0.77` | Everything in row 1, then the Maestro tests. Results go to `results/android/rn-0.77/maestro` (`results/ios/…` with `--platform ios`) |
 | 3 | `npm run run:metro -- --app 0.77` | Uninstalls the E2E app, starts Metro in this terminal, waits until it is ready, then builds, installs and opens a debug build. Metro keeps running (live reload) until Ctrl+C |
 | 4 | `npm run uninstall` | Removes the installed E2E app. If none is installed, it says so and succeeds |
 | 5 | `npm run run:release -- --app 0.81` after testing 0.77 | 0.77 is uninstalled and 0.81 installed. Only one E2E app is ever on the device |
@@ -212,7 +216,7 @@ Any failing step stops the run with that step's error.
 | 20 | `adb install` fails (for example, the APK's CPU type doesn't match the device) | The adb error is shown and the run stops |
 | 21 | `run:metro`: Metro exits while starting, or isn't ready within 60 seconds | `Metro exited with code … before it was ready` or `Metro did not start within 60 seconds`. Metro is stopped and nothing is built |
 | 22 | `run:metro`: the debug build fails | Metro is stopped too |
-| 23 | `maestro:release`: a test fails | The app stays installed; the failure is in the console and in `results/rn-<line>/maestro` |
+| 23 | `maestro:release`: a test fails | The app stays installed; the failure is in the console and in `results/<platform>/rn-<line>/maestro` |
 
 **Not handled**
 

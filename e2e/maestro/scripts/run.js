@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { loadEnv } = require('../../scripts/env');
+const { appIdOnDevice } = require('../../scripts/env');
 
 const root = path.join(__dirname, '../..');
 const workspace = path.join('maestro', '.maestro');
@@ -70,10 +70,11 @@ function main() {
     maestroArgs.splice(index, 2);
   }
 
-  loadEnv();
-  const appId = process.env.ADGEIST_E2E_PACKAGE_NAME;
-  if (!appId) {
-    fail('ADGEIST_E2E_PACKAGE_NAME is missing. Add it to .env.');
+  let appId;
+  try {
+    appId = appIdOnDevice();
+  } catch (error) {
+    fail(error.message);
   }
 
   fs.rmSync(path.join(root, resultsDir), { recursive: true, force: true });

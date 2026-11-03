@@ -2,6 +2,7 @@ appId: ${APP_ID}
 name: DISPLAY-01 Display ad lifecycle
 tags:
   - android
+  - ios
   - display
   - lifecycle
 env:

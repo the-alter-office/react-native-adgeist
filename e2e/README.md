@@ -23,8 +23,9 @@ real app on each React Native version our publishers run?**
   banner, display).
 - **The same checks in every app, in order.** A step only runs if the previous one passed:
   - **Install:** the SDK version under test installs into the app without errors
-  - **Build:** the app builds as a release APK, including the SDK's native Android code
-  - **Deploy:** the APK installs on an Android emulator
+  - **Build:** the app builds as a release APK (Android) or a release simulator app (iOS),
+    including the SDK's native code
+  - **Deploy:** the app installs on an Android emulator or an iOS simulator
   - **Run**, driven by [Maestro](https://maestro.mobile.dev):
     - the app launches and the SDK initializes
     - each ad renders
@@ -49,6 +50,7 @@ GitHub secrets.
 ```
 ADGEIST_E2E_APP_ID=
 ADGEIST_E2E_PACKAGE_NAME=
+ADGEIST_E2E_BUNDLE_ID=
 
 ADGEIST_E2E_AD1_UNIT_ID=
 ADGEIST_E2E_AD1_RESPONSIVE=
@@ -113,8 +115,14 @@ new React Native project, so the SDK is tested in exactly the setup host apps us
 
 **What it does.** `npm run create-apps` creates one app per line in `matrix.json`, in
 `apps/rn-<line>`, using that line's React Native version and the official React Native template.
-It then prepares the app's Android build to take the package name and AdGeist app ID from `.env`.
-It does not install the SDK; that is the next step.
+It then prepares the app's Android build to take the package name (`ADGEIST_E2E_PACKAGE_NAME`)
+and AdGeist app ID from `.env`, and its iOS project to take the bundle ID
+(`PRODUCT_BUNDLE_IDENTIFIER = $(ADGEIST_E2E_BUNDLE_ID)`) and AdGeist app ID (`ADGEIST_APP_ID` in
+`Info.plist` = `$(ADGEIST_E2E_APP_ID)`) as build settings, and target iOS 15.6, the minimum the
+SDK supports. It does not install the SDK; that is the next step.
+
+Apps that are on the right version but miss one of these preparations are patched in place, not
+recreated.
 
 **When to use it.**
 - After `update-matrix`, to create the apps for the first time.
@@ -135,7 +143,8 @@ it, inside apps that use it the way publishers do.
 the apps. A dist-tag such as `qa` or `latest` is first turned into its exact version. For each app
 it copies in the E2E screens from `template/app/` (one screen per ad format), adds the packages
 those screens need, sets the SDK to the exact version and runs `npm install`, then checks that the
-installed SDK is that version.
+installed SDK is that version. It is the same for Android and iOS; the iOS CocoaPods are
+installed later, when the app is run with `--platform ios`.
 
 **When to use it.**
 - After `create-apps`, to put the SDK into new apps.
@@ -153,15 +162,19 @@ what happens in each case.
 
 ## Running and testing an app
 
-**Why.** Every app uses the same package name, so only one can be installed on a device at a time.
+**Why.** Every app uses the same package name (Android) and bundle ID (iOS), so only one can be installed on a device at a time.
 These scripts run one app at a time, and always remove the previously installed E2E app first.
 
 | Script | What it does |
 |---|---|
 | `npm run run:metro -- --app <line>` | Starts Metro and runs a debug build with live reload. Use it while working on the app's screens |
 | `npm run run:release -- --app <line>` | Builds a release APK, installs it and opens the app. This is the build the tests use |
-| `npm run maestro:release -- --app <line>` | Does `run:release`, then runs the Maestro tests. Results go to `results/rn-<line>/maestro` |
+| `npm run maestro:release -- --app <line>` | Does `run:release`, then runs the Maestro tests. Results go to `results/<platform>/rn-<line>/maestro` |
 | `npm run uninstall` | Removes the installed E2E app from the device |
+
+Add `--platform android` or `--platform ios` to any of them, for example
+`npm run maestro:release -- --app 0.79 --platform ios`. Without it, the script asks
+`Platform (android/ios):` in the terminal.
 
 **When to use them.** After `integrate-sdk`. Use `maestro:release` to test an SDK release on one
 React Native line, `run:release` to check an app by hand, and `run:metro` while changing the
@@ -169,16 +182,49 @@ template screens.
 
 Connect one emulator or device before running them. With more than one connected, set
 `ANDROID_SERIAL=<serial>`. See [CONTRIBUTING.md](CONTRIBUTING.md) for what happens in each case.
+`adb devices` lists the serials in its first column; only rows with the state `device` can be used:
 
-Each check (integrate, SDK install, build, install, launch, Maestro) is saved to
-`results/summary.json`. In CI, `scripts/ci.sh` runs every app and shows the table on the run's
-Summary page.
+```bash
+adb devices                    # emulator-5554   device
+ANDROID_SERIAL=emulator-5554 npm run maestro:release -- --app 0.79
+```
+
+Each check (integrate, SDK install, Pods on iOS, build, install, launch, Maestro) is saved to
+`results/<platform>/summary.json`. `scripts/ci.sh` runs every app (set `PLATFORM=ios` for iOS) and,
+in CI, shows the table on the run's Summary page.
+
+## iOS
+
+Needs a Mac with Xcode, Ruby with Bundler (for CocoaPods) and Maestro. Boot one simulator first:
+
+```bash
+xcrun simctl boot "iPhone 17" && open -a Simulator
+npm run integrate-sdk -- qa --app 0.79
+npm run maestro:release -- --app 0.79 --platform ios
+PLATFORM=ios SDK_VERSION=qa ./scripts/ci.sh          # every app, like CI
+```
+
+With more than one simulator booted, set `IOS_SIMULATOR_UDID=<udid>`. The UDID is the value in
+brackets in `xcrun simctl list devices booted` (`xcrun simctl list devices` shows every simulator,
+booted or not):
+
+```bash
+xcrun simctl list devices booted   # iPhone 17 (97103CB5-8FAC-4B18-84DA-B0C2F8783AE1) (Booted)
+IOS_SIMULATOR_UDID=97103CB5-8FAC-4B18-84DA-B0C2F8783AE1 npm run maestro:release -- --app 0.79 --platform ios
+```
+
+Before building, the run
+installs the app's CocoaPods (`bundle install`, then `bundle exec pod install` in `ios/`),
+recorded as the **Pods** check. The release build runs
+`xcodebuild` for the simulator without code signing and passes `ADGEIST_E2E_APP_ID` and
+`ADGEIST_E2E_BUNDLE_ID` as build settings, so `.env` stays the single source of these values. A
+launch crash report is copied to `results/ios/rn-<line>/crash.log`.
 
 The Maestro tests can also be run on their own against an installed app; see
 [maestro/README.md](maestro/README.md).
 
 ## Scope
 
-- Android only, against the QA backend.
+- Android and iOS (simulator), against the QA backend. CI runs Android only for now.
 - The checks confirm that the SDK reports an ad as rendered and a click as handled. They do not
   verify that impressions or clicks were recorded by the backend.

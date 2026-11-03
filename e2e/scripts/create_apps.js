@@ -1,18 +1,19 @@
 #!/usr/bin/env node
 
 // Creates one React Native app per line in matrix.json (apps/rn-<line>) at that line's version,
-// and patches its Android build so the package name and AdGeist app ID come from .env.
+// and patches its Android build so the package name and AdGeist app ID come from .env, and its iOS
+// project so the bundle ID and AdGeist app ID come from build settings, plus the SDK's minimum iOS version.
 // Run with: npm run create-apps -- [--app 0.77 ...] [--replace] [--prune]
 
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const android = require('./utils/android');
+const ios = require('./utils/ios');
 
 const root = path.join(__dirname, '..');
 const matrixPath = path.join(root, 'matrix.json');
 const APP_NAME = 'AdgeistE2E';
-const NAMESPACE = 'ai.adgeist.e2e';
-const APP_ID_META_DATA = 'com.adgeistkit.ads.ADGEIST_APP_ID';
 
 const USAGE = `Usage:
   node scripts/create_apps.js [--app <x.y> ...] [--replace] [--prune]
@@ -21,40 +22,6 @@ Creates apps/rn-<line> for each line in matrix.json, using that line's React Nat
 Without --app, every line. An existing app is skipped if it is complete and on that version;
 otherwise it is recreated. --replace recreates every selected app. --prune also deletes
 apps/rn-* folders whose line is no longer in matrix.json.`;
-
-// Added to android/app/build.gradle: reads a value from the environment, or else from .env.
-const GRADLE_ENV = `def e2eDotEnv = { ->
-    def values = [:]
-    def file = rootProject.file("../../../.env")
-    if (file.exists()) {
-        file.eachLine { line ->
-            def trimmed = line.trim()
-            if (!trimmed || trimmed.startsWith("#")) {
-                return
-            }
-            def match = (trimmed =~ /^(?:export\\s+)?([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*(.*)$/)
-            if (match.matches()) {
-                values[match.group(1)] = match.group(2).replaceAll(/^(['"])(.*)\\1$/, '$2')
-            }
-        }
-    }
-    return values
-}()
-
-def e2eValue = { String variable ->
-    def value = System.getenv(variable) ?: e2eDotEnv[variable]
-    if (!value) {
-        throw new GradleException("\${variable} is not set. Add it to .env, or export it.")
-    }
-    return value
-}
-`;
-
-// Appended to android/app/build.gradle: re-bundles the JS when .env changes.
-const GRADLE_BUNDLE_INPUTS = `tasks.matching { it.name.startsWith("createBundle") && it.name.endsWith("JsAndAssets") }.configureEach { task ->
-    task.inputs.file(rootProject.file("../../../.env")).optional(true)
-}
-`;
 
 function fail(message) {
   console.error(`❌ ${message}`);
@@ -88,56 +55,27 @@ function selectedLines(requested) {
   return requested.map((line) => lines.find((entry) => entry.line === line) ?? fail(`${line} is not in matrix.json`));
 }
 
-function patchBuildGradle(appDir) {
-  const file = path.join(appDir, 'android/app/build.gradle');
-  const patched = fs
-    .readFileSync(file, 'utf8')
-    .replace(/^android\s*\{/m, (block) => `${GRADLE_ENV}\n${block}`)
-    .replace(
-      /^([ \t]*)applicationId\b.*$/m,
-      (_, indent) =>
-        `${indent}applicationId e2eValue("ADGEIST_E2E_PACKAGE_NAME")\n` +
-        `${indent}manifestPlaceholders = [adgeistAppId: e2eValue("ADGEIST_E2E_APP_ID")]`
-    )
-    .replace(/^react\s*\{/m, (block) => `${block}\n    extraPackagerArgs = ["--reset-cache"]`);
+const PATCHES = [...android.patches, ...ios.patches];
 
-  const expected = ['def e2eValue', 'applicationId e2eValue', 'extraPackagerArgs = ["--reset-cache"]'];
-  if (!expected.every((text) => patched.includes(text))) {
-    throw new Error(`${file} does not have the layout this script expects`);
-  }
-  fs.writeFileSync(file, `${patched.trimEnd()}\n\n${GRADLE_BUNDLE_INPUTS}`, 'utf8');
+function readAppFile(appDir, file) {
+  const fullPath = path.join(root, appDir, file);
+  return fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf8') : '';
 }
 
-// Adds the manifest entry the native SDK reads its app ID from.
-function patchManifest(appDir) {
-  const file = path.join(appDir, 'android/app/src/main/AndroidManifest.xml');
-  const patched = fs
-    .readFileSync(file, 'utf8')
-    .replace(
-      /<application\b[^>]*>/,
-      (tag) => `${tag}\n      <meta-data\n        android:name="${APP_ID_META_DATA}"\n        android:value="\${adgeistAppId}" />`
-    );
-  if (!patched.includes(APP_ID_META_DATA)) {
-    throw new Error(`${file}: <application> tag not found`);
-  }
-  fs.writeFileSync(file, patched, 'utf8');
-}
-
-// True if the app exists, is on the matrix version and has both patches.
-function isUpToDate({ version, appDir }) {
-  const read = (file) => {
-    const fullPath = path.join(root, appDir, file);
-    return fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf8') : '';
-  };
+function isOnVersion({ version, appDir }) {
   try {
-    return (
-      JSON.parse(read('package.json')).dependencies['react-native'] === version &&
-      read('android/app/build.gradle').includes('def e2eValue') &&
-      read('android/app/src/main/AndroidManifest.xml').includes(APP_ID_META_DATA)
-    );
+    return JSON.parse(readAppFile(appDir, 'package.json')).dependencies['react-native'] === version;
   } catch {
     return false;
   }
+}
+
+function missingPatches({ appDir }) {
+  return PATCHES.filter(({ file, marker }) => !readAppFile(appDir, file).includes(marker));
+}
+
+function isUpToDate(entry) {
+  return isOnVersion(entry) && missingPatches(entry).length === 0;
 }
 
 function createApp({ line, version, appDir }) {
@@ -155,7 +93,7 @@ function createApp({ line, version, appDir }) {
       '--directory',
       path.join(root, appDir),
       '--package-name',
-      NAMESPACE,
+      android.NAMESPACE,
       '--title',
       `${APP_NAME} ${line}`,
       '--pm',
@@ -167,8 +105,9 @@ function createApp({ line, version, appDir }) {
     ],
     { cwd: root, stdio: 'inherit' }
   );
-  patchBuildGradle(path.join(root, appDir));
-  patchManifest(path.join(root, appDir));
+  for (const patch of PATCHES) {
+    patch.apply(path.join(root, appDir));
+  }
 }
 
 // Deletes app folders whose line was dropped from matrix.json.
@@ -195,6 +134,18 @@ function main() {
     if (fs.existsSync(appDir)) {
       if (!args.replace && isUpToDate(entry)) {
         console.log(`⏭️  ${entry.appDir} is up to date (React Native ${entry.version}), skipped`);
+        continue;
+      }
+      if (!args.replace && isOnVersion(entry)) {
+        try {
+          for (const patch of missingPatches(entry)) {
+            patch.apply(appDir);
+            console.log(`🩹 ${entry.appDir}: patched ${patch.file}`);
+          }
+        } catch (error) {
+          console.error(`❌ ${entry.appDir}: ${error.message}`);
+          failures.push(entry.appDir);
+        }
         continue;
       }
       if (!args.replace) {
