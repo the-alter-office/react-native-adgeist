@@ -117,10 +117,13 @@ On the Expo managed workflow, set it in `app.json` or `app.config.js` instead, t
 }
 ```
 
-Then ask before your first ad loads. The SDK reads the tracking status once per launch, so an answer given after the first ad loads only takes effect on the next launch.
+Then call `requestTrackingAuthorization()` while your app is active, and before your first ad loads. Timing is up to your app: the SDK doesn't wait or retry. iOS only shows the prompt while the app is active, so call it once your first screen is on display, not during launch. A call made while the app isn't active resolves `false` without showing the prompt. The SDK reads the tracking status once per launch, so an answer given after the first ad loads only takes effect on the next launch.
+
+This example waits for `AppState` to report `'active'` before asking:
 
 ```tsx
 import { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 import {
   AdgeistProvider,
   requestTrackingAuthorization,
@@ -130,9 +133,24 @@ export default function App() {
   const [askedForTracking, setAskedForTracking] = useState(false);
 
   useEffect(() => {
-    requestTrackingAuthorization()
-      .then((authorized) => console.log('Tracking authorized:', authorized))
-      .finally(() => setAskedForTracking(true));
+    const ask = () => {
+      requestTrackingAuthorization()
+        .then((authorized) => console.log('Tracking authorized:', authorized))
+        .finally(() => setAskedForTracking(true));
+    };
+
+    if (AppState.currentState === 'active') {
+      ask();
+      return;
+    }
+
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        subscription.remove();
+        ask();
+      }
+    });
+    return () => subscription.remove();
   }, []);
 
   if (!askedForTracking) {
@@ -143,7 +161,7 @@ export default function App() {
 }
 ```
 
-It resolves `true` when the user allowed tracking, and `false` otherwise: the user declined, tracking is restricted on the device (for example by parental controls or a management profile), or the prompt couldn't be shown. iOS shows the prompt once per install, and only while the app is active. Once the user has answered, the call resolves straight away with that answer, and only the user can change it, in Settings. If the app isn't active yet when you call it (for example during launch), the call waits until it is and then shows the prompt.
+It resolves `true` when the user allowed tracking, and `false` otherwise: the user declined, tracking is restricted on the device (for example by parental controls or a management profile), or the prompt couldn't be shown because the app wasn't active. iOS shows the prompt once per install. Once the user has answered, the call resolves straight away with that answer, and only the user can change it, in Settings.
 
 On Android it resolves `false` and shows nothing, so you can call it on both platforms without checking `Platform.OS`.
 
