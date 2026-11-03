@@ -94,7 +94,7 @@ export default function App() {
 
 ## iOS App Tracking Transparency
 
-On iOS 14.5 and later, Apple requires your app to ask the user's permission through App Tracking Transparency (ATT) before it tracks them across apps or reads the advertising identifier (IDFA). The SDK exposes the system prompt as `requestTrackingAuthorization()`, and the current answer as `getTrackingAuthorizationStatus()`.
+On iOS 14.5 and later, Apple requires your app to ask the user's permission through App Tracking Transparency (ATT) before it tracks them across apps or reads the advertising identifier (IDFA). Ads serve without it, but authorization improves targeting. `requestTrackingAuthorization()` shows the system prompt and resolves `true` when tracking is authorized.
 
 First add an `NSUserTrackingUsageDescription` key to `Info.plist`. Its value is the sentence iOS shows in the prompt, so tell users what they get in return. Without it, iOS terminates the app the moment the prompt is requested.
 
@@ -117,7 +117,7 @@ On the Expo managed workflow, set it in `app.json` or `app.config.js` instead, t
 }
 ```
 
-Then ask once your first screen is on display, before ads load. iOS shows the prompt only while the app is active; if you call it any earlier, the SDK waits until the app becomes active and shows it then.
+Then ask before your first ad loads. The SDK reads the tracking status once per launch, so an answer given after the first ad loads only takes effect on the next launch.
 
 ```tsx
 import { useEffect, useState } from 'react';
@@ -131,7 +131,7 @@ export default function App() {
 
   useEffect(() => {
     requestTrackingAuthorization()
-      .then((status) => console.log('Tracking authorization:', status))
+      .then((authorized) => console.log('Tracking authorized:', authorized))
       .finally(() => setAskedForTracking(true));
   }, []);
 
@@ -143,17 +143,11 @@ export default function App() {
 }
 ```
 
-Both functions resolve with a `TrackingAuthorizationStatus`:
+It resolves `true` when the user allowed tracking, and `false` otherwise: the user declined, tracking is restricted on the device (for example by parental controls or a management profile), or the prompt couldn't be shown. iOS shows the prompt once per install, and only while the app is active. Once the user has answered, the call resolves straight away with that answer, and only the user can change it, in Settings. If the app isn't active yet when you call it (for example during launch), the call waits until it is and then shows the prompt.
 
-| Status | Meaning |
-|---|---|
-| `'authorized'` | The user allowed tracking. |
-| `'denied'` | The user declined, or turned tracking off in Settings. |
-| `'restricted'` | Tracking is blocked on this device, for example by parental controls or a device management profile. The prompt is not shown. |
-| `'not-determined'` | The user hasn't been asked yet. Only `getTrackingAuthorizationStatus()` returns this. |
-| `'unavailable'` | ATT does not apply: on Android, or any platform other than iOS. |
+On Android it resolves `false` and shows nothing, so you can call it on both platforms without checking `Platform.OS`.
 
-iOS shows the prompt once per install. After the user answers, `requestTrackingAuthorization()` resolves straight away with the stored answer, and only the user can change it, in Settings. Use `getTrackingAuthorizationStatus()` to read the answer without prompting. On Android both functions resolve `'unavailable'` and show nothing, so you can call them unconditionally. The SDK requires iOS 15.6 or later, so ATT is always available on a supported iPhone.
+To check the current answer without prompting, use `getConsentStatus()`. On iOS it resolves `'ACCEPTED'` when tracking is authorized and `'DENIED'` otherwise, including when the user hasn't been asked yet. On Android it reports the SDK's own consent flag, set with `updateConsentStatus()`, and has nothing to do with ATT.
 
 ## Show an ad
 

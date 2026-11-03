@@ -45,16 +45,10 @@ import React
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        AdgeistCore.shared.requestTrackingAuthorization { status in
-            resolver(status)
+        Task {
+            let granted = await AdgeistCore.shared.requestAdTrackingAutorisation()
+            resolver(granted)
         }
-    }
-
-    @objc public func getTrackingAuthorizationStatus(
-        resolver: @escaping RCTPromiseResolveBlock,
-        rejecter: @escaping RCTPromiseRejectBlock
-    ) {
-        resolver(AdgeistCore.shared.trackingAuthorizationStatus())
     }
 
     @objc public func logEvent(eventDict: [String: Any]) {}

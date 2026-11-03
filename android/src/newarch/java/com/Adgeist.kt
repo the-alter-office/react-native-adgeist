@@ -76,8 +76,4 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     override fun requestTrackingAuthorization(promise: Promise) {
         implementation.requestTrackingAuthorization(promise)
     }
-
-    override fun getTrackingAuthorizationStatus(promise: Promise) {
-        implementation.getTrackingAuthorizationStatus(promise)
-    }
 }

@@ -32,9 +32,7 @@ export interface Spec extends TurboModule {
 
   updateConsentStatus(consent: boolean): void;
 
-  requestTrackingAuthorization(): Promise<string>;
-
-  getTrackingAuthorizationStatus(): Promise<string>;
+  requestTrackingAuthorization(): Promise<boolean>;
 
   trackImpression(
     campaignId: string,

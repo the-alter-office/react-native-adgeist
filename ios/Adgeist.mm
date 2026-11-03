@@ -74,12 +74,6 @@ RCT_EXPORT_METHOD(requestTrackingAuthorization:(RCTPromiseResolveBlock)resolve
                                              rejecter:reject];
 }
 
-RCT_EXPORT_METHOD(getTrackingAuthorizationStatus:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject) {
-    [adgeist getTrackingAuthorizationStatusWithResolver:resolve
-                                               rejecter:reject];
-}
-
 RCT_EXPORT_METHOD(logEvent:(NSDictionary *)eventDict) {
     [adgeist logEventWithEventDict:eventDict];
 }
