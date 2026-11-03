@@ -92,6 +92,69 @@ export default function App() {
 }
 ```
 
+## iOS App Tracking Transparency
+
+On iOS 14.5 and later, Apple requires your app to ask the user's permission through App Tracking Transparency (ATT) before it tracks them across apps or reads the advertising identifier (IDFA). The SDK exposes the system prompt as `requestTrackingAuthorization()`, and the current answer as `getTrackingAuthorizationStatus()`.
+
+First add an `NSUserTrackingUsageDescription` key to `Info.plist`. Its value is the sentence iOS shows in the prompt, so tell users what they get in return. Without it, iOS terminates the app the moment the prompt is requested.
+
+```xml
+<key>NSUserTrackingUsageDescription</key>
+<string>We use your data to show you more relevant ads.</string>
+```
+
+On the Expo managed workflow, set it in `app.json` or `app.config.js` instead, then run `npx expo prebuild`:
+
+```json
+{
+  "expo": {
+    "ios": {
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "We use your data to show you more relevant ads."
+      }
+    }
+  }
+}
+```
+
+Then ask once your first screen is on display, before ads load. iOS shows the prompt only while the app is active; if you call it any earlier, the SDK waits until the app becomes active and shows it then.
+
+```tsx
+import { useEffect, useState } from 'react';
+import {
+  AdgeistProvider,
+  requestTrackingAuthorization,
+} from '@thealteroffice/react-native-adgeist';
+
+export default function App() {
+  const [askedForTracking, setAskedForTracking] = useState(false);
+
+  useEffect(() => {
+    requestTrackingAuthorization()
+      .then((status) => console.log('Tracking authorization:', status))
+      .finally(() => setAskedForTracking(true));
+  }, []);
+
+  if (!askedForTracking) {
+    return null;
+  }
+
+  return <AdgeistProvider>{/* Your app content */}</AdgeistProvider>;
+}
+```
+
+Both functions resolve with a `TrackingAuthorizationStatus`:
+
+| Status | Meaning |
+|---|---|
+| `'authorized'` | The user allowed tracking. |
+| `'denied'` | The user declined, or turned tracking off in Settings. |
+| `'restricted'` | Tracking is blocked on this device, for example by parental controls or a device management profile. The prompt is not shown. |
+| `'not-determined'` | The user hasn't been asked yet. Only `getTrackingAuthorizationStatus()` returns this. |
+| `'unavailable'` | ATT does not apply: on Android, or any platform other than iOS. |
+
+iOS shows the prompt once per install. After the user answers, `requestTrackingAuthorization()` resolves straight away with the stored answer, and only the user can change it, in Settings. Use `getTrackingAuthorizationStatus()` to read the answer without prompting. On Android both functions resolve `'unavailable'` and show nothing, so you can call them unconditionally. The SDK requires iOS 15.6 or later, so ATT is always available on a supported iPhone.
+
 ## Show an ad
 
 `HTML5AdView` loads itself when it mounts. An adspace is either fixed-size or responsive, depending on what you chose while creating it on [adgeist.ai](https://adgeist.ai) — use the snippet that matches yours. Each one is complete; copy it into your screen and the ad placement is done.

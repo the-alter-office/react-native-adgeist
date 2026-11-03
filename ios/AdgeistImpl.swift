@@ -2,8 +2,11 @@ import Foundation
 import AdgeistKit
 import AppTrackingTransparency
 import React
+import UIKit
 
 @objc public class AdgeistImpl: NSObject {
+
+    private var pendingTrackingResolvers: [RCTPromiseResolveBlock] = []
 
     @objc public func initializeSdk(
         customBidRequestBackendDomain: String?,
@@ -40,6 +43,67 @@ import React
     }
 
     @objc public func updateConsentStatus(_ consent: Bool) {}
+
+    @objc public func requestTrackingAuthorization(
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        DispatchQueue.main.async {
+            if UIApplication.shared.applicationState == .active {
+                AdgeistImpl.presentTrackingAuthorizationRequest(resolvers: [resolver])
+                return
+            }
+            self.pendingTrackingResolvers.append(resolver)
+            if self.pendingTrackingResolvers.count == 1 {
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(self.applicationDidBecomeActiveForTracking),
+                    name: UIApplication.didBecomeActiveNotification,
+                    object: nil
+                )
+            }
+        }
+    }
+
+    @objc public func getTrackingAuthorizationStatus(
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        resolver(AdgeistImpl.trackingAuthorizationStatusString(ATTrackingManager.trackingAuthorizationStatus))
+    }
+
+    @objc private func applicationDidBecomeActiveForTracking() {
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+        let resolvers = pendingTrackingResolvers
+        pendingTrackingResolvers.removeAll()
+        AdgeistImpl.presentTrackingAuthorizationRequest(resolvers: resolvers)
+    }
+
+    private static func presentTrackingAuthorizationRequest(resolvers: [RCTPromiseResolveBlock]) {
+        ATTrackingManager.requestTrackingAuthorization { status in
+            let value = AdgeistImpl.trackingAuthorizationStatusString(status)
+            resolvers.forEach { $0(value) }
+        }
+    }
+
+    private static func trackingAuthorizationStatusString(_ status: ATTrackingManager.AuthorizationStatus) -> String {
+        switch status {
+        case .authorized:
+            return "authorized"
+        case .denied:
+            return "denied"
+        case .restricted:
+            return "restricted"
+        case .notDetermined:
+            return "not-determined"
+        @unknown default:
+            return "unavailable"
+        }
+    }
 
     @objc public func logEvent(eventDict: [String: Any]) {}
 

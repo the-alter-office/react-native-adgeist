@@ -68,6 +68,18 @@ RCT_EXPORT_METHOD(updateConsentStatus:(BOOL)consent) {
     [adgeist updateConsentStatus:consent];
 }
 
+RCT_EXPORT_METHOD(requestTrackingAuthorization:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+    [adgeist requestTrackingAuthorizationWithResolver:resolve
+                                             rejecter:reject];
+}
+
+RCT_EXPORT_METHOD(getTrackingAuthorizationStatus:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+    [adgeist getTrackingAuthorizationStatusWithResolver:resolve
+                                               rejecter:reject];
+}
+
 RCT_EXPORT_METHOD(logEvent:(NSDictionary *)eventDict) {
     [adgeist logEventWithEventDict:eventDict];
 }

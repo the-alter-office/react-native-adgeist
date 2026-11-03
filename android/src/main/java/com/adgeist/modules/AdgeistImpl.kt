@@ -113,8 +113,17 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
     adgeistInstance?.updateConsentStatus(consent)
   }
 
+  fun requestTrackingAuthorization(promise: Promise) {
+    promise.resolve(TRACKING_STATUS_UNAVAILABLE)
+  }
+
+  fun getTrackingAuthorizationStatus(promise: Promise) {
+    promise.resolve(TRACKING_STATUS_UNAVAILABLE)
+  }
+
   companion object {
     const val NAME = "Adgeist"
+    const val TRACKING_STATUS_UNAVAILABLE = "unavailable"
   }
 }
 

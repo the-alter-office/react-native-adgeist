@@ -20,3 +20,5 @@ export type {
 } from './types/AdPreviewProps';
 
 export * from './cdpclient/index';
+
+export * from './tracking/index';
