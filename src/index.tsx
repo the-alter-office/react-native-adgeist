@@ -20,3 +20,21 @@ export type {
 } from './types/AdPreviewProps';
 
 export * from './cdpclient/index';
+
+export * from './remoteconfig/index';
+
+export type {
+  AdgeistAdServerEndpoints,
+  AdgeistAdSizeLimits,
+  AdgeistAdSizes,
+  AdgeistFeatureFlags,
+  AdgeistIdentifierEndpoints,
+  AdgeistPlatformFeatureFlags,
+  AdgeistRemoteConfig,
+  AdgeistRemoteConfigEndpoints,
+  AdgeistSdkVersionPair,
+  AdgeistSdkVersions,
+  AdgeistTelemetryEndpoints,
+  AdgeistTrackingConfig,
+  AdgeistWebSdkVersions,
+} from './types/AdgeistRemoteConfig';

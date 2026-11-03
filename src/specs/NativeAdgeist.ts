@@ -32,6 +32,10 @@ export interface Spec extends TurboModule {
 
   updateConsentStatus(consent: boolean): void;
 
+  getRemoteConfig(): Promise<string | null>;
+
+  fetchRemoteConfig(): Promise<string | null>;
+
   trackImpression(
     campaignId: string,
     adSpaceId: string,

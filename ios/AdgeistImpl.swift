@@ -41,6 +41,16 @@ import React
 
     @objc public func updateConsentStatus(_ consent: Bool) {}
 
+    @objc public func getRemoteConfig(resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
+        resolver(AdgeistCore.shared.remoteConfig?.rawJson)
+    }
+
+    @objc public func fetchRemoteConfig(resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
+        AdgeistCore.shared.fetchRemoteConfig { config in
+            resolver(config?.rawJson)
+        }
+    }
+
     @objc public func logEvent(eventDict: [String: Any]) {}
 
     @objc public func trackImpression(

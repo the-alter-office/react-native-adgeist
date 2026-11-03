@@ -6,7 +6,7 @@ export default function TestScreen() {
     <ScrollView
       style={styles.container}
       horizontal={false}
-      contentContainerStyle={{ padding: 16, gap: 16 }}
+      contentContainerStyle={styles.content}
     >
       <HTML5AdView
         adUnitID="6abbad621979b59913a3c141"
@@ -33,6 +33,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
+  },
+  content: {
+    padding: 16,
+    gap: 16,
   },
   title: {
     color: 'white',

@@ -5,10 +5,7 @@ import type { RootStackParamList } from '../App';
 type Props = NativeStackScreenProps<RootStackParamList, 'Scenarios'>;
 
 type ScenarioRoute =
-  | 'VerticalRail'
-  | 'BottomBanner'
-  | 'FixedBox'
-  | 'ScrollList';
+  'VerticalRail' | 'BottomBanner' | 'FixedBox' | 'ScrollList';
 
 const SCENARIOS: {
   route: ScenarioRoute;
