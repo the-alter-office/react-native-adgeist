@@ -86,4 +86,14 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     fun updateConsentStatus(consent: Boolean) {
         implementation.updateConsentStatus(consent)
     }
+
+    @ReactMethod
+    fun getRemoteConfig(promise: Promise) {
+        implementation.getRemoteConfig(promise)
+    }
+
+    @ReactMethod
+    fun fetchRemoteConfig(promise: Promise) {
+        implementation.fetchRemoteConfig(promise)
+    }
 }

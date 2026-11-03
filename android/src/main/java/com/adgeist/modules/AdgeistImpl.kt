@@ -113,6 +113,20 @@ class AdgeistImpl internal constructor(private val context: ReactApplicationCont
     adgeistInstance?.updateConsentStatus(consent)
   }
 
+  fun getRemoteConfig(promise: Promise) {
+    try {
+      promise.resolve(adgeistInstance?.getRemoteConfig()?.rawJson)
+    } catch (e: Exception) {
+      promise.reject("REMOTE_CONFIG_ERROR", "Failed to get remote config", e)
+    }
+  }
+
+  fun fetchRemoteConfig(promise: Promise) {
+    adgeistInstance?.fetchRemoteConfig { config ->
+      promise.resolve(config?.rawJson)
+    } ?: promise.resolve(null)
+  }
+
   companion object {
     const val NAME = "Adgeist"
   }
