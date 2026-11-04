@@ -117,6 +117,35 @@ yarn fetch-adgeistkit
 
 Since the project relies on Yarn workspaces, you cannot use npm for development. `yarn fetch-adgeistkit` is required before the first `pod install`, because the podspec fails without `AdgeistKit.xcframework`.
 
+## Testing unreleased native SDKs
+
+To run the example app against a native SDK branch that has no release yet, build it locally. Assumes `native-android-adgeist` and `native-ios-adgeist` are cloned next to this repo.
+
+**Android:** publish to Maven Local under a version no remote repository has, then pin it. The example app already resolves `mavenLocal()` first.
+
+```sh
+cd ../native-android-adgeist
+./gradlew :adgeistkit:publishToMavenLocal -PpublishVariant=betaRelease -PVERSION_NAME=1.1.39-local
+cd ../react-native-adgeist
+# set "adgeistKit.android.version" in package.json to "1.1.39-local"
+yarn example android
+```
+
+**iOS:** build the xcframework, then put it over the fetched one. `yarn fetch-adgeistkit` and `yarn prepare` leave it in place while the checksum stamp in `ios/Frameworks` still matches the pin.
+
+```sh
+cd ../native-ios-adgeist
+ADGEIST_CHANNEL=beta ./build_framework.sh
+cd ../react-native-adgeist
+yarn fetch-adgeistkit
+rm -rf ios/Frameworks/AdgeistKit.xcframework
+cp -R ../native-ios-adgeist/output/AdgeistKit.xcframework ios/Frameworks/
+cd example/ios && pod install && cd ../..
+yarn example ios
+```
+
+Don't commit the local Android pin. To go back to the pinned iOS binary, run `rm -rf ios/Frameworks && yarn fetch-adgeistkit`.
+
 The [example app](/example/) demonstrates usage of the library. You need to run it to test any changes you make.
 
 It is configured to use the built library from `lib/`, so after changing the library's JavaScript or TypeScript code, run `yarn prepare` to rebuild it before the example app picks up the change. Native code changes require a rebuild of the example app.
