@@ -1,21 +1,16 @@
 package com.adgeist.components
 
 import android.util.Log
-import androidx.annotation.RequiresPermission
 import com.adgeist.utils.WrapperEventCode
 import com.adgeist.utils.buildAdEvent
-import com.adgeistkit.ads.AdListener
-import com.adgeistkit.ads.AdSize
-import com.adgeistkit.ads.AdView
-import com.adgeistkit.ads.AdgeistEvent
-import com.adgeistkit.request.AdRequest
+import com.adgeist.utils.buildAdSizeEvent
+import com.adgeist.utils.sendViewEvent
+import com.adgeistkit.embed.AdgeistEmbedderListener
 import com.adgeistkit.utilities.AdgeistEmbedderApi
-import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableMap
-import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
-import com.facebook.react.uimanager.events.RCTEventEmitter
 
+@OptIn(AdgeistEmbedderApi::class)
 object HTML5AdViewManagerImpl {
     const val NAME = "HTML5AdNativeComponent"
     private const val TAG = "HTML5AdViewManagerImpl"
@@ -23,123 +18,67 @@ object HTML5AdViewManagerImpl {
     const val AD_EVENT_LISTENER = "onAdEvent"
     const val AD_SIZE_CHANGED_LISTENER = "onAdSizeChanged"
 
-    private val viewContextMap = mutableMapOf<Int, ThemedReactContext>()
+    fun createViewInstance(reactContext: ThemedReactContext): ReactAdView {
+        val view = ReactAdView(reactContext)
+        view.listener = object : AdgeistEmbedderListener {
+            override fun onEvent(event: Map<String, Any?>) {
+                reactContext.sendViewEvent(view, AD_EVENT_LISTENER, buildAdEvent(event))
+            }
 
-    @OptIn(AdgeistEmbedderApi::class)
-    fun createViewInstance(reactContext: ThemedReactContext): AdView {
-        Log.d(TAG, "Creating AdView with ThemedReactContext: ${reactContext.hashCode()}")
-        val adView = ReactAdView(reactContext)
-        // react-native-screens destroys/recreates the host fragment whenever a
-        // screen is covered, so fragment onDestroy is not a teardown signal
-        // here; RN drives teardown via onDropViewInstance instead
-        adView.watchFragmentLifecycle = false
-        adView.isFrameworkHosted = true
-        adView.setAdListener(createAdListener(adView))
-        viewContextMap[System.identityHashCode(adView)] = reactContext
-        Log.d(TAG, "AdView created with hash: ${System.identityHashCode(adView)} and context hash: ${reactContext.hashCode()}")
-        return adView
+            override fun onSizeResolved(widthDp: Int, heightDp: Int) {
+                reactContext.sendViewEvent(view, AD_SIZE_CHANGED_LISTENER, buildAdSizeEvent(widthDp, heightDp))
+            }
+        }
+        return view
     }
 
-    fun setAdUnitID(view: AdView, adUnitID: String?) {
+    fun setAdUnitID(view: ReactAdView, adUnitID: String?) {
         if (adUnitID != null) {
-            view.adUnitId = adUnitID
+            view.adUnitID = adUnitID
         }
     }
 
-    fun setAdIsResponsive(view: AdView, adIsResponsive: Boolean) {
+    fun setAdIsResponsive(view: ReactAdView, adIsResponsive: Boolean) {
         view.adIsResponsive = adIsResponsive
     }
 
-    fun setAdSize(view: AdView, adSizeMap: ReadableMap?) {
+    fun setAdSize(view: ReactAdView, adSizeMap: ReadableMap?) {
         if (adSizeMap == null) return
 
         try {
-            val width = adSizeMap.getDimension("width")
-            val height = adSizeMap.getDimension("height")
-
-            val adSize = when {
-                width > 0 && height > 0 -> AdSize(width, height)
-                width > 0 -> AdSize.width(width)
-                height > 0 -> AdSize.height(height)
-                else -> return
-            }
-
-            view.setAdDimension(adSize)
+            view.setAdSize(adSizeMap.getDimension("width"), adSizeMap.getDimension("height"))
         } catch (e: Exception) {
             Log.e(TAG, "Error setting ad size", e)
         }
     }
 
-    fun setReserveSpace(view: AdView, reserveSpace: Boolean) {
+    fun setReserveSpace(view: ReactAdView, reserveSpace: Boolean) {
         view.reserveSpace = reserveSpace
     }
 
-    @OptIn(AdgeistEmbedderApi::class)
-    private fun createAdListener(view: AdView): AdListener = object : AdListener() {
-        override fun onAdEvent(event: AdgeistEvent) {
-            val payload = buildAdEvent(
-                code = event.code.name,
-                type = event.type.name,
-                message = event.message,
-                reason = event.data?.reason
-            )
-
-            view.post {
-                sendEvent(view, AD_EVENT_LISTENER, payload)
-            }
-        }
-
-        override fun onAdSizeResolved(adSize: AdSize) {
-            val event = Arguments.createMap().apply {
-                putDouble("width", adSize.width.toDouble())
-                putDouble("height", adSize.height.toDouble())
-            }
-            sendEvent(view, AD_SIZE_CHANGED_LISTENER, event)
-        }
-    }
-
-    @RequiresPermission("android.permission.INTERNET")
-    fun loadAd(view: AdView) {
+    fun loadAd(view: ReactAdView) {
         try {
-            val adRequest = AdRequest.Builder().build()
-
-            view.loadAd(adRequest)
+            view.load()
         } catch (e: Exception) {
             val payload = buildAdEvent(
                 WrapperEventCode.RWAE1,
                 reason = listOfNotNull(e::class.java.simpleName, e.message).joinToString(": ")
             )
-
-            view.post {
-                sendEvent(view, AD_EVENT_LISTENER, payload)
-            }
+            view.reactContext.sendViewEvent(view, AD_EVENT_LISTENER, payload)
         }
     }
 
-    fun destroyAd(view: AdView) {
+    fun destroyAd(view: ReactAdView) {
         try {
-            view.destroyAd()
+            view.destroy()
         } catch (e: Exception) {
             Log.e(TAG, "Error destroying ad view", e)
-        } finally {
-            // Clean up the context reference
-            viewContextMap.remove(System.identityHashCode(view))
         }
     }
 
-    private fun sendEvent(view: AdView, eventName: String, params: WritableMap) {
-        val reactContext = viewContextMap[System.identityHashCode(view)]
-        if (reactContext != null) {
-            try {
-                reactContext
-                    .getJSModule(RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, eventName, params)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error sending event $eventName", e)
-            }
-        } else {
-            Log.w(TAG, "Unable to send event $eventName: ThemedReactContext not found or view already destroyed")
-        }
+    fun dropViewInstance(view: ReactAdView) {
+        view.listener = null
+        destroyAd(view)
     }
 
     private fun ReadableMap.getDimension(key: String): Int =
