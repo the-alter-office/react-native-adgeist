@@ -94,7 +94,7 @@ export default function App() {
 
 ## Identify the user
 
-Once you know who the user is, pass their details. The native SDK links them to an Adgeist CDP profile and sends the profile, the email and the phone as identifiers on later ad requests.
+Optional. Attach user details for targeted ads.
 
 ```tsx
 import { setUserDetails } from '@thealteroffice/react-native-adgeist';
@@ -106,9 +106,9 @@ setUserDetails({
 });
 ```
 
-- Every field is optional. Pass `email` and `phone` raw; the SDK does no hashing.
-- Each call replaces the previous details. Call it after sign-in and whenever they change.
-- It returns nothing and never waits on the network.
+Every field is optional, so pass only what you have. Phone numbers need the country code — `'+919876543210'`, not `'9876543210'`.
+
+Call it when the user signs in, and again whenever one of the details changes.
 
 ## Show an ad
 
