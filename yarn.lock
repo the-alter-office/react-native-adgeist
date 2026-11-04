@@ -4152,6 +4152,7 @@ __metadata:
     "@release-it/conventional-changelog": ^9.0.2
     "@types/jest": ^29.5.5
     "@types/react": ^19.0.0
+    "@types/react-test-renderer": ^19.0.0
     "@typescript-eslint/eslint-plugin": ^8.33.0
     commitlint: ^19.6.1
     del-cli: ^5.1.0
@@ -4165,6 +4166,7 @@ __metadata:
     react: 19.0.0
     react-native: 0.79.2
     react-native-builder-bob: ^0.40.10
+    react-test-renderer: 19.0.0
     release-it: ^17.10.0
     turbo: ^1.10.7
     typescript: ^5.2.2
@@ -4357,7 +4359,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^19.0.0":
+"@types/react-test-renderer@npm:^19.0.0":
+  version: 19.3.0
+  resolution: "@types/react-test-renderer@npm:19.3.0"
+  dependencies:
+    "@types/react": "*"
+  checksum: fbc49458dbb661d7565d60c07bca5284bac15bf88fc7fef9bb5ff0f58c4dbe87faf430443bac94b9a7a3dd2fa1e520435fe4d245928545756220b0fb76e0b080
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:*, @types/react@npm:^19.0.0":
   version: 19.3.0
   resolution: "@types/react@npm:19.3.0"
   dependencies:

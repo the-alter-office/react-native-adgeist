@@ -84,6 +84,7 @@
     "@release-it/conventional-changelog": "^9.0.2",
     "@types/jest": "^29.5.5",
     "@types/react": "^19.0.0",
+    "@types/react-test-renderer": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.33.0",
     "commitlint": "^19.6.1",
     "del-cli": "^5.1.0",
@@ -97,6 +98,7 @@
     "react": "19.0.0",
     "react-native": "0.79.2",
     "react-native-builder-bob": "^0.40.10",
+    "react-test-renderer": "19.0.0",
     "release-it": "^17.10.0",
     "turbo": "^1.10.7",
     "typescript": "^5.2.2"
