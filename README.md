@@ -94,7 +94,7 @@ export default function App() {
 
 ## Identify the user
 
-Once you know who the user is, pass their details. The native SDK links them to an Adgeist CDP profile and sends the profile, the email and the phone as identifiers on every ad request that follows.
+Once you know who the user is, pass their details. The native SDK links them to an Adgeist CDP profile and sends the profile, the email and the phone as identifiers on later ad requests.
 
 ```tsx
 import { setUserDetails } from '@thealteroffice/react-native-adgeist';
@@ -102,13 +102,13 @@ import { setUserDetails } from '@thealteroffice/react-native-adgeist';
 setUserDetails({
   userId: 'user-123',
   email: 'jane@example.com',
-  phone: '+91 98765 43210',
+  phone: '+919876543210',
 });
 ```
 
-- Every field is optional. Pass `email` and `phone` raw, as the user typed them: the SDK only trims whitespace and does no hashing. `phone` must include the `+` country code.
-- Calls merge: fields you pass override earlier values, and fields you leave out keep them. Call it after sign-in, and again on every app launch once the user is known.
-- It returns nothing and never waits on the network. Ads that load before the call go out without identifiers.
+- Every field is optional. Pass `email` and `phone` raw; the SDK does no hashing.
+- Each call replaces the previous details. Call it after sign-in and whenever they change.
+- It returns nothing and never waits on the network.
 
 ## Show an ad
 

@@ -35,12 +35,10 @@ import React
 
     @objc public func setUserDetails(_ userDetailsDict: [String: Any]) {
         AdgeistCore.shared.setUserDetails(
-            UserDetails(
-                userId: userDetailsDict["userId"] as? String,
-                userName: userDetailsDict["userName"] as? String,
-                email: userDetailsDict["email"] as? String,
-                phone: userDetailsDict["phone"] as? String
-            )
+            userId: userDetailsDict["userId"] as? String,
+            userName: userDetailsDict["userName"] as? String,
+            email: userDetailsDict["email"] as? String,
+            phone: userDetailsDict["phone"] as? String
         )
     }
 
