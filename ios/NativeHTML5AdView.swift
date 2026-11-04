@@ -26,7 +26,8 @@ public class NativeHTML5AdView: UIView {
     // MARK: Delegate (used to send events back to manager)
     @objc public weak var delegate: NativeHTML5AdDelegate?
 
-    private var adView: AdView?
+    private var adView: UIView?
+    private var adConfig: AdConfig?
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -46,13 +47,19 @@ public class NativeHTML5AdView: UIView {
     @objc public func triggerViewWillAppear() {}
 
     @objc public func reloadAd() {
-        cleanupAdView()
-        embedAdView()
-        setNeedsLayout()
+        guard adView != nil else { return }
+        loadAd()
     }
 
     @objc public func loadAd() {
-        reloadAd()
+        let config = currentConfig()
+        if adView == nil || config != adConfig {
+            cleanupAdView()
+            embedAdView(config)
+        }
+        if let adView = adView {
+            AdgeistEmbedder.shared.load(adView)
+        }
     }
 
     @objc public func destroy() {
@@ -60,54 +67,50 @@ public class NativeHTML5AdView: UIView {
     }
 
     private func cleanupAdView() {
-        adView?.onEvent = nil
-        adView?.removeFromSuperview()
-        adView = nil
+        guard let adView = adView else { return }
+        self.adView = nil
+        adConfig = nil
+        AdgeistEmbedder.shared.destroy(adView)
     }
 
-    private func embedAdView() {
-        guard let adUnitID = adUnitID, !adUnitID.isEmpty else {
-            emitAdEvent(code: "AW2", type: "AD_WARNING", message: "Ad unit ID is null or empty", reason: nil)
-            return
-        }
-
+    private func currentConfig() -> AdConfig {
         let dict = adSize as? [String: Any]
-        let width = adIsResponsive ? nil : dimension(dict?["width"])
-        let height = dimension(dict?["height"])
+        return AdConfig(
+            adUnitID: adUnitID ?? "",
+            width: dimension(dict?["width"]),
+            height: dimension(dict?["height"]),
+            responsive: adIsResponsive,
+            reserveSpace: reserveSpace
+        )
+    }
 
-        let adView = AdView(adId: adUnitID, width: width, height: height, reserveSpace: reserveSpace)
+    private func embedAdView(_ config: AdConfig) {
+        let adView = AdgeistEmbedder.shared.makeAdView(
+            adSpaceId: config.adUnitID,
+            width: config.width,
+            height: config.height,
+            responsive: config.responsive,
+            reserveSpace: config.reserveSpace,
+            onEvent: { [weak self] event in
+                self?.emitAdEvent(event)
+            },
+            onSizeResolved: { [weak self] size in
+                self?.emitAdSize(size)
+            }
+        )
         adView.frame = bounds
         adView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        adView.onEvent = { [weak self, weak adView] event in
-            DispatchQueue.main.async {
-                guard let self = self, let adView = adView, adView === self.adView else { return }
-                self.handle(event, from: adView)
-            }
-        }
 
         self.adView = adView
+        adConfig = config
         addSubview(adView)
-        adView.load()
     }
 
-    private func handle(_ event: AdgeistEvent, from adView: AdView) {
-        emitAdEvent(
-            code: event.code,
-            type: typeName(event.type),
-            message: event.message,
-            reason: event.data?["reason"]
-        )
-
-        guard event.type == .adLoaded else { return }
-
-        let size = adView.intrinsicContentSize
-        if size.width > 0 && size.height > 0 {
-            onAdSizeChanged?(["width": Double(size.width), "height": Double(size.height)])
-            delegate?.onAdSizeChanged(self, width: Double(size.width), height: Double(size.height))
-        }
-    }
-
-    private func emitAdEvent(code: String, type: String, message: String, reason: String?) {
+    private func emitAdEvent(_ event: [String: Any]) {
+        let code = event["code"] as? String ?? ""
+        let type = event["type"] as? String ?? ""
+        let message = event["message"] as? String ?? ""
+        let reason = (event["data"] as? [String: Any])?["reason"] as? String
         let body: [String: Any] = [
             "code": code,
             "type": type,
@@ -119,19 +122,21 @@ public class NativeHTML5AdView: UIView {
         delegate?.onAdEvent(self, code: code, type: type, message: message, reason: reason)
     }
 
-    private func typeName(_ type: AdgeistEventType) -> String {
-        switch type {
-        case .adLoaded: return "AD_LOADED"
-        case .adClicked: return "AD_CLICKED"
-        case .adNoFill: return "AD_NO_FILL"
-        case .adNetworkError: return "AD_NETWORK_ERROR"
-        case .adWarning: return "AD_WARNING"
-        @unknown default: return type.rawValue
-        }
+    private func emitAdSize(_ size: CGSize) {
+        onAdSizeChanged?(["width": Double(size.width), "height": Double(size.height)])
+        delegate?.onAdSizeChanged(self, width: Double(size.width), height: Double(size.height))
     }
 
-    private func dimension(_ value: Any?) -> CGFloat? {
-        guard let number = value as? NSNumber, number.doubleValue > 0 else { return nil }
+    private func dimension(_ value: Any?) -> CGFloat {
+        guard let number = value as? NSNumber, number.doubleValue > 0 else { return 0 }
         return CGFloat(number.doubleValue)
     }
+}
+
+private struct AdConfig: Equatable {
+    let adUnitID: String
+    let width: CGFloat
+    let height: CGFloat
+    let responsive: Bool
+    let reserveSpace: Bool
 }
