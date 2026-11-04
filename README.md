@@ -147,13 +147,15 @@ interface AdViewEvent {
 
 Everything except the ID has a default, so pass only what you need.
 
+`loadAd()` on the ref does nothing while a load is in flight or after one succeeded. After a failed load it tries again.
+
 ## Preview
 
 Sometimes you want the layout settled before the adspace exists, or you want to check a format still renders after upgrading the SDK. `HTML5AdViewPreview` renders a sample creative through the same renderer the real ads use.
 
 No ad request goes out, no ad unit ID is involved, and your Adgeist app ID doesn't need to be set. Nothing is reported either — no impressions, no clicks, no telemetry — so your live numbers stay clean.
 
-It runs on both platforms, but `onAdEvent` is iOS only: the Android preview renders and a tap still opens the CTA, it just reports nothing back. Don't gate anything on a preview event there.
+It runs on both platforms, and `onAdEvent` reports `AL1` when the sample renders and `AI1` on each tap, on both.
 
 ```tsx
 import { HTML5AdViewPreview } from '@thealteroffice/react-native-adgeist';
@@ -285,6 +287,8 @@ When you can't tell whether it's your layout or the delivery, render the same pl
 
 Prefixes: `AL` lifecycle, `AI` interaction, `AE` error, `AW` warning. Codes starting with `RW` come from this React Native wrapper rather than the native SDK, so `RWAE1` is a wrapper ad error.
 
+A code means the same on Android and iOS. iOS sends a subset: AL1, AI1, AE1–AE4, AW2, AW3 and AW6.
+
 | Code | type | Meaning | When it occurs | Possible cause | Recommended action |
 |---|---|---|---|---|---|
 | AL1 | `AD_LOADED` | Ad loaded successfully | Creative rendered | — | — |
@@ -299,7 +303,7 @@ Prefixes: `AL` lifecycle, `AI` interaction, `AE` error, `AW` warning. Codes star
 | AW2 | `AD_WARNING` | Ad unit ID is empty | When the ad loads | `adUnitID` is empty | Pass your ad unit ID as `adUnitID` |
 | AW3 | `AD_WARNING` | Ad has no size | After the ad response | Fixed-size ad with no `adSize` | Pass `adSize`, or set `adIsResponsive={true}` |
 | AW4 | `AD_WARNING` | Responsive ad has no width or height | During layout | Neither the parent nor `adSize` gives an axis a size, so it measures `0` | Follow `data.reason`, which names the axis and the fix |
-| AW5 | `AD_WARNING` | Ad is already loading | On `loadAd()` from the ref | `loadAd()` called again before the previous load finished | Wait for the previous load's event |
+| AW5 | `AD_WARNING` | Ad is already loading | Not sent by this wrapper | `loadAd()` during a load is ignored instead | — |
 | AW6 | `AD_WARNING` | Ad request rejected | During the ad request | Request rejected by the server (HTTP 4xx) | Check `adUnitID` and your publisher ID |
 | AW7 | `AD_WARNING` | Ad size mismatch | After the ad response | Your `adSize` differs from the adspace's size; the ad was resized | Set `adSize` to the size in `data.reason` |
 | AW8 | `AD_WARNING` | Not enough space for a companion ad | While rendering the creative | Less than 320x320 available; the ad is collapsed and not tracked | Give the ad at least 320x320 |

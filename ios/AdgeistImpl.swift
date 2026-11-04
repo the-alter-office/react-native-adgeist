@@ -1,6 +1,5 @@
 import Foundation
 import AdgeistKit
-import AppTrackingTransparency
 import React
 
 @objc public class AdgeistImpl: NSObject {
@@ -13,8 +12,10 @@ import React
         resolver: @escaping RCTPromiseResolveBlock,
         rejecter: @escaping RCTPromiseRejectBlock
     ) {
-        AdgeistCore.shared.initialize()
-        resolver("SDK initialized")
+        Task { @MainActor in
+            AdgeistEmbedder.shared.initialize()
+            resolver("SDK initialized")
+        }
     }
 
     @objc public func destroySdk(
@@ -36,7 +37,9 @@ import React
     @objc public func setUserDetails(_ userDetailsDict: [String: Any]) {}
 
     @objc public func getConsentStatus(resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
-        resolver(ATTrackingManager.trackingAuthorizationStatus == .authorized)
+        Task { @MainActor in
+            resolver(AdgeistEmbedder.shared.trackingAuthorizationStatus == 3)
+        }
     }
 
     @objc public func updateConsentStatus(_ consent: Bool) {}

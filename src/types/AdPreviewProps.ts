@@ -72,9 +72,7 @@ export interface HTML5AdViewPreviewProps {
   reserveSpace?: boolean;
 
   /**
-   * Native preview events: `AD_LOADED`, `AD_CLICKED`, `AD_NO_FILL`, `AD_NETWORK_ERROR`, `AD_WARNING`.
-   *
-   * @platform ios — never called on Android, where the preview reports nothing.
+   * Same codes as `HTML5AdView`: `AL1` when the sample renders, `AI1` on each tap.
    */
   onAdEvent?: (event: NativeSyntheticEvent<AdViewEvent>) => void;
 }

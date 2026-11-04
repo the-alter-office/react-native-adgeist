@@ -66,7 +66,7 @@ export default function ScrollListScreen() {
           </Text>
 
           <View
-            style={[styles.slot, { height: 0 }, styles.slotBad]}
+            style={[styles.slot, styles.zeroHeight, styles.slotBad]}
             onLayout={measure(setSizeB)}
           >
             <HTML5AdView
@@ -86,6 +86,9 @@ export default function ScrollListScreen() {
 }
 
 const styles = StyleSheet.create({
+  zeroHeight: {
+    height: 0,
+  },
   screen: {
     // flex: 1,
     backgroundColor: 'black',

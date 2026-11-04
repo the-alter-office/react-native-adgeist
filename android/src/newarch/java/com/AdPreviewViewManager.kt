@@ -93,6 +93,6 @@ class AdPreviewViewManager : SimpleViewManager<ReactAdPreviewView>(), AdPreviewN
 
     override fun onDropViewInstance(view: ReactAdPreviewView) {
         super.onDropViewInstance(view)
-        AdPreviewViewManagerImpl.destroyAd(view)
+        AdPreviewViewManagerImpl.dropViewInstance(view)
     }
 }
