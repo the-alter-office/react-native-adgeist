@@ -58,6 +58,7 @@ jobs:
         env:
           SNIPPET_PATH: ${{ runner.temp }}/android-snapshot-repository.md
           README_PATH: ${{ runner.temp }}/README.md
+          WARNINGS_PATH: ${{ runner.temp }}/publish-warnings.txt
         run: |
           cat > "$SNIPPET_PATH" <<'EOF'
           > **Beta release:** this version uses a snapshot build of the native Android SDK. Add the Sonatype snapshot repository to your app's `android/build.gradle`, or the Android build cannot find `ai.adgeist:adgeistkit`:
@@ -71,21 +72,22 @@ jobs:
           > ```
           EOF
 
-          awk -v snippet="$SNIPPET_PATH" '
+          if awk -v snippet="$SNIPPET_PATH" '
             { print }
-            $0 == "### Android Configuration" {
+            $0 == "## Install" {
               print ""
               while ((getline line < snippet) > 0) print line
               found = 1
             }
             END { if (!found) exit 1 }
-          ' README.md > "$README_PATH" || {
-            echo "::error::'### Android Configuration' heading not found in README.md"
-            exit 1
-          }
-
-          mv "$README_PATH" README.md
-          echo "Added the Android snapshot repository instructions to README.md"
+          ' README.md > "$README_PATH"; then
+            mv "$README_PATH" README.md
+            echo "Added the Android snapshot repository instructions to README.md"
+          else
+            WARNING="'## Install' heading not found in README.md, so the Android snapshot repository note was not added. The published README tells beta users nothing about \`ai.adgeist:adgeistkit\` snapshots."
+            echo "::warning::$WARNING"
+            printf '• %s\n' "$WARNING" >> "$WARNINGS_PATH"
+          fi
 
       - name: Use stable AdgeistKit releases
         if: >-
@@ -150,6 +152,7 @@ jobs:
           PUBLISH_ENV: ${{ steps.environment.outputs.publish_env }}
           PACKAGE_VERSION: ${{ steps.version.outputs.package_version }}
           JOB_STATUS: ${{ job.status }}
+          WARNINGS_PATH: ${{ runner.temp }}/publish-warnings.txt
           WORKFLOW_URL: >-
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           ARTIFACT_URL: https://www.npmjs.com/package/@thealteroffice/react-native-adgeist
@@ -177,6 +180,13 @@ jobs:
           $COMMITS
           EOF
           )"
+
+          if [ -s "$WARNINGS_PATH" ]; then
+            MESSAGE="$MESSAGE
+
+          *⚠️ Warnings:*
+          $(cat "$WARNINGS_PATH")"
+          fi
 
           PAYLOAD="$(
             jq -n \
