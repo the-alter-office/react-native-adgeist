@@ -118,6 +118,41 @@ Every field is optional, so pass only what you have. Phone numbers need the coun
 
 Call it when the user signs in, and again whenever one of the details changes.
 
+On iOS, ask for [tracking permission](#ask-for-tracking-permission) before this call.
+
+## Ask for tracking permission
+
+iOS only, and optional. `requestTrackingAuthorization()` shows Apple's App Tracking Transparency prompt and resolves to whether the user allowed tracking. Without that permission there is no advertising identifier to target with, so ads still serve, just untargeted.
+
+```tsx
+import { requestTrackingAuthorization } from '@thealteroffice/react-native-adgeist';
+
+const granted = await requestTrackingAuthorization();
+```
+
+The prompt only appears if `NSUserTrackingUsageDescription` is in your `Info.plist`. Without the key nothing is shown and the call resolves `false`. Write the sentence yourself — it's what the user reads, and Apple reviews it.
+
+```xml
+<key>NSUserTrackingUsageDescription</key>
+<string>We use your advertising identifier to provide personalized ads and measure ad performance.</string>
+```
+
+Expo apps put the same string in `app.json` — the config plugin writes the app ID, not this.
+
+```json
+{
+  "expo": {
+    "ios": {
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "We use your advertising identifier to provide personalized ads and measure ad performance."
+      }
+    }
+  }
+}
+```
+
+iOS shows the prompt once in the lifetime of the install, so call it at a point where the ask makes sense to the user; after that the call just resolves with the answer they already gave. On Android it does nothing and resolves `false`, so you can call it unconditionally.
+
 ## Show an ad
 
 `HTML5AdView` loads itself when it mounts. An adspace is either fixed-size or responsive, depending on what you chose while creating it on [adgeist.ai](https://adgeist.ai) — use the snippet that matches yours. Each one is complete; copy it into your screen and the ad placement is done.
