@@ -48,6 +48,16 @@ import React
 
     @objc public func updateConsentStatus(_ consent: Bool) {}
 
+    @objc public func requestTrackingAuthorization(
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        Task {
+            let granted = await AdgeistCore.shared.requestAdTrackingAutorisation()
+            resolver(granted)
+        }
+    }
+
     @objc public func logEvent(eventDict: [String: Any]) {}
 
     @objc public func trackImpression(

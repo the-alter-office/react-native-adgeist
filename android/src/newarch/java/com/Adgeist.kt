@@ -72,4 +72,8 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     override fun updateConsentStatus(consent: Boolean) {
         implementation.updateConsentStatus(consent)
     }
+
+    override fun requestTrackingAuthorization(promise: Promise) {
+        implementation.requestTrackingAuthorization(promise)
+    }
 }

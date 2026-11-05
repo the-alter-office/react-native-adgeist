@@ -86,4 +86,9 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
     fun updateConsentStatus(consent: Boolean) {
         implementation.updateConsentStatus(consent)
     }
+
+    @ReactMethod
+    fun requestTrackingAuthorization(promise: Promise) {
+        implementation.requestTrackingAuthorization(promise)
+    }
 }
