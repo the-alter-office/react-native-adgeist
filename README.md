@@ -6,9 +6,17 @@
 
 React Native bindings for the Adgeist Mobile Ads SDK. One component, `HTML5AdView`, serves ads on both platforms. It works with the new and the old architecture, and with Expo through the bundled config plugin.
 
-On Android you need a minimum SDK of 23 and a compile SDK of 35.
 
 Before ads will serve you need an Adgeist publisher account with your app registered.
+
+## Prerequisites
+
+| | Minimum |
+|---|---|
+| React Native | 0.77 |
+| Expo SDK | 53 |
+| iOS | Deployment target 15.6, Xcode 16 |
+| Android | `minSdkVersion` 24, `compileSdkVersion` 35, JDK 17 |
 
 ## Install
 
