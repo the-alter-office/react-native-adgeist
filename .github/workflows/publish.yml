@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
 
       - name: Set up Node.js and dependencies
         uses: ./.github/actions/setup
@@ -160,6 +162,8 @@ jobs:
             STATUS_TEXT="Deployment Failed"
           fi
 
+          COMMITS="$(git log -5 --no-merges --pretty=format:'• %h %s (%an)')"
+
           MESSAGE="$(cat <<EOF
           *React Native Package Deployment Status*
 
@@ -168,6 +172,9 @@ jobs:
           *Branch:* $BRANCH
           *Environment:* ${PUBLISH_ENV:-unknown}
           *Version:* ${PACKAGE_VERSION:-unknown}
+
+          *Last 5 commits:*
+          $COMMITS
           EOF
           )"
 

@@ -6,9 +6,17 @@
 
 React Native bindings for the Adgeist Mobile Ads SDK. One component, `HTML5AdView`, serves ads on both platforms. It works with the new and the old architecture, and with Expo through the bundled config plugin.
 
-On Android you need a minimum SDK of 23 and a compile SDK of 35.
 
 Before ads will serve you need an Adgeist publisher account with your app registered.
+
+## Prerequisites
+
+| | Minimum |
+|---|---|
+| React Native | 0.77 |
+| Expo SDK | 53 |
+| iOS | Deployment target 15.6, Xcode 16 |
+| Android | `minSdkVersion` 24, `compileSdkVersion` 35, JDK 17 |
 
 ## Install
 
@@ -91,6 +99,59 @@ export default function App() {
   );
 }
 ```
+
+## Identify the user
+
+Optional. Attach user details for targeted ads.
+
+```tsx
+import { setUserDetails } from '@thealteroffice/react-native-adgeist';
+
+setUserDetails({
+  userId: 'user-123',
+  email: 'jane@example.com',
+  phone: '+919876543210',
+});
+```
+
+Every field is optional, so pass only what you have. Phone numbers need the country code — `'+919876543210'`, not `'9876543210'`.
+
+Call it when the user signs in, and again whenever one of the details changes.
+
+On iOS, ask for [tracking permission](#ask-for-tracking-permission) before this call.
+
+## Ask for tracking permission
+
+iOS only, and optional. `requestTrackingAuthorization()` shows Apple's App Tracking Transparency prompt and resolves to whether the user allowed tracking. Without that permission there is no advertising identifier to target with, so ads still serve, just untargeted.
+
+```tsx
+import { requestTrackingAuthorization } from '@thealteroffice/react-native-adgeist';
+
+const granted = await requestTrackingAuthorization();
+```
+
+The prompt only appears if `NSUserTrackingUsageDescription` is in your `Info.plist`. Without the key nothing is shown and the call resolves `false`. Write the sentence yourself — it's what the user reads, and Apple reviews it.
+
+```xml
+<key>NSUserTrackingUsageDescription</key>
+<string>We use your advertising identifier to provide personalized ads and measure ad performance.</string>
+```
+
+Expo apps put the same string in `app.json` — the config plugin writes the app ID, not this.
+
+```json
+{
+  "expo": {
+    "ios": {
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "We use your advertising identifier to provide personalized ads and measure ad performance."
+      }
+    }
+  }
+}
+```
+
+iOS shows the prompt once in the lifetime of the install, so call it at a point where the ask makes sense to the user; after that the call just resolves with the answer they already gave. On Android it does nothing and resolves `false`, so you can call it unconditionally.
 
 ## Show an ad
 

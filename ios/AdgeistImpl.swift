@@ -33,13 +33,30 @@ import React
         rejecter("NOT_SUPPORTED", "fetchCreative is not supported on iOS", nil)
     }
 
-    @objc public func setUserDetails(_ userDetailsDict: [String: Any]) {}
+    @objc public func setUserDetails(_ userDetailsDict: [String: Any]) {
+        AdgeistCore.shared.setUserDetails(
+            userId: userDetailsDict["userId"] as? String,
+            userName: userDetailsDict["userName"] as? String,
+            email: userDetailsDict["email"] as? String,
+            phone: userDetailsDict["phone"] as? String
+        )
+    }
 
     @objc public func getConsentStatus(resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
         resolver(ATTrackingManager.trackingAuthorizationStatus == .authorized)
     }
 
     @objc public func updateConsentStatus(_ consent: Bool) {}
+
+    @objc public func requestTrackingAuthorization(
+        resolver: @escaping RCTPromiseResolveBlock,
+        rejecter: @escaping RCTPromiseRejectBlock
+    ) {
+        Task {
+            let granted = await AdgeistCore.shared.requestAdTrackingAutorisation()
+            resolver(granted)
+        }
+    }
 
     @objc public func logEvent(eventDict: [String: Any]) {}
 
