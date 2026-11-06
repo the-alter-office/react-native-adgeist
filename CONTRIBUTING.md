@@ -154,10 +154,29 @@ To fix formatting errors, run the following:
 yarn lint --fix
 ```
 
-Remember to add tests for your change if possible. Run the unit tests by:
+## Tests
+
+The **Unit tests** workflow (`.github/workflows/unit-tests.yml`) runs `yarn typecheck`, `yarn lint` and `yarn test --ci` on every pull request and on pushes to `dev`, `qa` and `main`. Run the same locally:
 
 ```sh
 yarn test
+yarn test src/__tests__/HTML5AdView.test.tsx   # one file
 ```
+
+Jest uses the `react-native` preset and runs only the JS layer, with no device or native build. Tests live next to the code they cover:
+
+| Path                    | Covers                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------- |
+| `src/__tests__/`        | Public API, `AdgeistProvider`, CDP client, ad views, Fabric/Paper commands, JS-native names |
+| `scripts/__tests__/`    | `configure-build` and `sync-version` against a temp copy of the repo, with a fake `npm`     |
+| `plugin/src/__tests__/` | Expo config plugin mods                                                                     |
+| `src/specs/__mocks__/`  | Mock of the `Adgeist` TurboModule, enabled with `jest.mock('../specs/NativeAdgeist')`       |
+
+When adding tests:
+
+- Never call real endpoints or native code. Mock the TurboModule with `jest.mock('../specs/NativeAdgeist')`, and mock the view spec module the way `HTML5AdView.test.tsx` does.
+- Render components with `react-test-renderer` inside `act`. Use fake timers and flush one frame to let a view load.
+- When you add a method to `NativeAdgeist`, add it to `src/specs/__mocks__/NativeAdgeist.ts` too. `yarn typecheck` fails until you do, and `nativeContract.test.ts` checks that iOS and both Android architectures export it.
+- Native Android and iOS code has no unit tests here. Test it in the native SDK repos or in the example app.
 
 Lefthook runs ESLint and `tsc` on commit, and commitlint on the message. Use [conventional commits](https://www.conventionalcommits.org/en) (`fix:`, `feat:`, `refactor:`, `docs:`, `test:`, `chore:`). Keep the header under 100 characters and put the details in the body.
