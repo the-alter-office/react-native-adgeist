@@ -1,16 +1,4 @@
-# Project Instructions
-
-## Writing for Human Consumption
-- Use as few words as possible.
-- Pick every word meticulously.
-- Be direct and concise.
-- Less is more.
-
-## Feedback Style
-- Avoid superlatives and praise.
-- Provide cold, hard truth.
-- No bullshit—verify each point.
-- Provide sources when suggesting changes.
-
-## Code
+- When writing something intended for human consumption, (comment, commit message, reply to prompt) use as few words as possible. Pick every word meticulously to reduce the volume to a strict minimum. Be down to the point. Less is more.
+- Avoid superlatives and praise. Stop telling me I am absolutely right. Give me the cold hard truth.
+- Dont bullshit verify each point you suggest. Provide sources.
 - Never write READMEs, docstrings, or comments. I will write those myself.
