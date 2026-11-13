@@ -40,6 +40,45 @@ export interface AdViewEvent {
   data: AdViewEventData;
 }
 
+type FontStyle = 'NORMAL' | 'BOLD' | 'ITALIC';
+type AdLabel =
+  'AD' | 'ADVERTISEMENT' | 'SPONSORED' | 'PROMOTED' | 'PARTNER_CONTENT';
+
+/**
+ * Style options for display and companion ads. Every field is optional; a
+ * field you leave out keeps the default. Values are case-sensitive, hex
+ * colours are `#RGB` or `#RRGGBB`, and a field with a value that isn't
+ * allowed is ignored.
+ *
+ * @see https://github.com/the-alter-office/react-native-adgeist#custom-styling
+ */
+export interface AdStyleOptions {
+  backgroundColor?: string;
+  cornerRadius?: 'SM' | 'MD' | 'LG' | 'XL';
+  showBorder?: boolean;
+  borderColor?: string;
+  adLabel?: AdLabel;
+  fontFamily?:
+    | 'system-ui'
+    | 'custom'
+    | 'Roboto'
+    | 'Open Sans'
+    | 'Lato'
+    | 'Montserrat'
+    | 'Inter'
+    | 'Poppins';
+  textAlign?: 'AUTO' | 'LEFT' | 'CENTER';
+  titleColor?: string;
+  titleFontStyle?: FontStyle;
+  descriptionColor?: string;
+  descriptionFontStyle?: FontStyle;
+  ctaStyle?: 'FILLED' | 'OUTLINE' | 'LINK';
+  ctaShape?: 'SQUARE' | 'ROUNDED' | 'PILL';
+  ctaBackgroundColor?: string;
+  ctaTextColor?: string;
+  ctaBorderColor?: string;
+}
+
 /**
  * Props of `HTML5AdView`.
  */
@@ -89,6 +128,24 @@ export interface HTML5AdNativeComponentProps {
    * @default true
    */
   reserveSpace?: boolean;
+
+  /**
+   * Styles a display or companion ad. Each field overrides the same field
+   * from your adspace settings. Banner ads ignore it. Applied on the next
+   * load.
+   *
+   * @see https://github.com/the-alter-office/react-native-adgeist#custom-styling
+   */
+  styleOptions?: AdStyleOptions;
+
+  /**
+   * Font for a display or companion ad: an `https` font stylesheet (e.g. a
+   * Google Fonts URL) or font file (`.woff2`, `.woff`, `.ttf`, `.otf`).
+   * Overrides `styleOptions.fontFamily`. Applied on the next load.
+   *
+   * @see https://github.com/the-alter-office/react-native-adgeist#custom-styling
+   */
+  fontUrl?: string;
 
   /**
    * Called for every ad event: loaded, clicked, closed, errors and

@@ -147,6 +147,52 @@ interface AdViewEvent {
 
 Everything except the ID has a default, so pass only what you need.
 
+### Custom styling
+
+Display and companion ads take `styleOptions` and `fontUrl`. Banner ads ignore both. Both apply on the next load.
+
+```tsx
+<HTML5AdView
+  adUnitID="YOUR_ADUNIT_ID"
+  adIsResponsive={true}
+  fontUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+  styleOptions={{
+    backgroundColor: '#141A17',
+    cornerRadius: 'MD',
+    showBorder: false,
+    adLabel: 'SPONSORED',
+    titleColor: '#F5F7F6',
+    titleFontStyle: 'BOLD',
+    ctaStyle: 'OUTLINE',
+    ctaShape: 'ROUNDED',
+  }}
+/>;
+```
+
+| Field | Allowed values | Default |
+| --- | --- | --- |
+| `backgroundColor` | hex colour | `#FFFFFF` |
+| `cornerRadius` | `SM` (4px), `MD` (8px), `LG` (12px), `XL` (16px) | square corners |
+| `showBorder` | `true`, `false` | `true` |
+| `borderColor` | hex colour | `#d4d5d7` |
+| `adLabel` | `AD`, `ADVERTISEMENT`, `SPONSORED`, `PROMOTED`, `PARTNER_CONTENT` | `AD` (shows `Ad`) |
+| `fontFamily` | `system-ui`, `Roboto`, `Open Sans`, `Lato`, `Montserrat`, `Inter`, `Poppins`, `custom` | system font |
+| `textAlign` | `AUTO`, `LEFT`, `CENTER` (display only) | `AUTO` |
+| `titleColor` | hex colour | `#000000` |
+| `titleFontStyle` | `NORMAL`, `BOLD`, `ITALIC` | `BOLD` on display, `NORMAL` on companion |
+| `descriptionColor` | hex colour | `#4B5563` |
+| `descriptionFontStyle` | `NORMAL`, `BOLD`, `ITALIC` | `NORMAL` |
+| `ctaStyle` | `FILLED`, `OUTLINE`, `LINK` | `FILLED` |
+| `ctaShape` | `SQUARE`, `ROUNDED`, `PILL` | `PILL` |
+| `ctaBackgroundColor` | hex colour (`FILLED` only) | `#85C896` |
+| `ctaTextColor` | hex colour | `#1D1D1D` |
+| `ctaBorderColor` | hex colour | no border |
+
+- Hex colours are `#RGB` or `#RRGGBB`. Values are case-sensitive.
+- A field with a value that isn't allowed is ignored and keeps the default.
+- A field set here overrides the same field from your adspace settings.
+- `fontUrl` is an `https` font stylesheet (e.g. Google Fonts) or font file (`.woff2`, `.woff`, `.ttf`, `.otf`). It overrides `fontFamily`. A font on another domain must be served with `Access-Control-Allow-Origin`; otherwise the system font is used.
+
 ## Preview
 
 Sometimes you want the layout settled before the adspace exists, or you want to check a format still renders after upgrading the SDK. `HTML5AdViewPreview` renders a sample creative through the same renderer the real ads use.

@@ -5,6 +5,7 @@ export * from './components/HTML5AdView';
 export * from './components/HTML5AdViewPreview';
 
 export type {
+  AdStyleOptions,
   AdViewEvent,
   AdViewEventCode,
   AdViewEventType,

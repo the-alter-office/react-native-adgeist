@@ -49,7 +49,16 @@ import { LOAD_FAILURE_CODES, toAdSizeAxis } from '../utilities';
 export const HTML5AdView = forwardRef<
   HTML5AdViewRef,
   HTML5AdNativeComponentProps
->(({ adUnitID, adIsResponsive, adSize, reserveSpace, onAdEvent }, ref) => {
+>((props, ref) => {
+  const {
+    adUnitID,
+    adIsResponsive,
+    adSize,
+    reserveSpace,
+    styleOptions,
+    fontUrl,
+    onAdEvent,
+  } = props;
   const nativeRef = useRef<any>(null);
   const [isViewReady, setIsViewReady] = useState(false);
   const [resolvedSize, setResolvedSize] = useState<AdSize | null>(null);
@@ -191,6 +200,8 @@ export const HTML5AdView = forwardRef<
       adIsResponsive={adIsResponsive}
       adSize={resolvedAdSize}
       reserveSpace={reserveSpace}
+      styleOptions={styleOptions ? JSON.stringify(styleOptions) : undefined}
+      fontUrl={fontUrl}
       // Required Event Callbacks
       onAdEvent={handleAdEvent}
       onAdSizeChanged={handleAdSizeChanged}
