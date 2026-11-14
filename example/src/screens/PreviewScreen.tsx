@@ -32,6 +32,7 @@ export default function PreviewScreen() {
           fontUrl={SAMPLE_FONT_URL}
           title="This is a display adspace"
           description="We show the description using this"
+          brandName="Adgeist"
 
           adSize={{
             width: 400,

@@ -277,6 +277,23 @@ Good to know:
 | `ctaTextColor` | Button text colour | Hex colour | `#1D1D1D` |
 | `ctaBorderColor` | Button border colour | Hex colour | No border |
 
+### Brand name and logo
+
+Display ads show the advertiser's brand name and logo. Both come with the ad, so there's nothing to pass on `HTML5AdView`. If the advertiser hasn't uploaded a logo, the card shows a monogram: the first letter of the brand name in a small badge.
+
+A [preview](#preview) has no advertiser behind it, so it shows "Brand Name" with a "B" monogram. To see how a particular brand will look in your layout, pass `brandName`, and `brandLogoUrl` if you have a logo:
+
+```tsx
+<HTML5AdViewPreview
+  type="display"
+  adSize={{ width: 300, height: 250 }}
+  brandName="Acme"
+  brandLogoUrl="https://example.com/acme-logo.png"
+/>;
+```
+
+Leave `brandLogoUrl` out to see the monogram for your brand name instead. Banner and companion ads don't show a brand.
+
 ## Preview
 
 Sometimes you want the layout settled before the adspace exists, or you want to check a format still renders after upgrading the SDK. `HTML5AdViewPreview` renders a sample creative through the same renderer the real ads use.
