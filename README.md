@@ -149,49 +149,72 @@ Everything except the ID has a default, so pass only what you need.
 
 ### Custom styling
 
-Display and companion ads take `styleOptions` and `fontUrl`. Banner ads ignore both. Both apply on the next load. `HTML5AdViewPreview` takes `styleOptions` only.
+You can make display and companion ads match the look of your app: colours, corners, border, fonts and the call-to-action button. Pass `styleOptions` to `HTML5AdView`, and pass `fontUrl` if you want to load your own font.
+
+If you change either prop after the ad has loaded, the new values are used the next time an ad loads.
 
 ```tsx
+import {
+  HTML5AdView,
+  HTML5AdViewPreview,
+  type AdStyleOptions,
+} from '@thealteroffice/react-native-adgeist';
+
+const brandStyle: AdStyleOptions = {
+  backgroundColor: '#141A17',
+  cornerRadius: 'MD',
+  showBorder: false,
+  adLabel: 'SPONSORED',
+  titleColor: '#F5F7F6',
+  titleFontStyle: 'BOLD',
+  ctaStyle: 'OUTLINE',
+  ctaShape: 'ROUNDED',
+};
+
 <HTML5AdView
   adUnitID="YOUR_ADUNIT_ID"
   adIsResponsive={true}
+  styleOptions={brandStyle}
   fontUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
-  styleOptions={{
-    backgroundColor: '#141A17',
-    cornerRadius: 'MD',
-    showBorder: false,
-    adLabel: 'SPONSORED',
-    titleColor: '#F5F7F6',
-    titleFontStyle: 'BOLD',
-    ctaStyle: 'OUTLINE',
-    ctaShape: 'ROUNDED',
-  }}
 />;
 ```
 
-| Field | Allowed values | Default |
-| --- | --- | --- |
-| `backgroundColor` | hex colour | `#FFFFFF` |
-| `cornerRadius` | `SM` (4px), `MD` (8px), `LG` (12px), `XL` (16px) | square corners |
-| `showBorder` | `true`, `false` | `true` |
-| `borderColor` | hex colour | `#d4d5d7` |
-| `adLabel` | `AD`, `ADVERTISEMENT`, `SPONSORED`, `PROMOTED`, `PARTNER_CONTENT` | `AD` (shows `Ad`) |
-| `fontFamily` | `system-ui`, `Roboto`, `Open Sans`, `Lato`, `Montserrat`, `Inter`, `Poppins`, `custom` | system font |
-| `textAlign` | `AUTO`, `LEFT`, `CENTER` (display only) | `AUTO` |
-| `titleColor` | hex colour | `#000000` |
-| `titleFontStyle` | `NORMAL`, `BOLD`, `ITALIC` | `BOLD` on display, `NORMAL` on companion |
-| `descriptionColor` | hex colour | `#4B5563` |
-| `descriptionFontStyle` | `NORMAL`, `BOLD`, `ITALIC` | `NORMAL` |
-| `ctaStyle` | `FILLED`, `OUTLINE`, `LINK` | `FILLED` |
-| `ctaShape` | `SQUARE`, `ROUNDED`, `PILL` | `PILL` |
-| `ctaBackgroundColor` | hex colour (`FILLED` only) | `#85C896` |
-| `ctaTextColor` | hex colour | `#1D1D1D` |
-| `ctaBorderColor` | hex colour | no border |
+To check the look before your adspace is live, pass the same style to a [preview](#preview):
 
-- Hex colours are `#RGB` or `#RRGGBB`. Values are case-sensitive.
-- A field with a value that isn't allowed is ignored and keeps the default.
-- A field set here overrides the same field from your adspace settings.
-- `fontUrl` is an `https` font stylesheet (e.g. Google Fonts) or font file (`.woff2`, `.woff`, `.ttf`, `.otf`). It overrides `fontFamily`. A font on another domain must be served with `Access-Control-Allow-Origin`; otherwise the system font is used.
+```tsx
+<HTML5AdViewPreview
+  type="display"
+  adSize={{ width: 300, height: 250 }}
+  styleOptions={brandStyle}
+/>;
+```
+
+Good to know:
+
+- Styling works on display and companion ads. Banner ads aren't styled.
+- Anything you set here overrides the styling set for the adspace on adgeist.ai. Anything you leave out keeps that setting, or the default in the table below if there isn't one.
+- Values are case-sensitive (`"MD"`, not `"md"`), and colours are hex: `#RGB` or `#RRGGBB`. If a value isn't valid, that field is skipped and the default is used.
+- `fontUrl` must be a public `https` link to either a stylesheet, such as a Google Fonts URL, or a font file (`.woff2`, `.woff`, `.ttf`, `.otf`). When you set it, it replaces `fontFamily`. If the font is hosted on another domain, that server has to allow cross-origin requests (`Access-Control-Allow-Origin`), otherwise the card uses the system font.
+- Previews (`HTML5AdViewPreview`) accept `styleOptions` but not `fontUrl`.
+
+| Field | What it changes | Values | Default |
+| --- | --- | --- | --- |
+| `backgroundColor` | Card background | Hex colour | `#FFFFFF` |
+| `cornerRadius` | How rounded the card's corners are | `SM` (4px), `MD` (8px), `LG` (12px), `XL` (16px) | Square corners |
+| `showBorder` | Whether the card has a border | `true`, `false` | `true` |
+| `borderColor` | Border colour | Hex colour | `#d4d5d7` |
+| `adLabel` | The label that marks the card as an ad | `AD`, `ADVERTISEMENT`, `SPONSORED`, `PROMOTED`, `PARTNER_CONTENT` | `AD` (shown as "Ad") |
+| `fontFamily` | Font for all text on the card. `custom` uses the font from `fontUrl` | `system-ui`, `Roboto`, `Open Sans`, `Lato`, `Montserrat`, `Inter`, `Poppins`, `custom` | System font |
+| `textAlign` | Text alignment. Display ads only | `AUTO`, `LEFT`, `CENTER` | `AUTO` |
+| `titleColor` | Headline colour | Hex colour | `#000000` |
+| `titleFontStyle` | Headline style | `NORMAL`, `BOLD`, `ITALIC` | `BOLD` on display, `NORMAL` on companion |
+| `descriptionColor` | Body text colour | Hex colour | `#4B5563` |
+| `descriptionFontStyle` | Body text style | `NORMAL`, `BOLD`, `ITALIC` | `NORMAL` |
+| `ctaStyle` | How the button is drawn: filled, outlined, or as a plain link | `FILLED`, `OUTLINE`, `LINK` | `FILLED` |
+| `ctaShape` | Shape of the button's corners | `SQUARE`, `ROUNDED`, `PILL` | `PILL` |
+| `ctaBackgroundColor` | Button fill colour. Only used when `ctaStyle` is `FILLED` | Hex colour | `#85C896` |
+| `ctaTextColor` | Button text colour | Hex colour | `#1D1D1D` |
+| `ctaBorderColor` | Button border colour | Hex colour | No border |
 
 ## Preview
 
