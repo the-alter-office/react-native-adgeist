@@ -142,10 +142,10 @@ export const HTML5AdView = forwardRef<
     }
   }, []);
 
-  const handleNativeRef = useCallback((ref: any) => {
-    nativeRef.current = ref;
+  const handleNativeRef = useCallback((instance: any) => {
+    nativeRef.current = instance;
 
-    if (ref) {
+    if (instance) {
       // Mark as ready in the next animation frame (ensures layout pass completed)
       requestAnimationFrame(() => {
         setIsViewReady(true);
