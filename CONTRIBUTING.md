@@ -154,10 +154,27 @@ To fix formatting errors, run the following:
 yarn lint --fix
 ```
 
-Remember to add tests for your change if possible. Run the unit tests by:
+Remember to add tests for your change if possible.
+
+### Running unit tests
+
+The unit tests run with Jest on Node, so you don't need a simulator, an emulator or the native SDKs. Use Node 20 (see `.nvmrc`) and run `yarn` once to install dependencies.
+
+Run all tests from the root directory:
 
 ```sh
 yarn test
 ```
+
+To run one file, pass its path. To run only the tests whose name matches some text, use `-t`:
+
+```sh
+yarn test src/__tests__/styleOptions.test.tsx
+yarn test -t "fontUrl"
+```
+
+`yarn test --watch` re-runs the affected tests as you save.
+
+Tests live in `src/__tests__/` and end in `.test.ts` or `.test.tsx`. Jest uses the `react-native` preset, configured in the `jest` block of `package.json`. Native code doesn't run under Jest, so mock any native component or module your code uses, as `styleOptions.test.tsx` does with the specs in `src/specs`.
 
 Lefthook runs ESLint and `tsc` on commit, and commitlint on the message. Use [conventional commits](https://www.conventionalcommits.org/en) (`fix:`, `feat:`, `refactor:`, `docs:`, `test:`, `chore:`). Keep the header under 100 characters and put the details in the body.
