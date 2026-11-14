@@ -1,0 +1,4 @@
+- When writing something intended for human consumption, (comment, commit message, reply to prompt) use as few words as possible. Pick every word meticulously to reduce the volume to a strict minimum. Be down to the point. Less is more.
+- Avoid superlatives and praise. Stop telling me I am absolutely right. Give me the cold hard truth.
+- Dont bullshit verify each point you suggest. Provide sources.
+- For git operations, follow [.claude/agents/git-agent.md](.claude/agents/git-agent.md).
