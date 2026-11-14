@@ -8,6 +8,7 @@ import com.adgeistkit.ads.AdListener
 import com.adgeistkit.ads.AdSize
 import com.adgeistkit.ads.AdView
 import com.adgeistkit.ads.AdgeistEvent
+import com.adgeistkit.data.models.StyleOptions
 import com.adgeistkit.request.AdRequest
 import com.adgeistkit.utilities.AdgeistEmbedderApi
 import com.facebook.react.bridge.Arguments
@@ -15,6 +16,7 @@ import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.events.RCTEventEmitter
+import org.json.JSONObject
 
 object HTML5AdViewManagerImpl {
     const val NAME = "HTML5AdNativeComponent"
@@ -72,6 +74,40 @@ object HTML5AdViewManagerImpl {
 
     fun setReserveSpace(view: AdView, reserveSpace: Boolean) {
         view.reserveSpace = reserveSpace
+    }
+
+    fun setStyleOptions(view: AdView, styleOptions: String?) {
+        view.styleOptions = parseStyleOptions(styleOptions)
+    }
+
+    fun parseStyleOptions(styleOptions: String?): StyleOptions? {
+        // Invalid JSON is ignored, as on web
+        val json = styleOptions?.let { runCatching { JSONObject(it) }.getOrNull() }
+        return json?.let {
+            StyleOptions(
+                backgroundColor = it.string("backgroundColor"),
+                cornerRadius = it.string("cornerRadius"),
+                showBorder = it.opt("showBorder") as? Boolean,
+                borderColor = it.string("borderColor"),
+                adLabel = it.string("adLabel"),
+                fontFamily = it.string("fontFamily"),
+                titleColor = it.string("titleColor"),
+                titleFontStyle = it.string("titleFontStyle"),
+                descriptionColor = it.string("descriptionColor"),
+                descriptionFontStyle = it.string("descriptionFontStyle"),
+                brandNameColor = it.string("brandNameColor"),
+                brandNameFontStyle = it.string("brandNameFontStyle"),
+                ctaStyle = it.string("ctaStyle"),
+                ctaShape = it.string("ctaShape"),
+                ctaBackgroundColor = it.string("ctaBackgroundColor"),
+                ctaTextColor = it.string("ctaTextColor"),
+                ctaBorderColor = it.string("ctaBorderColor")
+            )
+        }
+    }
+
+    fun setFontUrl(view: AdView, fontUrl: String?) {
+        view.fontUrl = fontUrl?.takeIf { it.isNotEmpty() }
     }
 
     @OptIn(AdgeistEmbedderApi::class)
@@ -144,4 +180,6 @@ object HTML5AdViewManagerImpl {
 
     private fun ReadableMap.getDimension(key: String): Int =
         if (hasKey(key) && !isNull(key)) getDouble(key).toInt() else 0
+
+    private fun JSONObject.string(key: String): String? = opt(key) as? String
 }

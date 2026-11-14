@@ -6,9 +6,17 @@
 
 React Native bindings for the Adgeist Mobile Ads SDK. One component, `HTML5AdView`, serves ads on both platforms. It works with the new and the old architecture, and with Expo through the bundled config plugin.
 
-On Android you need a minimum SDK of 23 and a compile SDK of 35.
 
 Before ads will serve you need an Adgeist publisher account with your app registered.
+
+## Prerequisites
+
+| | Minimum |
+|---|---|
+| React Native | 0.77 |
+| Expo SDK | 53 |
+| iOS | Deployment target 15.6, Xcode 16 |
+| Android | `minSdkVersion` 24, `compileSdkVersion` 35, JDK 17 |
 
 ## Install
 
@@ -92,6 +100,59 @@ export default function App() {
 }
 ```
 
+## Identify the user
+
+Optional. Attach user details for targeted ads.
+
+```tsx
+import { setUserDetails } from '@thealteroffice/react-native-adgeist';
+
+setUserDetails({
+  userId: 'user-123',
+  email: 'jane@example.com',
+  phone: '+919876543210',
+});
+```
+
+Every field is optional, so pass only what you have. Phone numbers need the country code — `'+919876543210'`, not `'9876543210'`.
+
+Call it when the user signs in, and again whenever one of the details changes.
+
+On iOS, ask for [tracking permission](#ask-for-tracking-permission) before this call.
+
+## Ask for tracking permission
+
+iOS only, and optional. `requestTrackingAuthorization()` shows Apple's App Tracking Transparency prompt and resolves to whether the user allowed tracking. Without that permission there is no advertising identifier to target with, so ads still serve, just untargeted.
+
+```tsx
+import { requestTrackingAuthorization } from '@thealteroffice/react-native-adgeist';
+
+const granted = await requestTrackingAuthorization();
+```
+
+The prompt only appears if `NSUserTrackingUsageDescription` is in your `Info.plist`. Without the key nothing is shown and the call resolves `false`. Write the sentence yourself — it's what the user reads, and Apple reviews it.
+
+```xml
+<key>NSUserTrackingUsageDescription</key>
+<string>We use your advertising identifier to provide personalized ads and measure ad performance.</string>
+```
+
+Expo apps put the same string in `app.json` — the config plugin writes the app ID, not this.
+
+```json
+{
+  "expo": {
+    "ios": {
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "We use your advertising identifier to provide personalized ads and measure ad performance."
+      }
+    }
+  }
+}
+```
+
+iOS shows the prompt once in the lifetime of the install, so call it at a point where the ask makes sense to the user; after that the call just resolves with the answer they already gave. On Android it does nothing and resolves `false`, so you can call it unconditionally.
+
 ## Show an ad
 
 `HTML5AdView` loads itself when it mounts. An adspace is either fixed-size or responsive, depending on what you chose while creating it on [adgeist.ai](https://adgeist.ai) — use the snippet that matches yours. Each one is complete; copy it into your screen and the ad placement is done.
@@ -146,6 +207,76 @@ interface AdViewEvent {
 ```
 
 Everything except the ID has a default, so pass only what you need.
+
+### Custom styling
+
+You can make display and companion ads match the look of your app: colours, corners, border, fonts and the call-to-action button. Pass `styleOptions` to `HTML5AdView`, and pass `fontUrl` if you want to load your own font.
+
+If you change either prop after the ad has loaded, the new values are used the next time an ad loads.
+
+```tsx
+import {
+  HTML5AdView,
+  HTML5AdViewPreview,
+  type AdStyleOptions,
+} from '@thealteroffice/react-native-adgeist';
+
+const brandStyle: AdStyleOptions = {
+  backgroundColor: '#141A17',
+  cornerRadius: 'MD',
+  showBorder: false,
+  adLabel: 'SPONSORED',
+  titleColor: '#F5F7F6',
+  titleFontStyle: 'BOLD',
+  ctaStyle: 'OUTLINE',
+  ctaShape: 'ROUNDED',
+};
+
+<HTML5AdView
+  adUnitID="YOUR_ADUNIT_ID"
+  adIsResponsive={true}
+  styleOptions={brandStyle}
+  fontUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+/>;
+```
+
+To check the look before your adspace is live, pass the same style and font to a [preview](#preview):
+
+```tsx
+<HTML5AdViewPreview
+  type="display"
+  adSize={{ width: 300, height: 250 }}
+  styleOptions={brandStyle}
+  fontUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+/>;
+```
+
+Good to know:
+
+- Styling works on display and companion ads. Banner ads aren't styled.
+- Anything you set here overrides the styling set for the adspace on adgeist.ai. Anything you leave out keeps that setting, or the default in the table below if there isn't one.
+- Values are case-sensitive (`"MD"`, not `"md"`), and colours are hex: `#RGB` or `#RRGGBB`. If a value isn't valid, that field is skipped and the default is used.
+- `fontUrl` must be a public `https` link to either a stylesheet, such as a Google Fonts URL, or a font file (`.woff2`, `.woff`, `.ttf`, `.otf`). When you set it, it replaces `fontFamily`. If the font is hosted on another domain, that server has to allow cross-origin requests (`Access-Control-Allow-Origin`), otherwise the card uses the system font.
+
+| Field | What it changes | Values | Default |
+| --- | --- | --- | --- |
+| `backgroundColor` | Card background | Hex colour | `#FFFFFF` |
+| `cornerRadius` | How rounded the card's corners are | `SM` (4px), `MD` (8px), `LG` (12px), `XL` (16px) | Square corners |
+| `showBorder` | Whether the card has a border | `true`, `false` | `true` |
+| `borderColor` | Border colour | Hex colour | `#d4d5d7` |
+| `adLabel` | The label that marks the card as an ad | `AD`, `ADVERTISEMENT`, `SPONSORED`, `PROMOTED`, `PARTNER_CONTENT` | `AD` (shown as "Ad") |
+| `fontFamily` | Font for all text on the card. `custom` uses the font from `fontUrl` | `system-ui`, `Roboto`, `Open Sans`, `Lato`, `Montserrat`, `Inter`, `Poppins`, `custom` | System font |
+| `titleColor` | Headline colour | Hex colour | `#000000` |
+| `titleFontStyle` | Headline style | `NORMAL`, `BOLD`, `ITALIC` | `BOLD` on display, `NORMAL` on companion |
+| `descriptionColor` | Body text colour | Hex colour | `#4B5563` |
+| `descriptionFontStyle` | Body text style | `NORMAL`, `BOLD`, `ITALIC` | `NORMAL` |
+| `brandNameColor` | Brand name colour. Display ads only | Hex colour | Card text colour |
+| `brandNameFontStyle` | Brand name style. Display ads only | `NORMAL`, `BOLD`, `ITALIC` | Semi-bold |
+| `ctaStyle` | How the button is drawn: filled, outlined, or as a plain link | `FILLED`, `OUTLINE`, `LINK` | `FILLED` |
+| `ctaShape` | Shape of the button's corners | `SQUARE`, `ROUNDED`, `PILL` | `PILL` |
+| `ctaBackgroundColor` | Button fill colour. Only used when `ctaStyle` is `FILLED` | Hex colour | `#85C896` |
+| `ctaTextColor` | Button text colour | Hex colour | `#1D1D1D` |
+| `ctaBorderColor` | Button border colour | Hex colour | No border |
 
 ## Preview
 

@@ -1,5 +1,6 @@
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { HTML5AdViewPreview } from '@thealteroffice/react-native-adgeist';
+import { SAMPLE_FONT_URL, SAMPLE_STYLE_OPTIONS } from '../sampleStyle';
 
 export default function PreviewScreen() {
   return (
@@ -15,6 +16,8 @@ export default function PreviewScreen() {
         />
         <HTML5AdViewPreview
           type="companion"
+          styleOptions={SAMPLE_STYLE_OPTIONS}
+          fontUrl={SAMPLE_FONT_URL}
           deepLinkUrl="hello://com"
           title="This is a companion adspace"
           description="We show the description using this"
@@ -25,8 +28,11 @@ export default function PreviewScreen() {
         />
         <HTML5AdViewPreview
           type="display"
+          styleOptions={SAMPLE_STYLE_OPTIONS}
+          fontUrl={SAMPLE_FONT_URL}
           title="This is a display adspace"
           description="We show the description using this"
+          brandName="Adgeist"
 
           adSize={{
             width: 400,

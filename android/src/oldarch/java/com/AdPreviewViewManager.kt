@@ -71,6 +71,26 @@ class AdPreviewViewManager : SimpleViewManager<ReactAdPreviewView>() {
         AdPreviewViewManagerImpl.setReserveSpace(view, reserveSpace)
     }
 
+    @ReactProp(name = "styleOptions")
+    fun setStyleOptions(view: ReactAdPreviewView, styleOptions: String?) {
+        AdPreviewViewManagerImpl.setStyleOptions(view, styleOptions)
+    }
+
+    @ReactProp(name = "fontUrl")
+    fun setFontUrl(view: ReactAdPreviewView, fontUrl: String?) {
+        AdPreviewViewManagerImpl.setFontUrl(view, fontUrl)
+    }
+
+    @ReactProp(name = "brandName")
+    fun setBrandName(view: ReactAdPreviewView, brandName: String?) {
+        AdPreviewViewManagerImpl.setBrandName(view, brandName)
+    }
+
+    @ReactProp(name = "brandLogoUrl")
+    fun setBrandLogoUrl(view: ReactAdPreviewView, brandLogoUrl: String?) {
+        AdPreviewViewManagerImpl.setBrandLogoUrl(view, brandLogoUrl)
+    }
+
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
         return listOf(
             AdPreviewViewManagerImpl.AD_EVENT_LISTENER,

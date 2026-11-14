@@ -82,6 +82,22 @@ object AdPreviewViewManagerImpl {
     fun setReserveSpace(view: ReactAdPreviewView, reserveSpace: Boolean) {
     }
 
+    fun setStyleOptions(view: ReactAdPreviewView, styleOptions: String?) {
+        view.styleOptions = HTML5AdViewManagerImpl.parseStyleOptions(styleOptions)
+    }
+
+    fun setFontUrl(view: ReactAdPreviewView, fontUrl: String?) {
+        view.fontUrl = fontUrl?.takeIf { it.isNotEmpty() }
+    }
+
+    fun setBrandName(view: ReactAdPreviewView, brandName: String?) {
+        view.brandName = brandName?.takeIf { it.isNotEmpty() }
+    }
+
+    fun setBrandLogoUrl(view: ReactAdPreviewView, brandLogoUrl: String?) {
+        view.brandLogoUrl = brandLogoUrl?.takeIf { it.isNotEmpty() }
+    }
+
     fun loadAd(view: ReactAdPreviewView) {
         try {
             view.load()
