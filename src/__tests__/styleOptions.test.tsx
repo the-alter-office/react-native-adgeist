@@ -118,9 +118,9 @@ describe.each(components)('%s styleOptions', (_name, component, base) => {
   });
 });
 
-describe('HTML5AdView fontUrl', () => {
+describe.each(components)('%s fontUrl', (_name, component, base) => {
   const sendFontUrl = (fontUrl: unknown) =>
-    render(HTML5AdView, { adUnitID: 'unit-1', fontUrl }).fontUrl;
+    render(component, { ...base, fontUrl }).fontUrl;
 
   it('passes fontUrl through unchanged', () => {
     const url = 'https://fonts.googleapis.com/css2?family=Inter';

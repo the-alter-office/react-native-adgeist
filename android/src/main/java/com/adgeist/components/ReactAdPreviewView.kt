@@ -87,6 +87,13 @@ class ReactAdPreviewView(context: Context) : FrameLayout(context) {
             schedulePropsReload()
         }
 
+    var fontUrl: String? = null
+        set(value) {
+            if (field == value) return
+            field = value
+            schedulePropsReload()
+        }
+
     private var preview: AdViewPreview? = null
     private var hasLoaded = false
 
@@ -149,6 +156,7 @@ class ReactAdPreviewView(context: Context) : FrameLayout(context) {
         view.adIsResponsive = adIsResponsive
         view.adSize = adSize
         view.styleOptions = styleOptions
+        view.fontUrl = fontUrl
 
         preview = view
         addView(view, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))

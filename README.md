@@ -179,13 +179,14 @@ const brandStyle: AdStyleOptions = {
 />;
 ```
 
-To check the look before your adspace is live, pass the same style to a [preview](#preview):
+To check the look before your adspace is live, pass the same style and font to a [preview](#preview):
 
 ```tsx
 <HTML5AdViewPreview
   type="display"
   adSize={{ width: 300, height: 250 }}
   styleOptions={brandStyle}
+  fontUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
 />;
 ```
 
@@ -195,7 +196,6 @@ Good to know:
 - Anything you set here overrides the styling set for the adspace on adgeist.ai. Anything you leave out keeps that setting, or the default in the table below if there isn't one.
 - Values are case-sensitive (`"MD"`, not `"md"`), and colours are hex: `#RGB` or `#RRGGBB`. If a value isn't valid, that field is skipped and the default is used.
 - `fontUrl` must be a public `https` link to either a stylesheet, such as a Google Fonts URL, or a font file (`.woff2`, `.woff`, `.ttf`, `.otf`). When you set it, it replaces `fontFamily`. If the font is hosted on another domain, that server has to allow cross-origin requests (`Access-Control-Allow-Origin`), otherwise the card uses the system font.
-- Previews (`HTML5AdViewPreview`) accept `styleOptions` but not `fontUrl`.
 
 | Field | What it changes | Values | Default |
 | --- | --- | --- | --- |

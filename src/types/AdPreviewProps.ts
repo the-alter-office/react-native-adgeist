@@ -82,6 +82,13 @@ export interface HTML5AdViewPreviewProps {
   styleOptions?: AdStyleOptions;
 
   /**
+   * Custom font, same as `HTML5AdView`. Display and companion only.
+   *
+   * @see https://github.com/the-alter-office/react-native-adgeist#custom-styling
+   */
+  fontUrl?: string;
+
+  /**
    * Native preview events: `AD_LOADED`, `AD_CLICKED`, `AD_NO_FILL`, `AD_NETWORK_ERROR`, `AD_WARNING`.
    *
    * @platform ios — never called on Android, where the preview reports nothing.

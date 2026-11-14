@@ -86,6 +86,10 @@ object AdPreviewViewManagerImpl {
         view.styleOptions = HTML5AdViewManagerImpl.parseStyleOptions(styleOptions)
     }
 
+    fun setFontUrl(view: ReactAdPreviewView, fontUrl: String?) {
+        view.fontUrl = fontUrl?.takeIf { it.isNotEmpty() }
+    }
+
     fun loadAd(view: ReactAdPreviewView) {
         try {
             view.load()

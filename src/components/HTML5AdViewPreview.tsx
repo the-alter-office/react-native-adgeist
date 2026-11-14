@@ -40,6 +40,7 @@ export const HTML5AdViewPreview = forwardRef<
       adSize,
       reserveSpace,
       styleOptions,
+      fontUrl,
       onAdEvent,
     },
     ref
@@ -158,6 +159,7 @@ export const HTML5AdViewPreview = forwardRef<
         adSize={resolvedAdSize}
         reserveSpace={reserveSpace}
         styleOptions={styleOptions ? JSON.stringify(styleOptions) : undefined}
+        fontUrl={fontUrl}
         onAdEvent={handleAdEvent}
         onAdSizeChanged={handleAdSizeChanged}
       />

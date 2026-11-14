@@ -76,6 +76,11 @@ class AdPreviewViewManager : SimpleViewManager<ReactAdPreviewView>() {
         AdPreviewViewManagerImpl.setStyleOptions(view, styleOptions)
     }
 
+    @ReactProp(name = "fontUrl")
+    fun setFontUrl(view: ReactAdPreviewView, fontUrl: String?) {
+        AdPreviewViewManagerImpl.setFontUrl(view, fontUrl)
+    }
+
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
         return listOf(
             AdPreviewViewManagerImpl.AD_EVENT_LISTENER,
