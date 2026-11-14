@@ -10,23 +10,24 @@ export default function TestScreen() {
       contentContainerStyle={styles.content}
     >
       <HTML5AdView
-        adUnitID="6abbad621979b59913a3c141"
+        adUnitID="6af826c8ef8b64fcb54effd2"
         styleOptions={SAMPLE_STYLE_OPTIONS}
         fontUrl={SAMPLE_FONT_URL}
         adSize={{ width: 360, height: 360 }}
+        reserveSpace={true}
       />
 
       <HTML5AdView
-        adUnitID="6abbada8dd7cf158e3e10cb2"
+        adUnitID="6af826ebef8b64fcb54f001e"
         styleOptions={SAMPLE_STYLE_OPTIONS}
         fontUrl={SAMPLE_FONT_URL}
-        adSize={{ height: 500 }}
+        adSize={{ height: 300 }}
         adIsResponsive={true}
         reserveSpace={true}
       />
 
       <HTML5AdView
-        adUnitID="6abe25e069c01bfd696f8124"
+        adUnitID="6af8272f8ff4f7972ac9cac6"
         styleOptions={SAMPLE_STYLE_OPTIONS}
         fontUrl={SAMPLE_FONT_URL}
         adIsResponsive={true}
