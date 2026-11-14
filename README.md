@@ -149,7 +149,7 @@ Everything except the ID has a default, so pass only what you need.
 
 ### Custom styling
 
-Display and companion ads take `styleOptions` and `fontUrl`. Banner ads ignore both. Both apply on the next load.
+Display and companion ads take `styleOptions` and `fontUrl`. Banner ads ignore both. Both apply on the next load. `HTML5AdViewPreview` takes `styleOptions` only.
 
 ```tsx
 <HTML5AdView

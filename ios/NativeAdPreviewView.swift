@@ -25,6 +25,7 @@ public class NativeAdPreviewView: UIView {
     @objc public var isResponsive: Bool = true
     @objc public var adSize: NSDictionary?
     @objc public var reserveSpace: Bool = false
+    @objc public var styleOptions: String?
 
     // MARK: Events (Old Architecture)
     @objc public var onAdEvent: ((_ body: [String: Any]) -> Void)?
@@ -83,6 +84,8 @@ public class NativeAdPreviewView: UIView {
         cleanupPreview()
 
         let dict = adSize as? [String: Any]
+        // Invalid JSON is ignored, as on web
+        let style = styleOptions.flatMap { try? JSONDecoder().decode(AdStyleOptions.self, from: Data($0.utf8)) }
 
         let preview = AdViewPreview(
             type: AdPreviewType(rawValue: previewType) ?? .banner,
@@ -96,7 +99,8 @@ public class NativeAdPreviewView: UIView {
             isResponsive: isResponsive,
             width: dimension(dict?["width"]),
             height: dimension(dict?["height"]),
-            reserveSpace: reserveSpace
+            reserveSpace: reserveSpace,
+            styleOptions: style
         )
 
         preview.frame = bounds

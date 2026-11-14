@@ -77,9 +77,13 @@ object HTML5AdViewManagerImpl {
     }
 
     fun setStyleOptions(view: AdView, styleOptions: String?) {
+        view.styleOptions = parseStyleOptions(styleOptions)
+    }
+
+    fun parseStyleOptions(styleOptions: String?): StyleOptions? {
         // Invalid JSON is ignored, as on web
         val json = styleOptions?.let { runCatching { JSONObject(it) }.getOrNull() }
-        view.styleOptions = json?.let {
+        return json?.let {
             StyleOptions(
                 backgroundColor = it.string("backgroundColor"),
                 cornerRadius = it.string("cornerRadius"),

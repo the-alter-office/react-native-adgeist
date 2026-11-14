@@ -82,6 +82,10 @@ object AdPreviewViewManagerImpl {
     fun setReserveSpace(view: ReactAdPreviewView, reserveSpace: Boolean) {
     }
 
+    fun setStyleOptions(view: ReactAdPreviewView, styleOptions: String?) {
+        view.styleOptions = HTML5AdViewManagerImpl.parseStyleOptions(styleOptions)
+    }
+
     fun loadAd(view: ReactAdPreviewView) {
         try {
             view.load()

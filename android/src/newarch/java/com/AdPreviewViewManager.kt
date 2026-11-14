@@ -80,6 +80,11 @@ class AdPreviewViewManager : SimpleViewManager<ReactAdPreviewView>(), AdPreviewN
         AdPreviewViewManagerImpl.setReserveSpace(view, reserveSpace)
     }
 
+    @ReactProp(name = "styleOptions")
+    override fun setStyleOptions(view: ReactAdPreviewView, styleOptions: String?) {
+        AdPreviewViewManagerImpl.setStyleOptions(view, styleOptions)
+    }
+
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
         return listOf(
             AdPreviewViewManagerImpl.AD_EVENT_LISTENER,

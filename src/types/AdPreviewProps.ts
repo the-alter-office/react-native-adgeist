@@ -1,6 +1,9 @@
 import type { NativeSyntheticEvent } from 'react-native';
 import type { AdSize } from './AdSize';
-import type { AdViewEvent } from './HTML5AdNativeComponentProps';
+import type {
+  AdStyleOptions,
+  AdViewEvent,
+} from './HTML5AdNativeComponentProps';
 
 /**
  * Preview card layout.
@@ -70,6 +73,13 @@ export interface HTML5AdViewPreviewProps {
    * @deprecated No effect — ignored by the native preview on both platforms.
    */
   reserveSpace?: boolean;
+
+  /**
+   * Card styling, same as `HTML5AdView`. Display and companion only.
+   *
+   * @see https://github.com/the-alter-office/react-native-adgeist#custom-styling
+   */
+  styleOptions?: AdStyleOptions;
 
   /**
    * Native preview events: `AD_LOADED`, `AD_CLICKED`, `AD_NO_FILL`, `AD_NETWORK_ERROR`, `AD_WARNING`.
