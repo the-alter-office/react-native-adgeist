@@ -6,6 +6,7 @@ import com.adgeistkit.ads.AdPreviewMedia
 import com.adgeistkit.ads.AdSize
 import com.adgeistkit.ads.AdViewPreview
 import com.adgeistkit.data.models.AdSpaceType
+import com.adgeistkit.data.models.StyleOptions
 
 class ReactAdPreviewView(context: Context) : FrameLayout(context) {
 
@@ -79,6 +80,20 @@ class ReactAdPreviewView(context: Context) : FrameLayout(context) {
             schedulePropsReload()
         }
 
+    var styleOptions: StyleOptions? = null
+        set(value) {
+            if (field == value) return
+            field = value
+            schedulePropsReload()
+        }
+
+    var fontUrl: String? = null
+        set(value) {
+            if (field == value) return
+            field = value
+            schedulePropsReload()
+        }
+
     private var preview: AdViewPreview? = null
     private var hasLoaded = false
 
@@ -140,6 +155,8 @@ class ReactAdPreviewView(context: Context) : FrameLayout(context) {
         view.deepLinkUrl = deepLinkUrl
         view.adIsResponsive = adIsResponsive
         view.adSize = adSize
+        view.styleOptions = styleOptions
+        view.fontUrl = fontUrl
 
         preview = view
         addView(view, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))

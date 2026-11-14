@@ -106,6 +106,18 @@ using namespace facebook::react;
         _swiftView.reserveSpace = newProps.reserveSpace;
     }
 
+    if (oldPropsStruct.styleOptions != newProps.styleOptions) {
+        _swiftView.styleOptions = newProps.styleOptions.empty()
+            ? nil
+            : [NSString stringWithUTF8String:newProps.styleOptions.c_str()];
+    }
+
+    if (oldPropsStruct.fontUrl != newProps.fontUrl) {
+        _swiftView.fontUrl = newProps.fontUrl.empty()
+            ? nil
+            : [NSString stringWithUTF8String:newProps.fontUrl.c_str()];
+    }
+
     [super updateProps:props oldProps:oldProps];
 }
 
@@ -199,6 +211,8 @@ RCT_EXPORT_VIEW_PROPERTY(adUnitID, NSString)
 RCT_EXPORT_VIEW_PROPERTY(adIsResponsive, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(adSize, NSDictionary)
 RCT_EXPORT_VIEW_PROPERTY(reserveSpace, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(styleOptions, NSString)
+RCT_EXPORT_VIEW_PROPERTY(fontUrl, NSString)
 
 RCT_EXPORT_VIEW_PROPERTY(onAdEvent, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAdSizeChanged, RCTDirectEventBlock)
