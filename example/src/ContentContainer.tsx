@@ -10,6 +10,7 @@ import {
 import type { NativeSyntheticEvent } from 'react-native';
 
 import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
+import { SAMPLE_FONT_URL, SAMPLE_STYLE_OPTIONS } from './sampleStyle';
 import type {
   AdViewEvent,
   AdViewEventCode,
@@ -267,6 +268,8 @@ export default function ContentContainer() {
                 key={'isReponsive'}
                 adUnitID={adSpaceId}
                 adIsResponsive={isResponsive}
+                styleOptions={SAMPLE_STYLE_OPTIONS}
+                fontUrl={SAMPLE_FONT_URL}
                 onAdEvent={handleAdEvent}
               />
             </View>
@@ -275,6 +278,8 @@ export default function ContentContainer() {
               key={width + height}
               adUnitID={adSpaceId}
               adSize={{ width: parseInt(width), height: parseInt(height) }}
+              styleOptions={SAMPLE_STYLE_OPTIONS}
+              fontUrl={SAMPLE_FONT_URL}
               onAdEvent={handleAdEvent}
             />
           )}

@@ -1,4 +1,5 @@
 import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
+import { SAMPLE_FONT_URL, SAMPLE_STYLE_OPTIONS } from '../sampleStyle';
 import { StyleSheet, ScrollView } from 'react-native';
 
 export default function TestScreen() {
@@ -10,11 +11,15 @@ export default function TestScreen() {
     >
       <HTML5AdView
         adUnitID="6abbad621979b59913a3c141"
+        styleOptions={SAMPLE_STYLE_OPTIONS}
+        fontUrl={SAMPLE_FONT_URL}
         adSize={{ width: 360, height: 360 }}
       />
 
       <HTML5AdView
         adUnitID="6abbada8dd7cf158e3e10cb2"
+        styleOptions={SAMPLE_STYLE_OPTIONS}
+        fontUrl={SAMPLE_FONT_URL}
         adSize={{ height: 500 }}
         adIsResponsive={true}
         reserveSpace={true}
@@ -22,6 +27,8 @@ export default function TestScreen() {
 
       <HTML5AdView
         adUnitID="6abe25e069c01bfd696f8124"
+        styleOptions={SAMPLE_STYLE_OPTIONS}
+        fontUrl={SAMPLE_FONT_URL}
         adIsResponsive={true}
         adSize={{ height: 350 }}
       />
