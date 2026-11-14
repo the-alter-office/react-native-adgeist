@@ -266,7 +266,6 @@ Good to know:
 | `borderColor` | Border colour | Hex colour | `#d4d5d7` |
 | `adLabel` | The label that marks the card as an ad | `AD`, `ADVERTISEMENT`, `SPONSORED`, `PROMOTED`, `PARTNER_CONTENT` | `AD` (shown as "Ad") |
 | `fontFamily` | Font for all text on the card. `custom` uses the font from `fontUrl` | `system-ui`, `Roboto`, `Open Sans`, `Lato`, `Montserrat`, `Inter`, `Poppins`, `custom` | System font |
-| `textAlign` | Text alignment. Display ads only | `AUTO`, `LEFT`, `CENTER` | `AUTO` |
 | `titleColor` | Headline colour | Hex colour | `#000000` |
 | `titleFontStyle` | Headline style | `NORMAL`, `BOLD`, `ITALIC` | `BOLD` on display, `NORMAL` on companion |
 | `descriptionColor` | Body text colour | Hex colour | `#4B5563` |

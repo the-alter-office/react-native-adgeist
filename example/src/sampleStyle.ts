@@ -5,7 +5,6 @@ export const SAMPLE_STYLE_OPTIONS: AdStyleOptions = {
   // cornerRadius: 'LG',
   borderColor: '#ffffff',
   adLabel: 'SPONSORED',
-  textAlign: 'LEFT',
   titleColor: '#F5F7F6',
   // titleFontStyle: 'BOLD',
   descriptionColor: '#B8C2BC',

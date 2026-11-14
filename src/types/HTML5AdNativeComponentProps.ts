@@ -67,7 +67,6 @@ export interface AdStyleOptions {
     | 'Montserrat'
     | 'Inter'
     | 'Poppins';
-  textAlign?: 'AUTO' | 'LEFT' | 'CENTER';
   titleColor?: string;
   titleFontStyle?: FontStyle;
   descriptionColor?: string;

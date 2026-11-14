@@ -45,7 +45,6 @@ const fullStyleOptions: AdStyleOptions = {
   borderColor: '#E0E0E0',
   adLabel: 'SPONSORED',
   fontFamily: 'custom',
-  textAlign: 'CENTER',
   titleColor: '#111',
   titleFontStyle: 'BOLD',
   descriptionColor: '#555555',

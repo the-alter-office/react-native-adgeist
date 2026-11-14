@@ -91,7 +91,6 @@ object HTML5AdViewManagerImpl {
                 borderColor = it.string("borderColor"),
                 adLabel = it.string("adLabel"),
                 fontFamily = it.string("fontFamily"),
-                textAlign = it.string("textAlign"),
                 titleColor = it.string("titleColor"),
                 titleFontStyle = it.string("titleFontStyle"),
                 descriptionColor = it.string("descriptionColor"),
