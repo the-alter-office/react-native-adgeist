@@ -90,6 +90,14 @@ object AdPreviewViewManagerImpl {
         view.fontUrl = fontUrl?.takeIf { it.isNotEmpty() }
     }
 
+    fun setBrandName(view: ReactAdPreviewView, brandName: String?) {
+        view.brandName = brandName?.takeIf { it.isNotEmpty() }
+    }
+
+    fun setBrandLogoUrl(view: ReactAdPreviewView, brandLogoUrl: String?) {
+        view.brandLogoUrl = brandLogoUrl?.takeIf { it.isNotEmpty() }
+    }
+
     fun loadAd(view: ReactAdPreviewView) {
         try {
             view.load()

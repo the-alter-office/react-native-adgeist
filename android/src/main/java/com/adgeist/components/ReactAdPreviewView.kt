@@ -94,6 +94,20 @@ class ReactAdPreviewView(context: Context) : FrameLayout(context) {
             schedulePropsReload()
         }
 
+    var brandName: String? = null
+        set(value) {
+            if (field == value) return
+            field = value
+            schedulePropsReload()
+        }
+
+    var brandLogoUrl: String? = null
+        set(value) {
+            if (field == value) return
+            field = value
+            schedulePropsReload()
+        }
+
     private var preview: AdViewPreview? = null
     private var hasLoaded = false
 
@@ -157,6 +171,8 @@ class ReactAdPreviewView(context: Context) : FrameLayout(context) {
         view.adSize = adSize
         view.styleOptions = styleOptions
         view.fontUrl = fontUrl
+        view.brandName = brandName
+        view.brandLogoUrl = brandLogoUrl
 
         preview = view
         addView(view, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))

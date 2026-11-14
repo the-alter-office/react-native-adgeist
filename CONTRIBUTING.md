@@ -125,6 +125,16 @@ If you want to use Android Studio or Xcode to edit the native code, you can open
 
 To edit the Java or Kotlin files, open `example/android` in Android Studio and find the source files at `@thealteroffice/react-native-adgeist` under `Android`.
 
+### Stale native builds after updating the package
+
+Gradle caches the generated native module spec in the `build/` folders. After a host app updates `@thealteroffice/react-native-adgeist`, it can keep building against the old spec, so the JS and native sides no longer match. Host apps must clean the build and refresh dependencies after every update:
+
+```sh
+cd example/android && ./gradlew clean --refresh-dependencies
+```
+
+The same applies to the example app (`example/android`) after changing the codegen specs in `src/specs/` or bumping `adgeistKit.android.version`.
+
 You can use various commands from the root directory to work with the project.
 
 To configure the build for an environment and start the packager:

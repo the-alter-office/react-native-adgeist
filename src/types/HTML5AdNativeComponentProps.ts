@@ -67,11 +67,12 @@ export interface AdStyleOptions {
     | 'Montserrat'
     | 'Inter'
     | 'Poppins';
-  textAlign?: 'AUTO' | 'LEFT' | 'CENTER';
   titleColor?: string;
   titleFontStyle?: FontStyle;
   descriptionColor?: string;
   descriptionFontStyle?: FontStyle;
+  brandNameColor?: string;
+  brandNameFontStyle?: FontStyle;
   ctaStyle?: 'FILLED' | 'OUTLINE' | 'LINK';
   ctaShape?: 'SQUARE' | 'ROUNDED' | 'PILL';
   ctaBackgroundColor?: string;

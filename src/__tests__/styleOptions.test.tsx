@@ -28,7 +28,12 @@ jest.mock('../specs/AdPreviewNativeComponent', () => ({
   AdPreviewCommands: { loadAd: jest.fn() },
 }));
 
-type NativeProps = { styleOptions?: string; fontUrl?: string };
+type NativeProps = {
+  styleOptions?: string;
+  fontUrl?: string;
+  brandName?: string;
+  brandLogoUrl?: string;
+};
 
 const render = (component: unknown, props: object): NativeProps =>
   ((component as any).render(props, null) as ReactElement<NativeProps>).props;
@@ -40,11 +45,12 @@ const fullStyleOptions: AdStyleOptions = {
   borderColor: '#E0E0E0',
   adLabel: 'SPONSORED',
   fontFamily: 'custom',
-  textAlign: 'CENTER',
   titleColor: '#111',
   titleFontStyle: 'BOLD',
   descriptionColor: '#555555',
   descriptionFontStyle: 'ITALIC',
+  brandNameColor: '#222222',
+  brandNameFontStyle: 'BOLD',
   ctaStyle: 'OUTLINE',
   ctaShape: 'PILL',
   ctaBackgroundColor: '#000000',
@@ -134,5 +140,25 @@ describe.each(components)('%s fontUrl', (_name, component, base) => {
 
   it('passes an empty string through for native to ignore', () => {
     expect(sendFontUrl('')).toBe('');
+  });
+});
+
+describe.each([
+  ['brandName', 'Acme'],
+  ['brandLogoUrl', 'https://example.com/logo.png'],
+] as const)('HTML5AdViewPreview %s', (prop, value) => {
+  const send = (sent: unknown) =>
+    render(HTML5AdViewPreview, { type: 'display', [prop]: sent })[prop];
+
+  it('passes the value through unchanged', () => {
+    expect(send(value)).toBe(value);
+  });
+
+  it('sends nothing when not set, so native shows the default', () => {
+    expect(send(undefined)).toBeUndefined();
+  });
+
+  it('passes an empty string through for native to treat as unset', () => {
+    expect(send('')).toBe('');
   });
 });

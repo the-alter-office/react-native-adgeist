@@ -1,4 +1,7 @@
-import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
+import {
+  HTML5AdView,
+  HTML5AdViewPreview,
+} from '@thealteroffice/react-native-adgeist';
 import { SAMPLE_FONT_URL, SAMPLE_STYLE_OPTIONS } from '../sampleStyle';
 import { StyleSheet, ScrollView } from 'react-native';
 
@@ -33,6 +36,27 @@ export default function TestScreen() {
         adIsResponsive={true}
         adSize={{ height: 350 }}
       />
+
+      <HTML5AdViewPreview
+        styleOptions={SAMPLE_STYLE_OPTIONS}
+        fontUrl={SAMPLE_FONT_URL}
+        adSize={{ width: 360, height: 360 }}
+        type="banner"
+      ></HTML5AdViewPreview>
+
+      <HTML5AdViewPreview
+        styleOptions={SAMPLE_STYLE_OPTIONS}
+        fontUrl={SAMPLE_FONT_URL}
+        adSize={{ height: 360 }}
+        type="display"
+      ></HTML5AdViewPreview>
+
+      <HTML5AdViewPreview
+        styleOptions={SAMPLE_STYLE_OPTIONS}
+        fontUrl={SAMPLE_FONT_URL}
+        adSize={{ height: 360 }}
+        type="companion"
+      ></HTML5AdViewPreview>
     </ScrollView>
   );
 }

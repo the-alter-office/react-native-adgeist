@@ -27,6 +27,8 @@ public class NativeAdPreviewView: UIView {
     @objc public var reserveSpace: Bool = false
     @objc public var styleOptions: String?
     @objc public var fontUrl: String?
+    @objc public var brandName: String?
+    @objc public var brandLogoUrl: String?
 
     // MARK: Events (Old Architecture)
     @objc public var onAdEvent: ((_ body: [String: Any]) -> Void)?
@@ -102,7 +104,9 @@ public class NativeAdPreviewView: UIView {
             height: dimension(dict?["height"]),
             reserveSpace: reserveSpace,
             styleOptions: style,
-            fontUrl: nonEmpty(fontUrl)
+            fontUrl: nonEmpty(fontUrl),
+            brandName: nonEmpty(brandName),
+            brandLogoUrl: nonEmpty(brandLogoUrl)
         )
 
         preview.frame = bounds

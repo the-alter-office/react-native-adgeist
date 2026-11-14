@@ -89,6 +89,19 @@ export interface HTML5AdViewPreviewProps {
   fontUrl?: string;
 
   /**
+   * Brand name shown on the card. Display only.
+   *
+   * @default 'Brand Name'
+   */
+  brandName?: string;
+
+  /**
+   * Brand logo shown next to the brand name. Display only.
+   * Omit to show a monogram of the brand name's first letter.
+   */
+  brandLogoUrl?: string;
+
+  /**
    * Native preview events: `AD_LOADED`, `AD_CLICKED`, `AD_NO_FILL`, `AD_NETWORK_ERROR`, `AD_WARNING`.
    *
    * @platform ios — never called on Android, where the preview reports nothing.
