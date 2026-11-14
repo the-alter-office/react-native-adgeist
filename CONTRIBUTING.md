@@ -177,4 +177,6 @@ yarn test -t "fontUrl"
 
 Tests live in `src/__tests__/` and end in `.test.ts` or `.test.tsx`. Jest uses the `react-native` preset, configured in the `jest` block of `package.json`. Native code doesn't run under Jest, so mock any native component or module your code uses, as `styleOptions.test.tsx` does with the specs in `src/specs`.
 
+The [Unit tests](/.github/workflows/unit-tests.yml) workflow runs `yarn test` on every pull request into `dev`.
+
 Lefthook runs ESLint and `tsc` on commit, and commitlint on the message. Use [conventional commits](https://www.conventionalcommits.org/en) (`fix:`, `feat:`, `refactor:`, `docs:`, `test:`, `chore:`). Keep the header under 100 characters and put the details in the body.
