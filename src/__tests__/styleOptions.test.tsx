@@ -49,6 +49,8 @@ const fullStyleOptions: AdStyleOptions = {
   titleFontStyle: 'BOLD',
   descriptionColor: '#555555',
   descriptionFontStyle: 'ITALIC',
+  brandNameColor: '#222222',
+  brandNameFontStyle: 'BOLD',
   ctaStyle: 'OUTLINE',
   ctaShape: 'PILL',
   ctaBackgroundColor: '#000000',

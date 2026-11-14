@@ -9,6 +9,8 @@ export const SAMPLE_STYLE_OPTIONS: AdStyleOptions = {
   // titleFontStyle: 'BOLD',
   descriptionColor: '#B8C2BC',
   // descriptionFontStyle: 'ITALIC',
+  brandNameColor: '#F5F7F6',
+  // brandNameFontStyle: 'BOLD',
   ctaStyle: 'FILLED',
   ctaShape: 'PILL',
   ctaBackgroundColor: '#F2C94C',

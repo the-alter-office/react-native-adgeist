@@ -270,6 +270,8 @@ Good to know:
 | `titleFontStyle` | Headline style | `NORMAL`, `BOLD`, `ITALIC` | `BOLD` on display, `NORMAL` on companion |
 | `descriptionColor` | Body text colour | Hex colour | `#4B5563` |
 | `descriptionFontStyle` | Body text style | `NORMAL`, `BOLD`, `ITALIC` | `NORMAL` |
+| `brandNameColor` | Brand name colour. Display ads only | Hex colour | Card text colour |
+| `brandNameFontStyle` | Brand name style. Display ads only | `NORMAL`, `BOLD`, `ITALIC` | Semi-bold |
 | `ctaStyle` | How the button is drawn: filled, outlined, or as a plain link | `FILLED`, `OUTLINE`, `LINK` | `FILLED` |
 | `ctaShape` | Shape of the button's corners | `SQUARE`, `ROUNDED`, `PILL` | `PILL` |
 | `ctaBackgroundColor` | Button fill colour. Only used when `ctaStyle` is `FILLED` | Hex colour | `#85C896` |

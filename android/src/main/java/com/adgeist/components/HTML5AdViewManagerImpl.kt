@@ -95,6 +95,8 @@ object HTML5AdViewManagerImpl {
                 titleFontStyle = it.string("titleFontStyle"),
                 descriptionColor = it.string("descriptionColor"),
                 descriptionFontStyle = it.string("descriptionFontStyle"),
+                brandNameColor = it.string("brandNameColor"),
+                brandNameFontStyle = it.string("brandNameFontStyle"),
                 ctaStyle = it.string("ctaStyle"),
                 ctaShape = it.string("ctaShape"),
                 ctaBackgroundColor = it.string("ctaBackgroundColor"),
