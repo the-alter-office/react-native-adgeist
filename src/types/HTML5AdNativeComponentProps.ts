@@ -78,6 +78,7 @@ export interface AdStyleOptions {
   ctaBackgroundColor?: string;
   ctaTextColor?: string;
   ctaBorderColor?: string;
+  theme?: 'LIGHT' | 'DARK';
 }
 
 /**

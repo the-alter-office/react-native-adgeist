@@ -256,6 +256,7 @@ Good to know:
 - Styling works on display and companion ads. Banner ads aren't styled.
 - Anything you set here overrides the styling set for the adspace on adgeist.ai. Anything you leave out keeps that setting, or the default in the table below if there isn't one.
 - Values are case-sensitive (`"MD"`, not `"md"`), and colours are hex: `#RGB` or `#RRGGBB`. If a value isn't valid, that field is skipped and the default is used.
+- `DARK` sets `backgroundColor` `#121417`, `borderColor` `#2C3036`, `titleColor` and `brandNameColor` `#F2F4F6`, `descriptionColor` `#A0A8B1`, `ctaBackgroundColor` `#23845F` and `ctaTextColor` `#FFFFFF`. `LIGHT` uses the defaults. Colours set for the adspace on adgeist.ai also override `theme`.
 - `fontUrl` must be a public `https` link to either a stylesheet, such as a Google Fonts URL, or a font file (`.woff2`, `.woff`, `.ttf`, `.otf`). When you set it, it replaces `fontFamily`. If the font is hosted on another domain, that server has to allow cross-origin requests (`Access-Control-Allow-Origin`), otherwise the card uses the system font.
 
 | Field | What it changes | Values | Default |
@@ -263,20 +264,21 @@ Good to know:
 | `backgroundColor` | Card background | Hex colour | `#FFFFFF` |
 | `cornerRadius` | How rounded the card's corners are | `SM` (4px), `MD` (8px), `LG` (12px), `XL` (16px) | Square corners |
 | `showBorder` | Whether the card has a border | `true`, `false` | `true` |
-| `borderColor` | Border colour | Hex colour | `#d4d5d7` |
+| `borderColor` | Border colour | Hex colour | `#E0E0E0` |
 | `adLabel` | The label that marks the card as an ad | `AD`, `ADVERTISEMENT`, `SPONSORED`, `PROMOTED`, `PARTNER_CONTENT` | `AD` (shown as "Ad") |
 | `fontFamily` | Font for all text on the card. `custom` uses the font from `fontUrl` | `system-ui`, `Roboto`, `Open Sans`, `Lato`, `Montserrat`, `Inter`, `Poppins`, `custom` | System font |
-| `titleColor` | Headline colour | Hex colour | `#000000` |
-| `titleFontStyle` | Headline style | `NORMAL`, `BOLD`, `ITALIC` | `BOLD` on display, `NORMAL` on companion |
-| `descriptionColor` | Body text colour | Hex colour | `#4B5563` |
+| `titleColor` | Headline colour | Hex colour | `#111418` |
+| `titleFontStyle` | Headline style | `NORMAL`, `BOLD`, `ITALIC` | `BOLD` |
+| `descriptionColor` | Body text colour | Hex colour | `#58616B` |
 | `descriptionFontStyle` | Body text style | `NORMAL`, `BOLD`, `ITALIC` | `NORMAL` |
 | `brandNameColor` | Brand name colour. Display ads only | Hex colour | Card text colour |
 | `brandNameFontStyle` | Brand name style. Display ads only | `NORMAL`, `BOLD`, `ITALIC` | Semi-bold |
 | `ctaStyle` | How the button is drawn: filled, outlined, or as a plain link | `FILLED`, `OUTLINE`, `LINK` | `FILLED` |
 | `ctaShape` | Shape of the button's corners | `SQUARE`, `ROUNDED`, `PILL` | `PILL` |
-| `ctaBackgroundColor` | Button fill colour. Only used when `ctaStyle` is `FILLED` | Hex colour | `#85C896` |
-| `ctaTextColor` | Button text colour | Hex colour | `#1D1D1D` |
+| `ctaBackgroundColor` | Button fill colour. Only used when `ctaStyle` is `FILLED` | Hex colour | `#1E6B52` |
+| `ctaTextColor` | Button text colour | Hex colour | `#FFFFFF` |
 | `ctaBorderColor` | Button border colour | Hex colour | No border |
+| `theme` | Preset colours for the card, text and button. Any colour field you set overrides the theme's value for that field | `LIGHT`, `DARK` | `LIGHT` |
 
 ## Preview
 

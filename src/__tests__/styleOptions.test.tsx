@@ -56,6 +56,7 @@ const fullStyleOptions: AdStyleOptions = {
   ctaBackgroundColor: '#000000',
   ctaTextColor: '#FFFFFF',
   ctaBorderColor: '#000000',
+  theme: 'DARK',
 };
 
 const components = [
