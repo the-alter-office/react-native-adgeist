@@ -101,7 +101,8 @@ object HTML5AdViewManagerImpl {
                 ctaShape = it.string("ctaShape"),
                 ctaBackgroundColor = it.string("ctaBackgroundColor"),
                 ctaTextColor = it.string("ctaTextColor"),
-                ctaBorderColor = it.string("ctaBorderColor")
+                ctaBorderColor = it.string("ctaBorderColor"),
+                theme = it.string("theme")
             )
         }
     }

@@ -1,6 +1,7 @@
 import type { AdStyleOptions } from '@thealteroffice/react-native-adgeist';
 
 export const SAMPLE_STYLE_OPTIONS: AdStyleOptions = {
+  theme: 'DARK',
   backgroundColor: '#141A17',
   // cornerRadius: 'LG',
   borderColor: '#ffffff',
