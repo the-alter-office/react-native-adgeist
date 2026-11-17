@@ -1,0 +1,27 @@
+name: Unit tests
+
+on:
+  pull_request:
+    branches: ["dev"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js and dependencies
+        uses: ./.github/actions/setup
+
+      - name: Run unit tests
+        run: yarn test --ci

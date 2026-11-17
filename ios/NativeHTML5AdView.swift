@@ -18,6 +18,8 @@ public class NativeHTML5AdView: UIView {
     @objc public var adSize: NSDictionary?
     @objc public var adIsResponsive: Bool = false
     @objc public var reserveSpace: Bool = true
+    @objc public var styleOptions: String?
+    @objc public var fontUrl: String?
 
     // MARK: Events (Old Architecture)
     @objc public var onAdEvent: ((_ body: [String: Any]) -> Void)?
@@ -75,7 +77,17 @@ public class NativeHTML5AdView: UIView {
         let width = adIsResponsive ? nil : dimension(dict?["width"])
         let height = dimension(dict?["height"])
 
-        let adView = AdView(adId: adUnitID, width: width, height: height, reserveSpace: reserveSpace)
+        // Invalid JSON is ignored, as on web
+        let style = styleOptions.flatMap { try? JSONDecoder().decode(AdStyleOptions.self, from: Data($0.utf8)) }
+
+        let adView = AdView(
+            adId: adUnitID,
+            width: width,
+            height: height,
+            reserveSpace: reserveSpace,
+            styleOptions: style,
+            fontUrl: fontUrl
+        )
         adView.frame = bounds
         adView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         adView.onEvent = { [weak self, weak adView] event in

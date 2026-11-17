@@ -10,6 +10,7 @@ import {
 import type { NativeSyntheticEvent } from 'react-native';
 
 import { HTML5AdView } from '@thealteroffice/react-native-adgeist';
+import { SAMPLE_FONT_URL, SAMPLE_STYLE_OPTIONS } from './sampleStyle';
 import type {
   AdViewEvent,
   AdViewEventCode,
@@ -226,7 +227,7 @@ export default function ContentContainer() {
         </Text>
 
         <TextInput
-          style={[styles.input, { height: 150, textAlignVertical: 'top' }]}
+          style={[styles.input, styles.snippetInput]}
           value={snippet}
           onChangeText={setSnippet}
           placeholder="Paste code snippet here..."
@@ -234,7 +235,7 @@ export default function ContentContainer() {
           multiline
         />
 
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View style={styles.buttonRow}>
           <Pressable
             style={[styles.submitButton, showAd && styles.disabledButton]}
             onPress={handleSubmit}
@@ -257,16 +258,20 @@ export default function ContentContainer() {
         <>
           {isResponsive ? (
             <View
-              style={{
-                height: parseInt(containerHeight) || 320,
-                width: parseInt(containerWidth) || 320,
-                overflow: 'hidden',
-              }}
+              style={[
+                styles.responsiveContainer,
+                {
+                  height: parseInt(containerHeight, 10) || 320,
+                  width: parseInt(containerWidth, 10) || 320,
+                },
+              ]}
             >
               <HTML5AdView
                 key={'isReponsive'}
                 adUnitID={adSpaceId}
                 adIsResponsive={isResponsive}
+                styleOptions={SAMPLE_STYLE_OPTIONS}
+                fontUrl={SAMPLE_FONT_URL}
                 onAdEvent={handleAdEvent}
               />
             </View>
@@ -275,6 +280,8 @@ export default function ContentContainer() {
               key={width + height}
               adUnitID={adSpaceId}
               adSize={{ width: parseInt(width), height: parseInt(height) }}
+              styleOptions={SAMPLE_STYLE_OPTIONS}
+              fontUrl={SAMPLE_FONT_URL}
               onAdEvent={handleAdEvent}
             />
           )}
@@ -285,6 +292,17 @@ export default function ContentContainer() {
 }
 
 const styles = StyleSheet.create({
+  snippetInput: {
+    height: 150,
+    textAlignVertical: 'top',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  responsiveContainer: {
+    overflow: 'hidden',
+  },
   container: {
     paddingVertical: 20,
     paddingHorizontal: 10,

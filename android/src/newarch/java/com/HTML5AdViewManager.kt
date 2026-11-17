@@ -48,6 +48,16 @@ class HTML5AdViewManager : SimpleViewManager<AdView>(), HTML5AdNativeComponentMa
         HTML5AdViewManagerImpl.setReserveSpace(view, reserveSpace)
     }
 
+    @ReactProp(name = "styleOptions")
+    override fun setStyleOptions(view: AdView, styleOptions: String?) {
+        HTML5AdViewManagerImpl.setStyleOptions(view, styleOptions)
+    }
+
+    @ReactProp(name = "fontUrl")
+    override fun setFontUrl(view: AdView, fontUrl: String?) {
+        HTML5AdViewManagerImpl.setFontUrl(view, fontUrl)
+    }
+
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
         return listOf(
             HTML5AdViewManagerImpl.AD_EVENT_LISTENER,

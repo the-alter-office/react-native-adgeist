@@ -1,4 +1,8 @@
-import { AdgeistProvider } from '@thealteroffice/react-native-adgeist';
+import {
+  AdgeistProvider,
+  requestTrackingAuthorization,
+  setUserDetails,
+} from '@thealteroffice/react-native-adgeist';
 import ContentContainer from '../ContentContainer';
 import { useState } from 'react';
 import {
@@ -58,6 +62,32 @@ export default function HomeScreen({ navigation }: Props) {
       <ScrollView>
         <View style={styles.configContainer}>
           <Text style={styles.header}>SDK Configuration</Text>
+
+          <Pressable
+            style={[styles.button]}
+            onPress={() => {
+              setUserDetails({
+                userId: 'user123',
+                email: 'joynal@thealteroffice.com',
+                phone: '+911234567890',
+                userName: 'Joynal Dsouza',
+              });
+            }}
+          >
+            <Text style={styles.buttonText}>Send User Details</Text>
+          </Pressable>
+
+          {Platform.OS === 'ios' && (
+            <Pressable
+              style={[styles.button]}
+              onPress={async () => {
+                const response = await requestTrackingAuthorization();
+                console.log('Tracking Authorization Response:', response);
+              }}
+            >
+              <Text style={styles.buttonText}>Request Tracking Permission</Text>
+            </Pressable>
+          )}
 
           <Text style={styles.label}>Backend Domain</Text>
           <TextInput

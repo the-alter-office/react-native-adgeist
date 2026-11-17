@@ -1,4 +1,5 @@
 import Adgeist, { type UserDetails, type Event } from '../specs/NativeAdgeist';
+import { Platform } from 'react-native';
 
 class AdgeistError extends Error {
   code?: string;
@@ -10,6 +11,17 @@ class AdgeistError extends Error {
     Object.setPrototypeOf(this, AdgeistError.prototype);
   }
 }
+
+export const requestTrackingAuthorization = async (): Promise<boolean> => {
+  try {
+    if (Platform.OS !== 'ios') {
+      return false;
+    }
+    return (await Adgeist.requestTrackingAuthorization()) === true;
+  } catch {
+    return false;
+  }
+};
 
 export const setUserDetails = (userDetails: UserDetails): void => {
   try {

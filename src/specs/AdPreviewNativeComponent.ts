@@ -40,6 +40,11 @@ export interface NativeProps extends ViewProps {
   isResponsive?: WithDefault<boolean, true>;
   adSize?: AdPreviewSize;
   reserveSpace?: WithDefault<boolean, false>;
+  // JSON string: a codegen object prop would turn an unset boolean into false
+  styleOptions?: string;
+  fontUrl?: string;
+  brandName?: string;
+  brandLogoUrl?: string;
 
   onAdEvent?: DirectEventHandler<NativeAdPreviewEvent>;
   onAdSizeChanged?: DirectEventHandler<NativeAdPreviewSizeChangedEvent>;

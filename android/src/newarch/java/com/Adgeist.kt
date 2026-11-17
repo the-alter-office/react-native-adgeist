@@ -34,7 +34,9 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
           .trackViewableImpression(
             timeToVisible.toLong(),
             scrollDepth.toFloat(),
-            visibilityRatio.toFloat()
+            visibilityRatio.toFloat(),
+            "",
+            ""
           )
           .build()
 
@@ -71,5 +73,9 @@ class Adgeist internal constructor(reactContext: ReactApplicationContext) :
 
     override fun updateConsentStatus(consent: Boolean) {
         implementation.updateConsentStatus(consent)
+    }
+
+    override fun requestTrackingAuthorization(promise: Promise) {
+        implementation.requestTrackingAuthorization(promise)
     }
 }

@@ -138,6 +138,26 @@ static NSString *RCTAdgeistPreviewString(const std::string &value)
         changed = YES;
     }
 
+    if (oldPropsStruct.styleOptions != newProps.styleOptions) {
+        _swiftView.styleOptions = RCTAdgeistPreviewString(newProps.styleOptions);
+        changed = YES;
+    }
+
+    if (oldPropsStruct.fontUrl != newProps.fontUrl) {
+        _swiftView.fontUrl = RCTAdgeistPreviewString(newProps.fontUrl);
+        changed = YES;
+    }
+
+    if (oldPropsStruct.brandName != newProps.brandName) {
+        _swiftView.brandName = RCTAdgeistPreviewString(newProps.brandName);
+        changed = YES;
+    }
+
+    if (oldPropsStruct.brandLogoUrl != newProps.brandLogoUrl) {
+        _swiftView.brandLogoUrl = RCTAdgeistPreviewString(newProps.brandLogoUrl);
+        changed = YES;
+    }
+
     if (changed) {
         [_swiftView reloadPreview];
     }
@@ -237,6 +257,10 @@ RCT_EXPORT_VIEW_PROPERTY(deepLinkUrl, NSString)
 RCT_EXPORT_VIEW_PROPERTY(isResponsive, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(adSize, NSDictionary)
 RCT_EXPORT_VIEW_PROPERTY(reserveSpace, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(styleOptions, NSString)
+RCT_EXPORT_VIEW_PROPERTY(fontUrl, NSString)
+RCT_EXPORT_VIEW_PROPERTY(brandName, NSString)
+RCT_EXPORT_VIEW_PROPERTY(brandLogoUrl, NSString)
 
 RCT_EXPORT_VIEW_PROPERTY(onAdEvent, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAdSizeChanged, RCTDirectEventBlock)

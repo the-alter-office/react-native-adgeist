@@ -111,7 +111,7 @@ The iOS SDK is a prebuilt `AdgeistKit.xcframework`, downloaded from the [adgeist
 - `yarn update-adgeistkit <version>` changes the pin. It downloads that release, computes its checksum and rewrites the `adgeistKit` block. It fails if the release doesn't exist.
 
 ```sh
-yarn update-adgeistkit 1.0.26-beta.1
+yarn update-adgeistkit ios 1.0.26-beta.10
 yarn fetch-adgeistkit
 ```
 
@@ -124,6 +124,16 @@ It is configured to use the built library from `lib/`, so after changing the lib
 If you want to use Android Studio or Xcode to edit the native code, you can open the `example/android` or `example/ios` directories respectively in those editors. To edit the Objective-C or Swift files, open `example/ios/AdgeistExample.xcworkspace` in Xcode and find the source files at `Pods > Development Pods > @thealteroffice/react-native-adgeist`.
 
 To edit the Java or Kotlin files, open `example/android` in Android Studio and find the source files at `@thealteroffice/react-native-adgeist` under `Android`.
+
+### Stale native builds after updating the package
+
+Gradle caches the generated native module spec in the `build/` folders. After a host app updates `@thealteroffice/react-native-adgeist`, it can keep building against the old spec, so the JS and native sides no longer match. Host apps must clean the build and refresh dependencies after every update:
+
+```sh
+cd example/android && ./gradlew clean --refresh-dependencies
+```
+
+The same applies to the example app (`example/android`) after changing the codegen specs in `src/specs/` or bumping `adgeistKit.android.version`.
 
 You can use various commands from the root directory to work with the project.
 
@@ -154,10 +164,29 @@ To fix formatting errors, run the following:
 yarn lint --fix
 ```
 
-Remember to add tests for your change if possible. Run the unit tests by:
+Remember to add tests for your change if possible.
+
+### Running unit tests
+
+The unit tests run with Jest on Node, so you don't need a simulator, an emulator or the native SDKs. Use Node 20 (see `.nvmrc`) and run `yarn` once to install dependencies.
+
+Run all tests from the root directory:
 
 ```sh
 yarn test
 ```
+
+To run one file, pass its path. To run only the tests whose name matches some text, use `-t`:
+
+```sh
+yarn test src/__tests__/styleOptions.test.tsx
+yarn test -t "fontUrl"
+```
+
+`yarn test --watch` re-runs the affected tests as you save.
+
+Tests live in `src/__tests__/` and end in `.test.ts` or `.test.tsx`. Jest uses the `react-native` preset, configured in the `jest` block of `package.json`. Native code doesn't run under Jest, so mock any native component or module your code uses, as `styleOptions.test.tsx` does with the specs in `src/specs`.
+
+The [Unit tests](/.github/workflows/unit-tests.yml) workflow runs `yarn test` on every pull request into `dev`.
 
 Lefthook runs ESLint and `tsc` on commit, and commitlint on the message. Use [conventional commits](https://www.conventionalcommits.org/en) (`fix:`, `feat:`, `refactor:`, `docs:`, `test:`, `chore:`). Keep the header under 100 characters and put the details in the body.
