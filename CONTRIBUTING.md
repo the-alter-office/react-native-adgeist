@@ -111,7 +111,7 @@ The iOS SDK is a prebuilt `AdgeistKit.xcframework`, downloaded from the [adgeist
 - `yarn update-adgeistkit <version>` changes the pin. It downloads that release, computes its checksum and rewrites the `adgeistKit` block. It fails if the release doesn't exist.
 
 ```sh
-yarn update-adgeistkit 1.0.26-beta.1
+yarn update-adgeistkit ios 1.0.26-beta.10
 yarn fetch-adgeistkit
 ```
 
