@@ -77,3 +77,5 @@ Read `.claude/Ad-persistence-scenarios.md` first. It lists the 10 lifecycle scen
 must never destroy a live ad. The native SDK implements them, but this layer can break them:
 on Android the manager sets `watchFragmentLifecycle = false` because react-native-screens
 destroys and recreates the host fragment, so teardown must come from `onDropViewInstance`.
+
+For task workflow (branching, PRs, build and release steps), follow `.claude/agents/sdk-developer.md`.
